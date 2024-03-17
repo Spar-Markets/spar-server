@@ -4,7 +4,7 @@
 #
 
 app = 'spar-server'
-primary_region = 'bos'
+primary_region = 'ewr'
 
 [build]
 
@@ -17,6 +17,4 @@ primary_region = 'bos'
   processes = ['app']
 
 [[vm]]
-  memory = '256mb'
-  cpu_kind = 'shared'
-  cpus = 1
+  size = 'shared-cpu-1x'
