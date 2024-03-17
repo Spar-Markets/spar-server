@@ -16,5 +16,8 @@
     "express-session": "^1.18.0",
     "mongoose": "^8.2.2",
     "plaid": "^21.0.0"
+  },
+  "devDependencies": {
+    "@flydotio/dockerfile": "^0.5.3"
   }
 }
