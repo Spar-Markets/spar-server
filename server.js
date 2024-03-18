@@ -11,8 +11,7 @@ const mongoose = require('mongoose');
 const crypto = require('crypto');
 
 const app = express();
-// listen on port provided by environment, or 8000 default 
-const port = process.env.PORT || 3000;
+const port = 3000;
 
 // app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
@@ -172,23 +171,19 @@ app.post('/exchangePublicToken', async function (request, response, next) {
   }
 });
 
-
-
 // Fetches balance data using the Node client library for Plaid
 app.post('/Balance', async (req, res, next) => {
-  const access_token = req.session.access_token;
-  const balanceResponse = await client.accountsBalanceGet({access_token});
+  const { access_token } = req.body;
+  const balanceResponse = await client.accountsBalanceGet(access_token);
+  const formattedResponse = balanceResponse.data; // Assuming balanceResponse is an Axios response object
   res.json({
-    Balance: balanceResponse.data,
+    Balance: formattedResponse,
   });
 });
 
 app.listen(port, () => {
   console.log(`Backend server is running on port ${port}...`);
 });
-
-
-
 
 
 // Function for random string generation:
@@ -207,3 +202,38 @@ function generateRandomString(length) {
 
   return randomString;
 }
+
+app.post("/updateUserAccessToken", async (req, res) => {
+    // Extract username and newBalance from the request body
+  const { email, newAccessToken } = req.body;
+  try {
+    // Find the user by username and update the balance
+    const user = await User.findOneAndUpdate(
+      { email: email },
+      { $set: { plaidPersonalAccess: newAccessToken } },
+      { new: true } // Return the updated document
+    );
+
+    // Log another success message to the console
+    console.log("success");
+
+    res.status(201).json({ message: 'User AccessToken Updated' });
+  } catch (error) {
+    console.error('Error AccessToken Failed to Update:', error);
+    res.status(500).json({ error: 'Could not create user' });
+  }
+  });
+
+  app.post('/accounts', async function (request, response, next) {
+    const { newAccessToken } = request.body 
+    try {
+      const accountsResponse = await client.accountsGet({
+        access_token: newAccessToken,
+      });
+      prettyPrintResponse(accountsResponse);
+      response.json(accountsResponse.data);
+    } catch (error) {
+      prettyPrintResponse(error);
+      return response.json(formatError(error.response));
+    }
+  });
