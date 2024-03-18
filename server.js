@@ -207,3 +207,8 @@ function generateRandomString(length) {
 
   return randomString;
 }
+
+// test endpint
+app.get('/ping', (req, res) => {
+  res.send('pong');
+});
