@@ -237,3 +237,8 @@ app.post("/updateUserAccessToken", async (req, res) => {
       return response.json(formatError(error.response));
     }
   });
+
+// test endpint
+app.get('/ping', (req, res) => {
+  res.send('pong');
+});
