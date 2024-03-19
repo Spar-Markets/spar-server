@@ -76,7 +76,7 @@ app.post("/createUser", async (req, res) => {
 
     const newUser = new User({
       username: generateRandomString(40),
-      email: email,
+      email: String(email),
     });
     await newUser.save();
     console.log("New User Created");
@@ -244,7 +244,7 @@ app.post("/checkUserExists", async function (req, res) {
   console.log("checkuserexist called" + req);
   const email = req.body;
 
-  const user = await User.findOne({ email: email });
+  const user = await User.findOne({ email: String(email) });
   user ? res.send(true) : res.send(false);
 });
 
