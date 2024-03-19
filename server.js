@@ -241,6 +241,7 @@ app.post("/accounts", async function (request, response, next) {
 });
 
 app.post("/checkUserExists", async function (req, res) {
+  console.log("checkuserexist called" + req);
   const email = req.body;
 
   const user = await User.findOne({ email: email });
