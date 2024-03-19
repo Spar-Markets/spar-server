@@ -243,8 +243,9 @@ app.post("/accounts", async function (request, response, next) {
 app.post("/checkUserExists", async function (req, res) {
   const email = req.body;
   const user = await User.findOne({ email: String(email) });
-  if (user != null) res.send(true);
-  else {
+  if (user != null) {
+    res.send(true);
+  } else {
     res.send(false);
   }
 });
