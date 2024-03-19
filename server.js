@@ -240,6 +240,13 @@ app.post("/accounts", async function (request, response, next) {
   }
 });
 
+app.post("/checkUserExists", async function (req, res) {
+  const email = req.body;
+
+  const user = await User.findOne({ email: email });
+  user ? res.send(true) : res.send(false);
+});
+
 // test endpint
 app.get("/ping", (req, res) => {
   res.send("pong");
