@@ -11,7 +11,7 @@ const mongoose = require("mongoose");
 const crypto = require("crypto");
 
 const app = express();
-const port = 8000;
+const port = 3000;
 
 // app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
