@@ -293,7 +293,7 @@ app.post("/getAccessFromMongo", async function (req, res) {
     }
 
     const plaidPersonalAccess = user.plaidPersonalAccess;
-    return res.status(200).json({ plaidPersonalAccess });
+    return res.send(plaidPersonalAccess);
   } catch (error) {
     console.error("Error retrieving user access:", error);
     return res.status(500).json({ message: "Internal server error" });
