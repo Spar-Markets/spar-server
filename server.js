@@ -208,6 +208,9 @@ function generateRandomString(length) {
 app.post("/updateUserAccessToken", async (req, res) => {
   // Extract username and newBalance from the request body
   const { email, newAccessToken } = req.body;
+  console.log("going into updateacces" + email + newAccessToken);
+
+
   try {
     // Find the user by username and update the balance
     const user = await User.findOneAndUpdate(
