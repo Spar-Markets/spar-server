@@ -241,16 +241,26 @@ app.post("/accounts", async function (request, response, next) {
 });
 
 app.post("/checkUserExists", async function (req, res) {
-  const email = req.body;
-  console.log(email);
-  const user = await User.findOne({ email: String(email) });
-  console.log(user);
-  if (user != null) {
-    res.send(true);
-  } else {
-    res.send(false);
+  const { email } = req.body; // Destructure email from request body
+  console.log(email); // Check if email is correctly received
+
+  try {
+    // Find user by email in the User collection
+    const user = await User.findOne({ email: email });
+
+    if (user) {
+      // If user exists, send true
+      res.send(true);
+    } else {
+      // If user doesn't exist, send false
+      res.send(false);
+    }
+  } catch (error) {
+    console.error("Error checking user existence:", error);
+    res.status(500).json({ error: "Internal server error" });
   }
 });
+
 
 // test endpint
 app.get("/ping", (req, res) => {
