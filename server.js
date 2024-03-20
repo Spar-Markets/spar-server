@@ -283,8 +283,28 @@ app.post("/checkUserExists", async function (req, res) {
   }
 });
 
+app.post("/getAccessFromMongo", async function (req, res) {
+  try {
+    const { email } = req.body; // Destructure email from request body
+    const user = await User.findOne({ email: email });
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const plaidPersonalAccess = user.plaidPersonalAccess;
+    return res.status(200).json({ plaidPersonalAccess });
+  } catch (error) {
+    console.error("Error retrieving user access:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+});
+
+
 
 // test endpint
 app.get("/ping", (req, res) => {
   res.send("pong");
 });
+
+
