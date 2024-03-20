@@ -176,10 +176,10 @@ app.post("/exchangePublicToken", async function (request, response, next) {
 // Fetches balance data using the Node client library for Plaid
 app.post("/Balance", async (req, res, next) => {
   console.log("Start of bal req")
-  console.log(req)
-  const access_token = req.body;
-  console.log("Acces_token " + access_token)
-  const balanceResponse = await client.accountsBalanceGet(access_token);
+  const { newAccessToken } = req.body;
+  
+  console.log("Acces_token " + newAccessToken)
+  const balanceResponse = await client.accountsBalanceGet(newAccessToken);
   const formattedResponse = balanceResponse.data; // Assuming balanceResponse is an Axios response object
   console.log(formattedResponse)
   res.json({
