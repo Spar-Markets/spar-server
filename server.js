@@ -242,7 +242,9 @@ app.post("/accounts", async function (request, response, next) {
 
 app.post("/checkUserExists", async function (req, res) {
   const email = req.body;
+  console.log(email);
   const user = await User.findOne({ email: String(email) });
+  console.log(user);
   if (user != null) {
     res.send(true);
   } else {
