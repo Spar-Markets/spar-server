@@ -6,7 +6,7 @@ require("dotenv").config();
 const express = require("express");
 const bodyParser = require("body-parser");
 const session = require("express-session");
-const { Configuration, PlaidApi, PlaidEnvironments } = require("plaid");
+const { Configuration, PlaidApi, PlaidEnvironments, AccountsGetRequest } = require("plaid");
 const mongoose = require("mongoose");
 const crypto = require("crypto");
 
@@ -173,18 +173,28 @@ app.post("/exchangePublicToken", async function (request, response, next) {
   }
 });
 
+
 // Fetches balance data using the Node client library for Plaid
 app.post("/Balance", async (req, res, next) => {
   console.log("Start of bal req")
+
   const { newAccessToken } = req.body;
+
+  const request = {
+    access_token: newAccessToken,
+  };
+
+  try {
+    const response = await client.accountsBalanceGet(request);
+    const accounts = response.data.accounts;
+    res.json({
+      accounts
+    });
+  }
+  catch (error) {
+    console.log("Error In Bal")
+  }
   
-  console.log("Acces_token " + newAccessToken)
-  const balanceResponse = await client.accountsBalanceGet(newAccessToken);
-  const formattedResponse = balanceResponse.data; // Assuming balanceResponse is an Axios response object
-  console.log(formattedResponse)
-  res.json({
-    Balance: formattedResponse,
-  });
 });
 
 app.listen(port, () => {
