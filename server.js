@@ -213,12 +213,16 @@ app.post("/updateUserAccessToken", async (req, res) => {
 
   try {
     // Find the user by username and update the balance
-    const user = await User.findOneAndUpdate(
+    try { 
+      const user = await User.findOneAndUpdate(
       { email: email },
       { $set: { plaidPersonalAccess: newAccessToken } },
       { new: true } // Return the updated document
     );
-
+      } catch (error) {
+        console.log("user doesn't exist")
+      }
+    
     // Log another success message to the console
     console.log("Success in accesstokenupdating");
 
@@ -236,10 +240,10 @@ app.post("/accounts", async function (request, response, next) {
     const accountsResponse = await client.accountsGet({
       access_token: newAccessToken,
     });
-    prettyPrintResponse(accountsResponse);
+    console.log(accountsResponse);
     response.json(accountsResponse.data);
   } catch (error) {
-    prettyPrintResponse(error);
+    console.log(error);
     return response.json(formatError(error.response));
   }
 });
