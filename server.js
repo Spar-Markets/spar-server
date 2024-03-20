@@ -217,7 +217,7 @@ app.post("/updateUserAccessToken", async (req, res) => {
     );
 
     // Log another success message to the console
-    console.log("success");
+    console.log("Success in accesstokenupdating");
 
     res.status(201).json({ message: "User AccessToken Updated" });
   } catch (error) {
@@ -228,6 +228,7 @@ app.post("/updateUserAccessToken", async (req, res) => {
 
 app.post("/accounts", async function (request, response, next) {
   const { newAccessToken } = request.body;
+  console.log(newAccessToken)
   try {
     const accountsResponse = await client.accountsGet({
       access_token: newAccessToken,
