@@ -109,11 +109,11 @@ const playerSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
-  entryFee: {
+  entryFeeInt: {
     type: Number,
     required: true,
   },
-  matchLength: {
+  matchLengthInt: {
     type: Number,
     required: true,
   },
