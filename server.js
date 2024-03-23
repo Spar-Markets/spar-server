@@ -417,6 +417,26 @@ app.post("/updateUserBalanceDeposit", async (req, res) => {
   }
 });
 
+
+app.post("/userToMatchmaking", async (req, res) => {
+  try {
+    const { email, skillRating, entryFee, matchLength } = req.body;
+
+    const newPlayer = new Player({
+      email,
+      skillRating,
+      entryFee,
+      matchLength,
+    });
+
+    await newPlayer.save();
+
+    res.send(username + "Entered Matchmaking");
+  } catch (err) {
+    console.log(err);
+  }
+});
+
 app.post("/updateUserBalanceWithdraw", async (req, res) => {
   const { email, withdraw } = req.body;
 
@@ -502,10 +522,10 @@ app.post("/getAccessFromMongo", async function (req, res) {
 
 app.post("/cancelMatchmaking", async (req, res) => {
   try {
-    const { username } = req.body;
+    const { email } = req.body;
 
     // Find the player in the matchmaking collection by username
-    const player = await Player.findOne({ username });
+    const player = await Player.findOne({ email });
 
     if (!player) {
       // Player not found, send an error response
@@ -513,7 +533,7 @@ app.post("/cancelMatchmaking", async (req, res) => {
     }
 
     // Delete the player from the matchmaking collection
-    await Player.deleteOne({ username });
+    await Player.deleteOne({ email });
 
     // Send a success response
     res.json({ message: "Matchmaking canceled successfully" });
@@ -525,11 +545,11 @@ app.post("/cancelMatchmaking", async (req, res) => {
 
 app.post("/areTheyMatchmaking", async (req, res) => {
   try {
-    const { username } = req.body;
+    const { email } = req.body;
 
     // Find the player in the matchmaking collection by username
     const Player = mongoose.model("Player", playerSchema, "matchmakingplayers");
-    const player = await Player.findOne({ username });
+    const player = await Player.findOne({ email });
 
     if (!player) {
       // Player not found, send an error response
