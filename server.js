@@ -72,7 +72,56 @@ const userSchema = new mongoose.Schema({
   },
 });
 
+const matchSchema = new mongoose.Schema({
+  matchId: {
+    type: String,
+    required: true,
+    unique: true,
+  },
+  users: {
+    type: [String], // Array of usernames participating in the match
+    required: true,
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now,
+  },
+  // You can add more fields as needed for your specific application
+});
+
+const playerSchema = new mongoose.Schema({
+  email: {
+    type: String,
+    required: true,
+    unique: true,
+  },
+  username: {
+    type: String,
+    required: true,
+    unique: true,
+  },
+  skillRating: {
+    type: mongoose.Schema.Types.Decimal128,
+    required: true,
+    default: 50.0,
+  },
+  enteredMatchmakingAt: {
+    type: Date,
+    default: Date.now,
+  },
+  entryFee: {
+    type: Number,
+    required: true,
+  },
+  matchLength: {
+    type: Number,
+    required: true,
+  },
+});
+
 const User = mongoose.model("users", userSchema);
+const Player = mongoose.model("matchmakingPlayer", playerSchema);
+const Match = mongoose.model("Match", matchSchema);
 
 app.post("/createUser", async (req, res) => {
   try {
@@ -438,6 +487,112 @@ app.post("/getAccessFromMongo", async function (req, res) {
     return res.status(500).json({ message: "Internal server error" });
   }
 });
+
+app.post("/cancelMatchmaking", async (req, res) => {
+  try {
+    const { username } = req.body;
+
+    // Find the player in the matchmaking collection by username
+    const player = await Player.findOne({ username });
+
+    if (!player) {
+      // Player not found, send an error response
+      return res.status(404).json({ error: "Player not found in matchmaking" });
+    }
+
+    // Delete the player from the matchmaking collection
+    await Player.deleteOne({ username });
+
+    // Send a success response
+    res.json({ message: "Matchmaking canceled successfully" });
+  } catch (error) {
+    console.error("Error canceling matchmaking:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+app.post("/areTheyMatchmaking", async (req, res) => {
+  try {
+    const { username } = req.body;
+
+    // Find the player in the matchmaking collection by username
+    const Player = mongoose.model("Player", playerSchema, "matchmakingplayers");
+    const player = await Player.findOne({ username });
+
+    if (!player) {
+      // Player not found, send an error response
+      return res.json({
+        result: false,
+        message: "Player not found in matchmaking",
+      });
+    }
+
+    // Send a success response
+    res.json({ result: true, message: "Matchmaking Player is in matchmaking" });
+  } catch (error) {
+    console.error("Error checking matchmaking:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+async function createMatch() {
+  try {
+    const users = await Player.find({}).exec();
+
+    for (let i = 0; i < users.length; i++) {
+      for (let j = i + 1; j < users.length; j++) {
+        const skillDifference = Math.abs(
+          users[i].skillRating - users[j].skillRating
+        );
+        console.log(users[i]);
+        if (skillDifference <= 10) {
+          // Create a unique match ID (you might want to use a more sophisticated approach)
+          const matchId = generateRandomString(45);
+
+          // Insert the matched users into the "matches" collection
+          const match = new Match({
+            matchId,
+            users: [users[i].email, users[j].email],
+          });
+          await match.save();
+          console.log("Updating user:", users[i].email);
+          console.log("Match ID:", matchId);
+          // Create an object representing the match
+          console.log(users[i].email, match.matchId);
+          // Add the match to both users' activematches field
+          await User.findOneAndUpdate(
+            { email: users[i].email },
+            { $addToSet: { activematches: match.matchId } },
+            { new: true } // Return the updated document
+          );
+
+          await User.findOneAndUpdate(
+            { email: users[j].email },
+            { $addToSet: { activematches: match.matchId } },
+            { new: true } // Return the updated document
+          );
+          // Remove matched users from the "matchmaking" collection
+          await Player.deleteMany({
+            _id: { $in: [users[i]._id, users[j]._id] },
+          });
+          console.log(`Match found and created: ${matchId}`);
+        }
+      }
+    }
+  } finally {
+    console.log("Match made. Why is this under finally");
+  }
+}
+
+// // Run the matchmaking process every 10 seconds
+// setInterval(async () => {
+//   try {
+//     await createMatch();
+//     console.log("Matchmaking process completed successfully");
+//   } catch (error) {
+//     console.error("Error in matchmaking process:", error);
+//   }
+// }, 10000);
 
 // test endpint
 app.get("/ping", (req, res) => {
