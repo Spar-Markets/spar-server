@@ -19,6 +19,7 @@ const WebSocket = require('ws');
 
 
 
+
 const app = express();
 const port = 3000;
 
@@ -607,6 +608,7 @@ app.get("/ping", (req, res) => {
 
 // Websocket 
 
+'use strict'
 
 
 const wss = new WebSocket.Server({ port: 8080 });
