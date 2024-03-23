@@ -120,8 +120,8 @@ const playerSchema = new mongoose.Schema({
 });
 
 const User = mongoose.model("users", userSchema);
-const Player = mongoose.model("matchmakingPlayer", playerSchema);
-const Match = mongoose.model("Match", matchSchema);
+const Player = mongoose.model("matchmakingplayers", playerSchema);
+const Match = mongoose.model("matches", matchSchema);
 
 app.post("/createUser", async (req, res) => {
   try {
