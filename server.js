@@ -15,9 +15,6 @@ const {
 const mongoose = require("mongoose");
 const crypto = require("crypto");
 const plaid = require("plaid");
-const WebSocket = require('ws');
-
-
 
 
 const app = express();
@@ -601,27 +598,4 @@ async function createMatch() {
 // test endpint
 app.get("/ping", (req, res) => {
   res.send("pong");
-});
-
-
-
-
-// Websocket 
-
-'use strict'
-
-
-const wss = new WebSocket.Server({ port: 8080 });
-
-wss.on('connection', function connection(ws) {
-  console.log('Client connected');
-
-  ws.on('message', function incoming(message) {
-    console.log('received: %s', message);
-    // Handle incoming messages here
-  });
-
-  ws.on('close', function close() {
-    console.log('Client disconnected');
-  });
 });
