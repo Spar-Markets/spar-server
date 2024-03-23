@@ -97,7 +97,7 @@ const playerSchema = new mongoose.Schema({
   },
   username: {
     type: String,
-    required: true,
+    required: false,
     unique: true,
   },
   skillRating: {
@@ -422,11 +422,15 @@ app.post("/userToMatchmaking", async (req, res) => {
   try {
     const { email, skillRating, entryFee, matchLength } = req.body;
 
+    const entryFeeInt = parseInt(entryFee)
+
+    const matchLengthInt = parseInt(matchLength)
+
     const newPlayer = new Player({
       email,
       skillRating,
-      entryFee,
-      matchLength,
+      entryFeeInt,
+      matchLengthInt,
     });
 
     await newPlayer.save();
