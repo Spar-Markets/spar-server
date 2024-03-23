@@ -6,9 +6,15 @@ require("dotenv").config();
 const express = require("express");
 const bodyParser = require("body-parser");
 const session = require("express-session");
-const { Configuration, PlaidApi, PlaidEnvironments, AccountsGetRequest } = require("plaid");
+const {
+  Configuration,
+  PlaidApi,
+  PlaidEnvironments,
+  AccountsGetRequest,
+} = require("plaid");
 const mongoose = require("mongoose");
 const crypto = require("crypto");
+const plaid = require("plaid");
 
 const app = express();
 const port = 3000;
@@ -123,7 +129,7 @@ app.post("/createLinkToken", async (req, res) => {
       user: { client_user_id: "user" },
       client_name: "Spar",
       language: "en",
-      products: ["auth"],
+      products: ["auth", "transfer"],
       country_codes: ["US"],
       //redirect_uri: process.env.PLAID_SANDBOX_REDIRECT_URI,
     };
@@ -133,7 +139,7 @@ app.post("/createLinkToken", async (req, res) => {
       user: { client_user_id: "user" },
       client_name: "Spar",
       language: "en",
-      products: ["auth"],
+      products: ["auth", "transfer"],
       country_codes: ["US"],
       android_package_name: process.env.PLAID_ANDROID_PACKAGE_NAME,
     };
@@ -173,10 +179,78 @@ app.post("/exchangePublicToken", async function (request, response, next) {
   }
 });
 
+app.post("/transfer", async function (req, res) {
+  //request with access_token, account_id, legal_name, amount, debit/credit, network
+  //for ACH, ach_class also required.
+  //idempotency_key - recommended to avoid duplicate transfers
+
+  try {
+    console.log("STARTING TRANSFER");
+    const { access_token, account_id } = req.body;
+    const authId = await client.transferAuthorizationCreate(req.body);
+    const transferReq = {
+      access_token: access_token,
+      account_id: account_id,
+      authorization_id: authId.data.authorization.id,
+      description: "Deposit",
+    };
+    console.log(authId.data);
+    //console.log("transfer data:");
+    //console.log(transferReq.body);
+    const response = await client.transferCreate(transferReq);
+    //console.log(transfer.amount + ", " + transfer.id);
+    res.send(authId.data.authorization.decision);
+  } catch (error) {
+    console.error(error);
+  }
+});
+
+app.post("/simTransfer", async function (req, res) {
+  try {
+    const response = await client.sandboxTransferSimulate(req.body);
+    res.send("Success: " + req.body.event_type);
+  } catch {
+    console.error("Error Simming");
+  }
+});
+
+app.post("/getPlaidBalance", async function (req, res) {
+  try {
+    const response = await client.transferLedgerGet({});
+    const available_balance = response.data.balance.available;
+    const pending_balance = response.data.balance.pending;
+    res.send(
+      "Available Balance: " +
+        available_balance +
+        ", Pending Balance: " +
+        pending_balance
+    );
+  } catch {
+    console.error("error getting plaid balance");
+  }
+});
+
+app.post("/getTransferList", async (req, res) => {
+  const request = {
+    count: 25,
+  };
+
+  try {
+    const response = await client.transferList(request);
+    const transfers = response.data.transfers;
+    for (const transfer of transfers) {
+      console.log(transfer.amount + ", " + transfer.status);
+    }
+    res.send(transfers);
+    //console.log(transfers);
+  } catch {
+    console.error("Error getting transfer list");
+  }
+});
 
 // Fetches balance data using the Node client library for Plaid
-app.post("/Balance", async (req, res, next) => {
-  console.log("Start of bal req")
+app.post("/getBalance", async (req, res) => {
+  //console.log("Start of bal req");
 
   const { newAccessToken } = req.body;
 
@@ -188,13 +262,32 @@ app.post("/Balance", async (req, res, next) => {
     const response = await client.accountsBalanceGet(request);
     const accounts = response.data.accounts;
     res.json({
-      accounts
+      accounts,
     });
+    console.log("Get Balance: Success");
+  } catch (error) {
+    console.log("Error Getting Balance");
   }
-  catch (error) {
-    console.log("Error In Bal")
+});
+
+app.post("/getAccount", async (req, res) => {
+  const { newAccessToken } = req.body;
+  const request = {
+    access_token: newAccessToken,
+  };
+
+  //console.log("Getting Account: " + request);
+
+  try {
+    const response = await client.accountsGet(request);
+    const data = response.data;
+    res.json({
+      data,
+    });
+    console.log("Get Account: Success");
+  } catch (error) {
+    console.log("Error Getting Account");
   }
-  
 });
 
 app.listen(port, () => {
@@ -224,19 +317,18 @@ app.post("/updateUserAccessToken", async (req, res) => {
   const { email, newAccessToken } = req.body;
   console.log("going into updateacces" + email + newAccessToken);
 
-
   try {
     // Find the user by username and update the balance
-    try { 
+    try {
       const user = await User.findOneAndUpdate(
-      { email: email },
-      { $set: { plaidPersonalAccess: newAccessToken } },
-      { new: true } // Return the updated document
-    );
-      } catch (error) {
-        console.log("user doesn't exist")
-      }
-    
+        { email: email },
+        { $set: { plaidPersonalAccess: newAccessToken } },
+        { new: true } // Return the updated document
+      );
+    } catch (error) {
+      console.log("user doesn't exist");
+    }
+
     // Log another success message to the console
     console.log("Success in accesstokenupdating");
 
@@ -247,9 +339,56 @@ app.post("/updateUserAccessToken", async (req, res) => {
   }
 });
 
+app.post("/updateUserBalanceDeposit", async (req, res) => {
+  const { email, deposit } = req.body;
+
+  try {
+    try {
+      await User.findOneAndUpdate(
+        { email: email },
+        { $inc: { balance: deposit } }
+      );
+    } catch (error) {
+      console.log("user doesn't exist");
+    }
+  } catch (error) {
+    console.error("Error in updating balance");
+  }
+});
+
+app.post("/updateUserBalanceWithdraw", async (req, res) => {
+  const { email, withdraw } = req.body;
+
+  try {
+    try {
+      await User.findOneAndUpdate(
+        { email: email },
+        { $inc: { balance: -withdraw } }
+      );
+    } catch (error) {
+      console.log("user doesn't exist");
+    }
+  } catch (error) {
+    console.error("Error in updating balance");
+  }
+});
+
+app.post("/getMongoAccount", async function (req, res) {
+  const { email } = req.body;
+  try {
+    const user = await User.findOne({ email: email });
+    console.log(user);
+    if (user) {
+      res.send(user.balance);
+    }
+  } catch {
+    console.error("error");
+  }
+});
+
 app.post("/accounts", async function (request, response, next) {
   const { newAccessToken } = request.body;
-  console.log("printing" + newAccessToken)
+  console.log("printing" + newAccessToken);
   try {
     const accountsResponse = await client.accountsGet({
       access_token: newAccessToken,
@@ -300,11 +439,7 @@ app.post("/getAccessFromMongo", async function (req, res) {
   }
 });
 
-
-
 // test endpint
 app.get("/ping", (req, res) => {
   res.send("pong");
 });
-
-
