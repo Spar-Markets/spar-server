@@ -10,6 +10,7 @@ const { Configuration, PlaidApi, PlaidEnvironments, AccountsGetRequest } = requi
 const mongoose = require("mongoose");
 const crypto = require("crypto");
 
+
 const app = express();
 const port = 3000;
 
@@ -446,18 +447,15 @@ async function createMatch() {
   } 
 }
 
-// Run the matchmaking process every 10 seconds
-setInterval(async () => {
-  try {
-    await createMatch();
-    console.log("Matchmaking process completed successfully");
-  } catch (error) {
-    console.error("Error in matchmaking process:", error);
-  }
-}, 10000);
-
-
-
+// // Run the matchmaking process every 10 seconds
+// setInterval(async () => {
+//   try {
+//     await createMatch();
+//     console.log("Matchmaking process completed successfully");
+//   } catch (error) {
+//     console.error("Error in matchmaking process:", error);
+//   }
+// }, 10000);
 
 
 // test endpint
