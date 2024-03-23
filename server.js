@@ -16,7 +16,6 @@ const mongoose = require("mongoose");
 const crypto = require("crypto");
 const plaid = require("plaid");
 
-
 const app = express();
 const port = 3000;
 
@@ -263,6 +262,18 @@ app.post("/simTransfer", async function (req, res) {
     console.error("Error Simming");
   }
 });
+
+
+app.post("/getActiveUser", async (req, res) => {
+  const { email }= req.body;
+  console.log("Called", email);
+
+  User.findOne({ email: email }).then((user) => {
+    console.log(user);
+    res.send(user);
+  });
+});
+
 
 app.post("/getPlaidBalance", async function (req, res) {
   try {
