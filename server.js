@@ -24,10 +24,10 @@ app.use(bodyParser.json());
 
 // Mongo
 
-mongoose
+/*mongoose
   // WE should look at saving this in a .env file which should be safer
   .connect(
-    "mongodb+srv://jjquaratiello:Schoolipad1950!@cluster0.xcfppj4.mongodb.net/Spar",
+    "mongodb+srv://jjquaratiello:Schoolipad1950!@cluster0.xcfppj4.mongodb.net/",
     {}
   )
   .then(() => {
@@ -35,7 +35,14 @@ mongoose
   })
   .catch((err) => {
     console.log("Test Error connecting", err);
-  });
+  });*/
+
+const sparDB = mongoose.createConnection(
+  "mongodb+srv://jjquaratiello:Schoolipad1950!@cluster0.xcfppj4.mongodb.net/Spar"
+);
+const stockDB = mongoose.createConnection(
+  "mongodb+srv://jjquaratiello:Schoolipad1950!@cluster0.xcfppj4.mongodb.net/stocks"
+);
 
 // Define a Song schema
 const userSchema = new mongoose.Schema({
@@ -119,9 +126,22 @@ const playerSchema = new mongoose.Schema({
   },
 });
 
-const User = mongoose.model("users", userSchema);
-const Player = mongoose.model("matchmakingPlayer", playerSchema);
-const Match = mongoose.model("Match", matchSchema);
+const stockSchema = new mongoose.Schema({
+  ticker: {
+    type: String,
+    required: true,
+    unique: true,
+  },
+  prices: {
+    type: [Object],
+    required: true,
+  },
+});
+
+const User = sparDB.model("users", userSchema);
+const Player = sparDB.model("matchmakingPlayer", playerSchema);
+const Match = sparDB.model("Match", matchSchema);
+const Stock = stockDB.model("oneDayStock", stockSchema);
 
 app.post("/createUser", async (req, res) => {
   try {
@@ -435,6 +455,19 @@ app.post("/getMongoAccount", async function (req, res) {
   }
 });
 
+app.post("/getOneDayStockData", async function (req, res) {
+  const { ticker } = req.body;
+  try {
+    const stock = await Stock.findOne({ ticker: ticker });
+    console.log("Stock: " + stock);
+    if (stock) {
+      res.send(stock.prices);
+    }
+  } catch {
+    console.error("Error getting one day stock data");
+  }
+});
+
 app.post("/accounts", async function (request, response, next) {
   const { newAccessToken } = request.body;
   console.log("printing" + newAccessToken);
@@ -516,7 +549,7 @@ app.post("/areTheyMatchmaking", async (req, res) => {
     const { username } = req.body;
 
     // Find the player in the matchmaking collection by username
-    const Player = mongoose.model("Player", playerSchema, "matchmakingplayers");
+    const Player = sparDB.model("Player", playerSchema, "matchmakingplayers");
     const player = await Player.findOne({ username });
 
     if (!player) {
