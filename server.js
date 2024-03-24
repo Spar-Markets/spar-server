@@ -592,7 +592,7 @@ app.post("/areTheyMatchmaking", async (req, res) => {
 
     // Find the player in the matchmaking collection by username
     const Player = sparDB.model("Player", playerSchema, "matchmakingplayers");
-    const player = await Player.findOne({ username });
+    const player = await Player.findOne({ email });
 
     if (!player) {
       // Player not found, send an error response
