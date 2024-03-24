@@ -97,12 +97,12 @@ const matchSchema = new mongoose.Schema({
 });
 
 const playerSchema = new mongoose.Schema({
-  email: {
+  username: {
     type: String,
     required: true,
     unique: true,
   },
-  username: {
+  email: {
     type: String,
     required: true,
     unique: true,
@@ -115,14 +115,17 @@ const playerSchema = new mongoose.Schema({
   enteredMatchmakingAt: {
     type: Date,
     default: Date.now,
+    unique: false,
   },
-  entryFee: {
+  entryFeeInt: {
     type: Number,
     required: true,
+    unique: false,
   },
-  matchLength: {
+  matchLengthInt: {
     type: Number,
     required: true,
+    unique: false,
   },
 });
 
@@ -281,6 +284,16 @@ app.post("/simTransfer", async function (req, res) {
   } catch {
     console.error("Error Simming");
   }
+});
+
+app.post("/getActiveUser", async (req, res) => {
+  const { email } = req.body;
+  console.log("Called", email);
+
+  User.findOne({ email: email }).then((user) => {
+    console.log(user);
+    res.send(user);
+  });
 });
 
 app.post("/getPlaidBalance", async function (req, res) {
@@ -521,12 +534,14 @@ app.post("/getAccessFromMongo", async function (req, res) {
   }
 });
 
+// Matchmaking
+
 app.post("/cancelMatchmaking", async (req, res) => {
   try {
-    const { username } = req.body;
+    const { email } = req.body;
 
     // Find the player in the matchmaking collection by username
-    const player = await Player.findOne({ username });
+    const player = await Player.findOne({ email });
 
     if (!player) {
       // Player not found, send an error response
@@ -534,7 +549,7 @@ app.post("/cancelMatchmaking", async (req, res) => {
     }
 
     // Delete the player from the matchmaking collection
-    await Player.deleteOne({ username });
+    await Player.deleteOne({ email });
 
     // Send a success response
     res.json({ message: "Matchmaking canceled successfully" });
@@ -544,9 +559,36 @@ app.post("/cancelMatchmaking", async (req, res) => {
   }
 });
 
+app.post("/userToMatchmaking", async (req, res) => {
+  try {
+    const { username, email, skillRating, entryFee, matchLength } = req.body;
+
+    const entryFeeInt = parseInt(entryFee);
+
+    const matchLengthInt = parseInt(matchLength);
+
+    const newPlayer = new Player({
+      username,
+      email,
+      skillRating,
+      entryFeeInt,
+      matchLengthInt,
+    });
+    console.log("logging player creds in usertomatchmaking" + newPlayer);
+
+    await newPlayer.save();
+
+    res.send(email + "Entered Matchmaking");
+  } catch (err) {
+    console.log("inmatchmaking" + err);
+  }
+});
+
 app.post("/areTheyMatchmaking", async (req, res) => {
   try {
-    const { username } = req.body;
+    console.log("Are they matchmaking called");
+
+    const { email } = req.body;
 
     // Find the player in the matchmaking collection by username
     const Player = sparDB.model("Player", playerSchema, "matchmakingplayers");
@@ -617,15 +659,15 @@ async function createMatch() {
   }
 }
 
-// // Run the matchmaking process every 10 seconds
-// setInterval(async () => {
-//   try {
-//     await createMatch();
-//     console.log("Matchmaking process completed successfully");
-//   } catch (error) {
-//     console.error("Error in matchmaking process:", error);
-//   }
-// }, 10000);
+// Run the matchmaking process every 10 seconds
+setInterval(async () => {
+  try {
+    await createMatch();
+    console.log("Matchmaking process completed successfully");
+  } catch (error) {
+    console.error("Error in matchmaking process:", error);
+  }
+}, 20000);
 
 // test endpint
 app.get("/ping", (req, res) => {
