@@ -141,10 +141,37 @@ const stockSchema = new mongoose.Schema({
   },
 });
 
+const stockDetailsSchema = new mongoose.Schema({
+  ticker: {
+    type: String,
+    required: true,
+    unique: true,
+  },
+  address: {
+    type: Object,
+  },
+  branding: {
+    type: Object,
+  },
+  description: {
+    type: String,
+  },
+  market_cap: {
+    type: Number,
+  },
+  name: {
+    type: String,
+  },
+  total_employees: {
+    type: Number,
+  },
+});
+
 const User = sparDB.model("users", userSchema);
 const Player = sparDB.model("matchmakingPlayer", playerSchema);
 const Match = sparDB.model("Match", matchSchema);
 const Stock = stockDB.model("oneDayStock", stockSchema);
+const StockDetails = stockDB.model("tickerdetail", stockDetailsSchema);
 
 app.post("/createUser", async (req, res) => {
   try {
@@ -472,12 +499,23 @@ app.post("/getOneDayStockData", async function (req, res) {
   const { ticker } = req.body;
   try {
     const stock = await Stock.findOne({ ticker: ticker });
-    console.log("Stock: " + stock);
     if (stock) {
-      res.send(stock.prices);
+      res.send(stock);
     }
   } catch {
     console.error("Error getting one day stock data");
+  }
+});
+
+app.post("/getTickerDetails", async function (req, res) {
+  const { ticker } = req.body;
+  try {
+    const details = await StockDetails.findOne({ ticker: ticker });
+    if (details) {
+      res.send(details);
+    }
+  } catch {
+    console.error("Error getting stock data");
   }
 });
 
