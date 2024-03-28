@@ -574,13 +574,13 @@ app.post("/userToMatchmaking", async (req, res) => {
       entryFeeInt,
       matchLengthInt,
     });
-    console.log("logging player creds in usertomatchmaking" + newPlayer);
+    console.log("Logging player creds in Usertomatchmaking " + newPlayer);
 
     await newPlayer.save();
 
     res.send(email + "Entered Matchmaking");
   } catch (err) {
-    console.log("inmatchmaking" + err);
+    console.log("inmatchmaking " + err);
   }
 });
 
@@ -667,7 +667,7 @@ setInterval(async () => {
   } catch (error) {
     console.error("Error in matchmaking process:", error);
   }
-}, 20000);
+}, 5000);
 
 // test endpint
 app.get("/ping", (req, res) => {
