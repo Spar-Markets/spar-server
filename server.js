@@ -742,7 +742,26 @@ setInterval(async () => {
   }
 }, 5000);
 
-// test endpint
+// Test Endpint
 app.get("/ping", (req, res) => {
   res.send("pong");
 });
+
+
+// Websocket 
+
+const WebSocket = require("ws");
+const server = http.createServer(app);
+const wss = new WebSocket.Server({ server });
+
+wss.on("connection", function connection(ws) {
+  ws.on("message", function incoming(message, isBinary) {
+    console.log(message.toString(), isBinary);
+    wss.clients.forEach(function each(client) {
+      if (client.readyState === WebSocket.OPEN) { 
+        client.send(message.toString());
+      }
+    });
+  });
+});
+
