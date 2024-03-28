@@ -85,13 +85,22 @@ const matchSchema = new mongoose.Schema({
     required: true,
     unique: true,
   },
-  users: {
-    type: [String], // Array of usernames participating in the match
+  user1: {
+    type: Object, // Array of usernames participating in the match
+    required: true,
+  },
+  user2: {
+    type: Object,
+    required: true,
+  },
+  wagerAmt: {
+    type: Number,
     required: true,
   },
   createdAt: {
     type: Date,
     default: Date.now,
+    required: true,
   },
   // You can add more fields as needed for your specific application
 });
@@ -141,10 +150,37 @@ const stockSchema = new mongoose.Schema({
   },
 });
 
+const stockDetailsSchema = new mongoose.Schema({
+  ticker: {
+    type: String,
+    required: true,
+    unique: true,
+  },
+  address: {
+    type: Object,
+  },
+  branding: {
+    type: Object,
+  },
+  description: {
+    type: String,
+  },
+  market_cap: {
+    type: Number,
+  },
+  name: {
+    type: String,
+  },
+  total_employees: {
+    type: Number,
+  },
+});
+
 const User = sparDB.model("users", userSchema);
 const Player = sparDB.model("matchmakingPlayer", playerSchema);
 const Match = sparDB.model("Match", matchSchema);
 const Stock = stockDB.model("oneDayStock", stockSchema);
+const StockDetails = stockDB.model("tickerdetail", stockDetailsSchema);
 
 app.post("/createUser", async (req, res) => {
   try {
@@ -472,12 +508,23 @@ app.post("/getOneDayStockData", async function (req, res) {
   const { ticker } = req.body;
   try {
     const stock = await Stock.findOne({ ticker: ticker });
-    console.log("Stock: " + stock);
     if (stock) {
-      res.send(stock.prices);
+      res.send(stock);
     }
   } catch {
     console.error("Error getting one day stock data");
+  }
+});
+
+app.post("/getTickerDetails", async function (req, res) {
+  const { ticker } = req.body;
+  try {
+    const details = await StockDetails.findOne({ ticker: ticker });
+    if (details) {
+      res.send(details);
+    }
+  } catch {
+    console.error("Error getting stock data");
   }
 });
 
@@ -531,6 +578,30 @@ app.post("/getAccessFromMongo", async function (req, res) {
   } catch (error) {
     console.error("Error retrieving user access:", error);
     return res.status(500).json({ message: "Internal server error" });
+  }
+});
+
+app.post("/getUserMatches", async function (req, res) {
+  try {
+    const { email } = req.body;
+    const user = await User.findOne({ email: email });
+    if (user) {
+      res.send(user.activematches);
+    }
+  } catch {
+    console.error("Error retrieving active matches.", error);
+  }
+});
+
+app.post("/getMatchData", async function (req, res) {
+  try {
+    const { matchId } = req.body;
+    const match = await Match.findOne({ matchId: matchId });
+    if (match) {
+      res.send(match);
+    }
+  } catch {
+    console.error("Error getting match data");
   }
 });
 
@@ -627,7 +698,9 @@ async function createMatch() {
           // Insert the matched users into the "matches" collection
           const match = new Match({
             matchId,
-            users: [users[i].email, users[j].email],
+            wagerAmt: users[i].entryFeeInt,
+            user1: { name: users[i].email, assets: [] },
+            user2: { name: users[j].email, assets: [] },
           });
           await match.save();
           console.log("Updating user:", users[i].email);
@@ -655,7 +728,7 @@ async function createMatch() {
       }
     }
   } finally {
-    console.log("Match made. Why is this under finally");
+    console.log("Match made.");
   }
 }
 
