@@ -85,13 +85,22 @@ const matchSchema = new mongoose.Schema({
     required: true,
     unique: true,
   },
-  users: {
-    type: [String], // Array of usernames participating in the match
+  user1: {
+    type: Object, // Array of usernames participating in the match
+    required: true,
+  },
+  user2: {
+    type: Object,
+    required: true,
+  },
+  wagerAmt: {
+    type: Number,
     required: true,
   },
   createdAt: {
     type: Date,
     default: Date.now,
+    required: true,
   },
   // You can add more fields as needed for your specific application
 });
@@ -572,6 +581,30 @@ app.post("/getAccessFromMongo", async function (req, res) {
   }
 });
 
+app.post("/getUserMatches", async function (req, res) {
+  try {
+    const { email } = req.body;
+    const user = await User.findOne({ email: email });
+    if (user) {
+      res.send(user.activematches);
+    }
+  } catch {
+    console.error("Error retrieving active matches.", error);
+  }
+});
+
+app.post("/getMatchData", async function (req, res) {
+  try {
+    const { matchId } = req.body;
+    const match = await Match.findOne({ matchId: matchId });
+    if (match) {
+      res.send(match);
+    }
+  } catch {
+    console.error("Error getting match data");
+  }
+});
+
 // Matchmaking
 
 app.post("/cancelMatchmaking", async (req, res) => {
@@ -665,7 +698,9 @@ async function createMatch() {
           // Insert the matched users into the "matches" collection
           const match = new Match({
             matchId,
-            users: [users[i].email, users[j].email],
+            wagerAmt: users[i].entryFeeInt,
+            user1: { name: users[i].email, assets: [] },
+            user2: { name: users[j].email, assets: [] },
           });
           await match.save();
           console.log("Updating user:", users[i].email);
@@ -693,7 +728,7 @@ async function createMatch() {
       }
     }
   } finally {
-    console.log("Match made. Why is this under finally");
+    console.log("Match made.");
   }
 }
 
