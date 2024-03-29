@@ -408,9 +408,6 @@ app.post("/getAccount", async (req, res) => {
   }
 });
 
-app.listen(port, () => {
-  console.log(`Backend server is running on port ${port}...`);
-});
 
 // Function for random string generation:
 
@@ -748,21 +745,21 @@ app.get("/ping", (req, res) => {
 });
 
 
-// Websocket 
-
-const http = require("http");
+// Websocket
+app.use(express.json({ extended: false}));
+app.use(express.static('public'));
 const WebSocket = require("ws");
-const server = http.createServer(app);
-const wss = new WebSocket.Server({ server });
+const PORT = 443;
 
-wss.on("connection", function connection(ws) {
-  ws.on("message", function incoming(message, isBinary) {
-    console.log(message.toString(), isBinary);
-    wss.clients.forEach(function each(client) {
-      if (client.readyState === WebSocket.OPEN) { 
-        client.send(message.toString());
-      }
-    });
+
+const server = new WebSocket.Server({ server:app.listen(PORT) });
+
+
+
+server.on('connection', (socket) => {
+  socket.on('message', (msg) => {
+    server.clients.forEach( client => {
+      client.send(msg);
+    })
   });
 });
-
