@@ -14,10 +14,9 @@ const {
 } = require("plaid");
 const mongoose = require("mongoose");
 const crypto = require("crypto");
-const plaid = require("plaid");
 
 const app = express();
-const port = 3000;
+const PORT = process.env.PORT || 3000; // Use the PORT environment variable if provided, otherwise default to 3000
 
 // app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
@@ -745,21 +744,46 @@ app.get("/ping", (req, res) => {
 });
 
 
+
 // Websocket
-app.use(express.json({ extended: false}));
-app.use(express.static('public'));
-const WebSocket = require("ws");
-const PORT = 443;
+
+const server = require("http").createServer(app);
+const io = require("socket-io").listen(server);
+
+io.on("connection", socket => {
+  console.logo("a user has connected ")
+})
 
 
-const server = new WebSocket.Server({ server:app.listen(PORT) });
 
 
 
-server.on('connection', (socket) => {
-  socket.on('message', (msg) => {
-    server.clients.forEach( client => {
-      client.send(msg);
-    })
-  });
+
+
+// app.use(express.json({ extended: false}));
+// app.use(express.static('public'));
+// const WebSocket = require("ws");
+// const http = require('http');
+
+// const server = http.createServer(app);
+// const wss = new WebSocket.Server({ server });
+
+
+// wss.on('connection', function connection(ws) {
+//   console.log('Client connected');
+
+//   ws.on('message', function incoming(message) {
+//     console.log('Received: %s', message);
+//   });
+
+//   ws.on('close', function close() {
+//     console.log('Client disconnected');
+//   });
+// });
+
+
+
+
+server.listen(PORT, function listening() {
+  console.log('Server started on port', PORT);
 });
