@@ -97,6 +97,10 @@ const matchSchema = new mongoose.Schema({
     type: Number,
     required: true,
   },
+  timeframe: {
+    type: Number,
+    required: true,
+  },
   createdAt: {
     type: Date,
     default: Date.now,
@@ -179,7 +183,8 @@ const stockDetailsSchema = new mongoose.Schema({
 const User = sparDB.model("users", userSchema);
 const Player = sparDB.model("matchmakingPlayer", playerSchema);
 const Match = sparDB.model("Match", matchSchema);
-const Stock = stockDB.model("oneDayStock", stockSchema);
+const oneDayStock = stockDB.model("oneDayStock", stockSchema);
+const oneWeekStock = stockDB.model("oneWeekStock", stockSchema);
 const StockDetails = stockDB.model("tickerdetail", stockDetailsSchema);
 
 app.post("/createUser", async (req, res) => {
@@ -497,7 +502,7 @@ app.post("/getMongoAccount", async function (req, res) {
     const user = await User.findOne({ email: email });
     console.log(user);
     if (user) {
-      res.send(user.balance);
+      res.send(user);
     }
   } catch {
     console.error("error");
@@ -507,12 +512,24 @@ app.post("/getMongoAccount", async function (req, res) {
 app.post("/getOneDayStockData", async function (req, res) {
   const { ticker } = req.body;
   try {
-    const stock = await Stock.findOne({ ticker: ticker });
+    const stock = await oneDayStock.findOne({ ticker: ticker });
     if (stock) {
       res.send(stock);
     }
   } catch {
     console.error("Error getting one day stock data");
+  }
+});
+
+app.post("/getOneWeekStockData", async function (req, res) {
+  const { ticker } = req.body;
+  try {
+    const stock = await oneWeekStock.findOne({ ticker: ticker });
+    if (stock) {
+      res.send(stock);
+    }
+  } catch {
+    console.error("Error getting one week stock data");
   }
 });
 
