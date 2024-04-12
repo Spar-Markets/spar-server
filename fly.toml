@@ -16,9 +16,21 @@ primary_region = 'bos'
   min_machines_running = 0
   processes = ['app']
 
+[[services]]
+  internal_port = 3001
+  protocol = "tcp"
+
+  [services.concurrency]
+    hard_limit = 25
+    soft_limit = 20
+
+  [[services.ports]]
+    handlers = ["tls", "http"]
+    port = "443"
+
+  [[services.tcp_checks]]
+    interval = 10000
+    timeout = 2000
+
 [[vm]]
   size = 'shared-cpu-1x'
-
-  [http_service.ports]
-    port = 443
-    handlers = ["tls", "http", "websocket"]

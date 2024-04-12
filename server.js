@@ -14,27 +14,86 @@ const {
 } = require("plaid");
 const mongoose = require("mongoose");
 const crypto = require("crypto");
+const WebSocket = require('ws');
 
 const app = express();
 const PORT = process.env.PORT || 3000; // Use the PORT environment variable if provided, otherwise default to 3000
+ 
+const WsPort = 3001;
+const wss = new WebSocket.Server({ server:app.listen(WsPort) });
+
+
+// Store all connected sockets
+const sockets = [];
+
+
+
+wss.on('connection', (socket) => {
+  console.log('Client connected');
+
+  // Add the new socket to the list
+  sockets.push(socket);
+
+  socket.on('message', (message) => {
+    console.log('Received message from client:', message);
+  });
+
+  socket.on('close', () => {
+    console.log('Client disconnected');
+    
+    // Remove the socket from the list when it's closed
+    const index = sockets.indexOf(socket);
+    if (index !== -1) {
+      sockets.splice(index, 1);
+    }
+  });
+});
+
+
+// Function to update the "currentPrice" field every 2 seconds
+async function updateCurrentPriceAndBroadcast() {
+  try {
+    // Find documents where currentPrice exists
+    const stock = await Stock.findOne({ symbol: "AAPL" });
+
+    // Update each document's currentPrice by increasing it by one
+    if (stock) {
+      const previousPrice = stock.currentPrice;
+      console.log(previousPrice)
+      const newPrice = previousPrice + 1;
+      console.log(newPrice)
+      await Stock.findByIdAndUpdate(stock._id, { $inc: { currentPrice: 1 } });
+      broadcast(`AAPL price updated: ${newPrice}`);
+
+    }
+  
+
+  } catch (error) {
+    console.error('Error updating price:', error);
+  }
+}
+
+setInterval(updateCurrentPriceAndBroadcast, 2000);
+
+
+// Function to broadcast a message to all connected sockets
+function broadcast(message) {
+  sockets.forEach(socket => {
+    socket.send(message);
+  });
+}
+
+
+
+
+
+
+
 
 // app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
 
 // Mongo
-
-/*mongoose
-  // WE should look at saving this in a .env file which should be safer
-  .connect(
-    "mongodb+srv://jjquaratiello:Schoolipad1950!@cluster0.xcfppj4.mongodb.net/",
-    {}
-  )
-  .then(() => {
-    console.log("Connected to MongoDB");
-  })
-  .catch((err) => {
-    console.log("Test Error connecting", err);
-  });*/
 
 const sparDB = mongoose.createConnection(
   "mongodb+srv://jjquaratiello:Schoolipad1950!@cluster0.xcfppj4.mongodb.net/Spar"
@@ -764,14 +823,17 @@ app.get("/ping", (req, res) => {
 
 // Websocket
 
-const server = require("http").createServer(app);
-const io = require("socket-io").listen(server);
-
-io.on("connection", socket => {
-  console.logo("a user has connected ")
-})
+// const { Server } = require("socket.io");
+// const { createServer } = require("http");
+// const httpServer = createServer();
+// const io = new Server(httpServer, { /* options */ });
 
 
+// io.on("connection", (socket) => {
+//   console.logo("a user has connected ")
+// })
+
+// httpServer.listen(3000);
 
 
 
@@ -801,6 +863,6 @@ io.on("connection", socket => {
 
 
 
-server.listen(PORT, function listening() {
+app.listen(PORT, function listening() {
   console.log('Server started on port', PORT);
 });
