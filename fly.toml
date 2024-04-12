@@ -18,3 +18,7 @@ primary_region = 'bos'
 
 [[vm]]
   size = 'shared-cpu-1x'
+
+  [http_service.ports]
+    port = 443
+    handlers = ["tls", "http", "websocket"]
