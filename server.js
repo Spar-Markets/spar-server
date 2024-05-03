@@ -14,33 +14,30 @@ const {
 } = require("plaid");
 const mongoose = require("mongoose");
 const crypto = require("crypto");
-const WebSocket = require('ws');
+const WebSocket = require("ws");
 
 const app = express();
 const PORT = process.env.PORT || 3000; // Use the PORT environment variable if provided, otherwise default to 3000
- 
-const WsPort = 3001;
-const wss = new WebSocket.Server({ server:app.listen(WsPort) });
 
+const WsPort = 3001;
+const wss = new WebSocket.Server({ server: app.listen(WsPort) });
 
 // Store all connected sockets
 const sockets = [];
 
-
-
-wss.on('connection', (socket) => {
-  console.log('Client connected');
+wss.on("connection", (socket) => {
+  console.log("Client connected");
 
   // Add the new socket to the list
   sockets.push(socket);
 
-  socket.on('message', (message) => {
-    console.log('Received message from client:', message);
+  socket.on("message", (message) => {
+    console.log("Received message from client:", message);
   });
 
-  socket.on('close', () => {
-    console.log('Client disconnected');
-    
+  socket.on("close", () => {
+    console.log("Client disconnected");
+
     // Remove the socket from the list when it's closed
     const index = sockets.indexOf(socket);
     if (index !== -1) {
@@ -48,7 +45,6 @@ wss.on('connection', (socket) => {
     }
   });
 });
-
 
 // Function to update the "currentPrice" field every 2 seconds
 async function updateCurrentPriceAndBroadcast() {
@@ -59,36 +55,25 @@ async function updateCurrentPriceAndBroadcast() {
     // Update each document's currentPrice by increasing it by one
     if (stock) {
       const previousPrice = stock.currentPrice;
-      console.log(previousPrice)
+      console.log(previousPrice);
       const newPrice = previousPrice + 1;
-      console.log(newPrice)
+      console.log(newPrice);
       await Stock.findByIdAndUpdate(stock._id, { $inc: { currentPrice: 1 } });
       broadcast(`AAPL price updated: ${newPrice}`);
-
     }
-  
-
   } catch (error) {
-    console.error('Error updating price:', error);
+    console.error("Error updating price:", error);
   }
 }
 
 setInterval(updateCurrentPriceAndBroadcast, 2000);
 
-
 // Function to broadcast a message to all connected sockets
 function broadcast(message) {
-  sockets.forEach(socket => {
+  sockets.forEach((socket) => {
     socket.send(message);
   });
 }
-
-
-
-
-
-
-
 
 // app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
@@ -471,7 +456,6 @@ app.post("/getAccount", async (req, res) => {
   }
 });
 
-
 // Function for random string generation:
 
 function generateRandomString(length) {
@@ -771,8 +755,8 @@ async function createMatch() {
           const match = new Match({
             matchId,
             wagerAmt: users[i].entryFeeInt,
-            user1: { name: users[i].email, assets: [] },
-            user2: { name: users[j].email, assets: [] },
+            user1: { name: users[i].email, assets: [], buyingPower: 100000 },
+            user2: { name: users[j].email, assets: [], buyingPower: 100000 },
           });
           await match.save();
           console.log("Updating user:", users[i].email);
@@ -819,8 +803,6 @@ app.get("/ping", (req, res) => {
   res.send("pong");
 });
 
-
-
 // Websocket
 
 // const { Server } = require("socket.io");
@@ -828,16 +810,11 @@ app.get("/ping", (req, res) => {
 // const httpServer = createServer();
 // const io = new Server(httpServer, { /* options */ });
 
-
 // io.on("connection", (socket) => {
 //   console.logo("a user has connected ")
 // })
 
 // httpServer.listen(3000);
-
-
-
-
 
 // app.use(express.json({ extended: false}));
 // app.use(express.static('public'));
@@ -846,7 +823,6 @@ app.get("/ping", (req, res) => {
 
 // const server = http.createServer(app);
 // const wss = new WebSocket.Server({ server });
-
 
 // wss.on('connection', function connection(ws) {
 //   console.log('Client connected');
@@ -860,9 +836,6 @@ app.get("/ping", (req, res) => {
 //   });
 // });
 
-
-
-
 app.listen(PORT, function listening() {
-  console.log('Server started on port', PORT);
+  console.log("Server started on port", PORT);
 });
