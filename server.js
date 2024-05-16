@@ -52,29 +52,29 @@ wss.on('connection', (socket) => {
 });
 
 // Function to update the "currentPrice" field every 2 seconds
-async function updateCurrentPriceAndBroadcast() {
-  try {
-    console.log("ws")
-    // Find documents where currentPrice exists
-    const stock = await oneDayStock.findOne({ ticker: "AAPL" });
-    // Update each document's currentPrice by increasing it by one
-    if (stock) {
-      const previousPrice = stock.currentPrice;
-      console.log(previousPrice)
-      const newPrice = previousPrice + 1;
-      console.log(newPrice)
-      await Stock.findByIdAndUpdate(stock._id, { $inc: { currentPrice: 1 } });
-      broadcast(`AAPL price updated: ${newPrice}`);
+// async function updateCurrentPriceAndBroadcast() {
+//   try {
+//     console.log("ws")
+//     // Find documents where currentPrice exists
+//     const stock = await oneDayStock.findOne({ ticker: "AAPL" });
+//     // Update each document's currentPrice by increasing it by one
+//     if (stock) {
+//       const previousPrice = stock.currentPrice;
+//       console.log(previousPrice)
+//       const newPrice = previousPrice + 1;
+//       console.log(newPrice)
+//       await Stock.findByIdAndUpdate(stock._id, { $inc: { currentPrice: 1 } });
+//       broadcast(`AAPL price updated: ${newPrice}`);
 
-    }
+//     }
   
 
-  } catch (error) {
-    console.error("Error updating price:", error);
-  }
-}
+//   } catch (error) {
+//     console.error("Error updating price:", error);
+//   }
+// }
 
-setInterval(updateCurrentPriceAndBroadcast, 2000);
+// setInterval(updateCurrentPriceAndBroadcast, 2000);
 
 
 // Function to broadcast a message to all connected sockets
@@ -890,7 +890,7 @@ setInterval(async () => {
   updateCurrentPrice("AAPL");
   updateCurrentPrice("GOOG");
   updateCurrentPrice("TSLA");
-}, 5000)
+}, 20000)
 
 // Test Endpint
 app.get("/ping", (req, res) => {
