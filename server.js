@@ -834,6 +834,11 @@ setInterval(async () => {
  * STOCK DATA
  */
 
+// cache for prices for each ticker, updated whenever new price is written to DB
+// 1. so that we only write to DB if price is new (minimize write operations)
+// 2. to not read directly from DB to check whether price is new (minimize read operations)
+const priceCache = {}
+
 const getCurrentPrice = async (ticker) => {
   // constants
   let hoursAgo = 24;
@@ -867,19 +872,29 @@ const getCurrentPrice = async (ticker) => {
 const updateCurrentPrice = async (ticker) => {
   const newPrice = await getCurrentPrice(ticker);
   try {
-    const result = await oneDayStock.findOneAndUpdate(
-      {ticker: ticker},
-      {
-        $set: {currentPrice: newPrice},
-        $setOnInsert: { prices: [] } // to make sure prices array is initialized if new document is created
-      },
-      {
-        new: true,
-        upsert: true,
-        runValidators: true
-      }
-    );
-    console.log('Updated or created document: ', result);
+    const cachedPrice = priceCache[ticker];
+
+    // write price to DB if price is changed or not cached
+    if (!cachedPrice || cachedPrice.price !== newPrice.price || cachedPrice.timeField !== newPrice.timeField) {
+      const result = await oneDayStock.findOneAndUpdate(
+        {ticker: ticker},
+        {
+          $set: {currentPrice: newPrice},
+          $setOnInsert: { prices: [] } // to make sure prices array is initialized if new document is created
+        },
+        {
+          new: true,
+          upsert: true,
+          runValidators: true
+        }
+      );
+      console.log('Updated', result.ticker, '. New price: ', result.currentPrice);
+
+      // update the cache
+      priceCache[ticker] = newPrice;
+    } else {
+      console.log('Price for', ticker, 'not updated because price hasn\'t changed.')
+    }
   } catch(error) {
     console.error("Error updating price: ", error);
   }
