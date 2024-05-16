@@ -15,6 +15,8 @@ const {
 const mongoose = require("mongoose");
 const crypto = require("crypto");
 const WebSocket = require("ws");
+const axios = require("axios");
+const polygonKey = "_4BtZn3PRCLu6fsdu7dgddb4ucmB1sfp";
 
 const app = express();
 const PORT = process.env.PORT || 3000; // Use the PORT environment variable if provided, otherwise default to 3000
@@ -209,6 +211,10 @@ const stockSchema = new mongoose.Schema({
     type: [Object],
     required: true,
   },
+  currentPrice: {
+    type: Object,
+    required: true
+  }
 });
 
 const stockDetailsSchema = new mongoose.Schema({
@@ -823,6 +829,68 @@ setInterval(async () => {
     console.error("Error in matchmaking process:", error);
   }
 }, 5000);
+
+/**
+ * STOCK DATA
+ */
+
+const getCurrentPrice = async (ticker) => {
+  // constants
+  let hoursAgo = 24;
+  let millisAgo = hoursAgo * 60 * 60 * 1000
+  const now = Date.now();
+  const timestamp1 = now - millisAgo;
+  const timestamp2 = now - millisAgo + 60000;
+  
+  // get price from 24h ago timestamp
+  const response = await axios.get(
+      `https://api.polygon.io/v2/aggs/ticker/${ticker}/range/1/minute/${timestamp1}/${timestamp2}?adjusted=true&sort=asc&limit=1000&apiKey=${polygonKey}`
+  );
+
+  if (response.data.queryCount == 0 || response.data.resultsCount == 0) {
+    console.error("No data was found for specified timestamp.");
+    return null;
+  }
+
+  const data = response.data.results;
+
+  const closestBefore = data.reduce((prev, curr) => {
+    // Ignore objects where `t` is not before `time`
+    if (curr.t > timestamp1) return prev;
+    // If prev is null (initial state) or the current object's `t` is closer to `time`, update prev
+    return (prev === null || Math.abs(curr.t - timestamp1) < Math.abs(prev.t - timestamp1)) ? curr : prev;
+  }, null);
+
+  return { timeField: closestBefore.t, price: closestBefore.c };
+}
+
+const updateCurrentPrice = async (ticker) => {
+  const newPrice = await getCurrentPrice(ticker);
+  try {
+    const result = await oneDayStock.findOneAndUpdate(
+      {ticker: ticker},
+      {
+        $set: {currentPrice: newPrice},
+        $setOnInsert: { prices: [] } // to make sure prices array is initialized if new document is created
+      },
+      {
+        new: true,
+        upsert: true,
+        runValidators: true
+      }
+    );
+    console.log('Updated or created document: ', result);
+  } catch(error) {
+    console.error("Error updating price: ", error);
+  }
+}
+
+// Stock data
+setInterval(async () => {
+  updateCurrentPrice("AAPL");
+  updateCurrentPrice("GOOG");
+  updateCurrentPrice("TSLA");
+}, 5000)
 
 // Test Endpint
 app.get("/ping", (req, res) => {
