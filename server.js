@@ -15,22 +15,20 @@ const {
 const mongoose = require("mongoose");
 const crypto = require("crypto");
 const WebSocket = require('ws');
+const cors = require('cors');
+
 
 const app = express();
-const PORT = process.env.PORT || 3000; // Use the PORT environment variable if provided, otherwise default to 3000
+const Port = 3000; // Use the PORT environment variable if provided, otherwise default to 3000
  
 const WsPort = 3001;
 const wss = new WebSocket.Server({ server:app.listen(WsPort) });
 
-
 // Store all connected sockets
 const sockets = [];
 
-
-
 wss.on('connection', (socket) => {
   console.log('Client connected');
-
   // Add the new socket to the list
   sockets.push(socket);
 
@@ -39,6 +37,7 @@ wss.on('connection', (socket) => {
   });
 
   socket.on('close', () => {
+    console.log("??")
     console.log('Client disconnected');
     
     // Remove the socket from the list when it's closed
@@ -53,42 +52,40 @@ wss.on('connection', (socket) => {
 // Function to update the "currentPrice" field every 2 seconds
 async function updateCurrentPriceAndBroadcast() {
   try {
+    console.log("ws")
     // Find documents where currentPrice exists
-    const stock = await Stock.findOne({ symbol: "AAPL" });
-
+    const stock = await oneDayStock.findOne({ ticker: "AAPL" });
     // Update each document's currentPrice by increasing it by one
     if (stock) {
-      const previousPrice = stock.currentPrice;
-      console.log(previousPrice)
-      const newPrice = previousPrice + 1;
-      console.log(newPrice)
-      await Stock.findByIdAndUpdate(stock._id, { $inc: { currentPrice: 1 } });
-      broadcast(`AAPL price updated: ${newPrice}`);
+      
+      const previousPrice = stock.prices || []; // Ensure previousPrice is initialized as an array
+      const newPrice = previousPrice[1]
+      console.log(newPrice.price)
+      newPrice.price = newPrice.price + Math.random(0,20)
+      
+      // await oneDayStock.findByIdAndUpdate(stock._id, { $inc: { currentPrice: 1 } });
+      broadcast(`${newPrice.price}`);
 
     }
   
-
   } catch (error) {
     console.error('Error updating price:', error);
   }
 }
 
-setInterval(updateCurrentPriceAndBroadcast, 2000);
+// setInterval(updateCurrentPriceAndBroadcast, 2000);
 
 
 // Function to broadcast a message to all connected sockets
 function broadcast(message) {
+  console.log("broadcasting")
   sockets.forEach(socket => {
     socket.send(message);
   });
 }
 
 
-
-
-
-
-
+app.use(cors());
 
 // app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
@@ -238,12 +235,24 @@ const stockDetailsSchema = new mongoose.Schema({
   },
 });
 
+const prop1 = new mongoose.Schema({
+  prop: {
+    type: String,
+    required: true,
+    unique: true,
+  },
+});
+
+
 const User = sparDB.model("users", userSchema);
 const Player = sparDB.model("matchmakingPlayer", playerSchema);
 const Match = sparDB.model("Match", matchSchema);
 const oneDayStock = stockDB.model("oneDayStock", stockSchema);
 const oneWeekStock = stockDB.model("oneWeekStock", stockSchema);
 const StockDetails = stockDB.model("tickerdetail", stockDetailsSchema);
+
+const prop2 = stockDB.model('prop', prop1);
+
 
 app.post("/createUser", async (req, res) => {
   try {
@@ -820,49 +829,37 @@ app.get("/ping", (req, res) => {
 });
 
 
-
-// Websocket
-
-// const { Server } = require("socket.io");
-// const { createServer } = require("http");
-// const httpServer = createServer();
-// const io = new Server(httpServer, { /* options */ });
-
-
-// io.on("connection", (socket) => {
-//   console.logo("a user has connected ")
-// })
-
-// httpServer.listen(3000);
-
-
-
-
-
-// app.use(express.json({ extended: false}));
-// app.use(express.static('public'));
-// const WebSocket = require("ws");
-// const http = require('http');
-
-// const server = http.createServer(app);
-// const wss = new WebSocket.Server({ server });
-
-
-// wss.on('connection', function connection(ws) {
-//   console.log('Client connected');
-
-//   ws.on('message', function incoming(message) {
-//     console.log('Received: %s', message);
-//   });
-
-//   ws.on('close', function close() {
-//     console.log('Client disconnected');
-//   });
-// });
-
-
-
-
-app.listen(PORT, function listening() {
-  console.log('Server started on port', PORT);
+app.listen(Port, function listening() {
+  console.log('Server started on port', Port);
 });
+
+
+async function main() {
+    await client.connect();
+    const db = client.db('your-database');
+    const prop2 = db.collection('prop2');
+
+    const changeStream = prop2.watch();
+    changeStream.on('change', async (change) => {
+        if (change.operationType === 'update') {
+            const updatedDoc = await prop2.findOne({ _id: change.documentKey._id });
+            const updatedProp = updatedDoc.prop;
+            console.log('Updated prop:', updatedProp);
+        }
+    });
+}
+
+main().catch(console.error);
+
+// API endpoint to fetch the prop value
+app.get('/get-prop', async (req, res) => {
+    try {
+        // Query the database to get the latest prop value
+        const latestProp = await getLatestPropValue(); // Implement this function to get the latest prop value
+        res.json({ prop: latestProp });
+    } catch (error) {
+        console.error('Error fetching prop:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
