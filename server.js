@@ -900,11 +900,36 @@ const updateCurrentPrice = async (ticker) => {
   }
 }
 
+const isWithinMarketHours = () => {
+  const startHour = 9;
+  const startMinute = 30;
+  const endHour = 16;
+  const endMinute = 0;
+
+  const now = new Date();
+  
+  // Convert to EST
+  const options = { timeZone: 'America/New_York', hour: 'numeric', minute: 'numeric', hour12: false };
+  const estTimeString = now.toLocaleTimeString('en-US', options);
+  const [currentHour, currentMinute] = estTimeString.split(':').map(Number);
+  
+  // Check if current time is within the specified range
+  const afterStart = (currentHour > startHour) || (currentHour === startHour && currentMinute >= startMinute);
+  const beforeEnd = (currentHour < endHour) || (currentHour === endHour && currentMinute <= endMinute);
+  
+  return afterStart && beforeEnd;
+}
+
 // Stock data
 setInterval(async () => {
-  updateCurrentPrice("AAPL");
-  updateCurrentPrice("GOOG");
-  updateCurrentPrice("TSLA");
+  if (isWithinMarketHours()) {
+    updateCurrentPrice("AAPL");
+    updateCurrentPrice("GOOG");
+    updateCurrentPrice("TSLA");
+  } else {
+    console.log("Outside market hours. Skipping function.")
+  }
+
 }, 20000)
 
 // Test Endpint
