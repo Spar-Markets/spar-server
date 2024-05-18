@@ -26,8 +26,6 @@ const wss = new WebSocket.Server({ server:app.listen(WsPort) });
 // Store all connected sockets
 const sockets = [];
 
-
-
 wss.on('connection', (socket) => {
   console.log('Client connected');
 
@@ -81,11 +79,6 @@ function broadcast(message) {
     socket.send(message);
   });
 }
-
-
-
-
-
 
 
 
@@ -845,10 +838,6 @@ app.get("/ping", (req, res) => {
 
 // httpServer.listen(3000);
 
-
-
-
-
 // app.use(express.json({ extended: false}));
 // app.use(express.static('public'));
 // const WebSocket = require("ws");
@@ -869,9 +858,6 @@ app.get("/ping", (req, res) => {
 //     console.log('Client disconnected');
 //   });
 // });
-
-
-
 
 app.listen(PORT, function listening() {
   console.log('Server started on port', PORT);
