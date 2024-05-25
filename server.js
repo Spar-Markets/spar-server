@@ -15,7 +15,8 @@ const {
 const mongoose = require("mongoose");
 const crypto = require("crypto");
 const WebSocket = require("ws");
-const { MongoClient } = require("mongodb");
+const axios = require("axios");
+const polygonKey = "_4BtZn3PRCLu6fsdu7dgddb4ucmB1sfp";
 
 const app = express();
 const PORT = process.env.PORT || 3000; // Use the PORT environment variable if provided, otherwise default to 3000
@@ -48,7 +49,7 @@ wss.on("connection", (socket) => {
 });
 
 // Function to update the "currentPrice" field every 2 seconds
-/*async function updateCurrentPriceAndBroadcast() {
+async function updateCurrentPriceAndBroadcast() {
   try {
     // Find documents where currentPrice exists
     const stock = await Stock.findOne({ symbol: "AAPL" });
@@ -67,7 +68,7 @@ wss.on("connection", (socket) => {
   }
 }
 
-setInterval(updateCurrentPriceAndBroadcast, 2000);*/
+setInterval(updateCurrentPriceAndBroadcast, 2000);
 
 // Function to broadcast a message to all connected sockets
 function broadcast(message) {
@@ -75,16 +76,6 @@ function broadcast(message) {
     socket.send(message);
   });
 }
-
-const gameClient = new MongoClient(
-  "mongodb+srv://jjquaratiello:Schoolipad1950!@cluster0.xcfppj4.mongodb.net"
-);
-let db;
-
-gameClient.connect().then((client) => {
-  db = client.db("Spar");
-  const matches = db.collection();
-});
 
 // app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
@@ -206,6 +197,10 @@ const stockSchema = new mongoose.Schema({
     type: [Object],
     required: true,
   },
+  currentPrice: {
+    type: Object,
+    required: true,
+  },
 });
 
 const stockDetailsSchema = new mongoose.Schema({
@@ -234,12 +229,22 @@ const stockDetailsSchema = new mongoose.Schema({
   },
 });
 
+const prop1 = new mongoose.Schema({
+  prop: {
+    type: String,
+    required: true,
+    unique: true,
+  },
+});
+
 const User = sparDB.model("users", userSchema);
 const Player = sparDB.model("matchmakingPlayer", playerSchema);
 const Match = sparDB.model("Match", matchSchema);
 const oneDayStock = stockDB.model("oneDayStock", stockSchema);
 const oneWeekStock = stockDB.model("oneWeekStock", stockSchema);
 const StockDetails = stockDB.model("tickerdetail", stockDetailsSchema);
+
+const prop2 = stockDB.model("prop", prop1);
 
 app.post("/createUser", async (req, res) => {
   try {
@@ -821,7 +826,7 @@ setInterval(async () => {
   } catch (error) {
     console.error("Error in matchmaking process:", error);
   }
-}, 500000);
+}, 5000);
 
 // Test Endpint
 app.get("/ping", (req, res) => {

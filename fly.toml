@@ -1,10 +1,10 @@
-# fly.toml app configuration file generated for spar-server on 2024-03-17T23:39:50-04:00
+# fly.toml app configuration file generated for music-api-grant on 2024-03-12T14:06:17-04:00
 #
 # See https://fly.io/docs/reference/configuration/ for information about how to use this file.
 #
 
-app = 'spar-server'
-primary_region = 'bos'
+app = 'music-api-grant'
+primary_region = 'ewr'
 
 [build]
 
@@ -13,7 +13,7 @@ primary_region = 'bos'
   force_https = true
   auto_stop_machines = true
   auto_start_machines = true
-  min_machines_running = 0
+  min_machines_running = 1
   processes = ['app']
 
 [[services]]
