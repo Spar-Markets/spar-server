@@ -15,6 +15,7 @@ const {
 const mongoose = require("mongoose");
 const crypto = require("crypto");
 const WebSocket = require("ws");
+const { MongoClient } = require("mongodb");
 
 const app = express();
 const PORT = process.env.PORT || 3000; // Use the PORT environment variable if provided, otherwise default to 3000
@@ -47,7 +48,7 @@ wss.on("connection", (socket) => {
 });
 
 // Function to update the "currentPrice" field every 2 seconds
-async function updateCurrentPriceAndBroadcast() {
+/*async function updateCurrentPriceAndBroadcast() {
   try {
     // Find documents where currentPrice exists
     const stock = await Stock.findOne({ symbol: "AAPL" });
@@ -66,7 +67,7 @@ async function updateCurrentPriceAndBroadcast() {
   }
 }
 
-setInterval(updateCurrentPriceAndBroadcast, 2000);
+setInterval(updateCurrentPriceAndBroadcast, 2000);*/
 
 // Function to broadcast a message to all connected sockets
 function broadcast(message) {
@@ -74,6 +75,16 @@ function broadcast(message) {
     socket.send(message);
   });
 }
+
+const gameClient = new MongoClient(
+  "mongodb+srv://jjquaratiello:Schoolipad1950!@cluster0.xcfppj4.mongodb.net"
+);
+let db;
+
+gameClient.connect().then((client) => {
+  db = client.db("Spar");
+  const matches = db.collection();
+});
 
 // app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
@@ -737,6 +748,19 @@ app.post("/areTheyMatchmaking", async (req, res) => {
   }
 });
 
+app.post("/purchaseStock", async (req, res) => {
+  try {
+    const { email, matchId, buyPrice, ticker } = req.body;
+    const match = await Match.findOneAndUpdate(
+      { matchId: matchId },
+      { $push: { "user1.assets": { ticker: ticker } } },
+      { new: true }
+    );
+  } catch (error) {
+    console.log(error);
+  }
+});
+
 async function createMatch() {
   try {
     const users = await Player.find({}).exec();
@@ -755,6 +779,7 @@ async function createMatch() {
           const match = new Match({
             matchId,
             wagerAmt: users[i].entryFeeInt,
+            timeframe: users[i].matchLengthInt,
             user1: { name: users[i].email, assets: [], buyingPower: 100000 },
             user2: { name: users[j].email, assets: [], buyingPower: 100000 },
           });
@@ -796,7 +821,7 @@ setInterval(async () => {
   } catch (error) {
     console.error("Error in matchmaking process:", error);
   }
-}, 5000);
+}, 500000);
 
 // Test Endpint
 app.get("/ping", (req, res) => {
