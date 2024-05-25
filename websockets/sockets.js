@@ -3,8 +3,7 @@ const WebSocket = require("ws");
 // Store all connected sockets
 const sockets = [];
 
-function setupWebSocket() {
-  const WsPort = 3001;
+function setupWebSocket(app, WsPort) {
   const wss = new WebSocket.Server({ server: app.listen(WsPort) });
 
   wss.on("connection", (socket) => {
