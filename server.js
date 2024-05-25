@@ -827,7 +827,7 @@ setInterval(async () => {
  * STOCK DATA
  */
 
-// cache for prices for each ticker, updated whenever new price is written to DB
+// Cache for prices for each ticker, updated whenever new price is written to DB
 // 1. so that we only write to DB if price is new (minimize write operations)
 // 2. to not read directly from DB to check whether price is new (minimize read operations)
 const priceCache = {}
@@ -922,7 +922,6 @@ setInterval(async () => {
   } else {
     console.log("Outside market hours. Skipping function.")
   }
-
 }, 20000)
 
 // Test Endpint
@@ -930,42 +929,6 @@ app.get("/ping", (req, res) => {
   res.send("pong");
 });
 
-
-
-// Websocket
-
-// const { Server } = require("socket.io");
-// const { createServer } = require("http");
-// const httpServer = createServer();
-// const io = new Server(httpServer, { /* options */ });
-
-
-// io.on("connection", (socket) => {
-//   console.logo("a user has connected ")
-// })
-
-// httpServer.listen(3000);
-
-// app.use(express.json({ extended: false}));
-// app.use(express.static('public'));
-// const WebSocket = require("ws");
-// const http = require('http');
-
-// const server = http.createServer(app);
-// const wss = new WebSocket.Server({ server });
-
-
-// wss.on('connection', function connection(ws) {
-//   console.log('Client connected');
-
-//   ws.on('message', function incoming(message) {
-//     console.log('Received: %s', message);
-//   });
-
-//   ws.on('close', function close() {
-//     console.log('Client disconnected');
-//   });
-// });
 
 app.listen(PORT, function listening() {
   console.log('Server started on port', PORT);
