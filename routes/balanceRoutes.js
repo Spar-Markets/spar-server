@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 
-app.post("/updateUserBalanceDeposit", async (req, res) => {
+router.post("/updateUserBalanceDeposit", async (req, res) => {
   const { email, deposit } = req.body;
 
   try {
@@ -18,7 +18,7 @@ app.post("/updateUserBalanceDeposit", async (req, res) => {
   }
 });
 
-app.post("/updateUserBalanceWithdraw", async (req, res) => {
+router.post("/updateUserBalanceWithdraw", async (req, res) => {
   const { email, withdraw } = req.body;
 
   try {

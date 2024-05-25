@@ -206,7 +206,7 @@ router.post("/getAccount", async (req, res) => {
   }
 });
 
-app.post("/updateUserAccessToken", async (req, res) => {
+router.post("/updateUserAccessToken", async (req, res) => {
   // Extract username and newBalance from the request body
   const { email, newAccessToken } = req.body;
   console.log("going into updateacces" + email + newAccessToken);
@@ -233,7 +233,7 @@ app.post("/updateUserAccessToken", async (req, res) => {
   }
 });
 
-app.post("/getAccessFromMongo", async function (req, res) {
+router.post("/getAccessFromMongo", async function (req, res) {
   try {
     const { email } = req.body; // Destructure email from request body
     const user = await User.findOne({ email: email });

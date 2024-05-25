@@ -24,7 +24,7 @@ router.post("/createUser", async (req, res) => {
   }
 });
 
-app.post("/getActiveUser", async (req, res) => {
+router.post("/getActiveUser", async (req, res) => {
   const { email } = req.body;
   console.log("Called", email);
 
@@ -34,7 +34,7 @@ app.post("/getActiveUser", async (req, res) => {
   });
 });
 
-app.post("/getMongoAccount", async function (req, res) {
+router.post("/getMongoAccount", async function (req, res) {
   const { email } = req.body;
   try {
     const user = await User.findOne({ email: email });
@@ -47,7 +47,7 @@ app.post("/getMongoAccount", async function (req, res) {
   }
 });
 
-app.post("/checkUserExists", async function (req, res) {
+router.post("/checkUserExists", async function (req, res) {
   const { email } = req.body; // Destructure email from request body
   console.log(email); // Check if email is correctly received
 
@@ -68,7 +68,7 @@ app.post("/checkUserExists", async function (req, res) {
   }
 });
 
-app.post("/accounts", async function (request, response, next) {
+router.post("/accounts", async function (request, response, next) {
   const { newAccessToken } = request.body;
   console.log("printing" + newAccessToken);
   try {
