@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-
+import Match from "../models/Match"
 router.post("/purchaseStock", async (req, res) => {
   try {
     const { email, matchId, buyPrice, ticker } = req.body;
