@@ -26,7 +26,7 @@ router.post("/createUser", async (req, res) => {
     res.status(500).json({ error: "Could not create user" });
   }
 });
-
+ 
 router.post("/getActiveUser", async (req, res) => {
   const { email } = req.body;
   console.log("Called", email);
