@@ -20,7 +20,7 @@ const WebSocket = require("ws");
 const axios = require("axios");
 const polygonKey = "_4BtZn3PRCLu6fsdu7dgddb4ucmB1sfp";
 
-// import websocket shit
+// import websocket
 const { setupWebSocket, broadcast, sockets } = require("./websockets/sockets");
 
 // import routes

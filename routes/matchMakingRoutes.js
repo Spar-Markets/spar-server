@@ -158,8 +158,9 @@ async function createMatch() {
         }
       }
     }
-  } finally {
-    console.log("Match made.");
+  } 
+  catch(error) {
+    console.log("Eror in matchmaking", error)
   }
 }
 

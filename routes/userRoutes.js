@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 
 const User = require("../models/User");
+const getLeftOfAtSymbol = require("../utility/getLeftOfAtSymbol.js");
 const generateRandomString = require("../utility/generateRandomString");
 
 // define routes here
@@ -13,7 +14,8 @@ router.post("/createUser", async (req, res) => {
     console.log("Received email:", email);
 
     const newUser = new User({
-      username: generateRandomString(40),
+      username: getLeftOfAtSymbol(email),
+      userID: generateRandomString(40),
       email: String(email),
     });
     await newUser.save();
