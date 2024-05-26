@@ -30,6 +30,7 @@ const plaidRoutes = require("./routes/plaidRoutes");
 const stockRoutes = require("./routes/stockRoutes");
 const tradeRoutes = require("./routes/tradeRoutes");
 const userRoutes = require("./routes/userRoutes");
+const stockDataDelayed = require("./routes/stockDataDelayed");
 
 const app = express();
 const PORT = process.env.PORT || 3000; // Use the PORT environment variable if provided, otherwise default to 3000
@@ -45,6 +46,7 @@ app.use(plaidRoutes);
 app.use(stockRoutes);
 app.use(tradeRoutes);
 app.use(userRoutes);
+app.use(stockDataDelayed);
 
 // websockets
 setupWebSocket(app, WsPort);

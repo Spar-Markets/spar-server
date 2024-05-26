@@ -1,3 +1,9 @@
+const express = require("express");
+const router = express.Router();
+
+const axios = require("axios");
+const polygonKey = "_4BtZn3PRCLu6fsdu7dgddb4ucmB1sfp";
+
 /**
  * STOCK DATA
  */
@@ -12,7 +18,7 @@ const getCurrentPrice = async (ticker) => {
   let hoursAgo = 24;
   let millisAgo = hoursAgo * 60 * 60 * 1000;
   const now = Date.now();
-  const timestamp1 = now - millisAgo;
+  const timestamp1 = now - millisAgo - 60000;
   const timestamp2 = now - millisAgo + 60000;
 
   // get price from 24h ago timestamp
@@ -51,27 +57,9 @@ const updateCurrentPrice = async (ticker) => {
       cachedPrice.price !== newPrice.price ||
       cachedPrice.timeField !== newPrice.timeField
     ) {
-      const result = await oneDayStock.findOneAndUpdate(
-        { ticker: ticker },
-        {
-          $set: { currentPrice: newPrice },
-          $setOnInsert: { prices: [] }, // to make sure prices array is initialized if new document is created
-        },
-        {
-          new: true,
-          upsert: true,
-          runValidators: true,
-        }
-      );
-      console.log(
-        "Updated",
-        result.ticker,
-        ". New price: ",
-        result.currentPrice
-      );
-
       // update the cache
       priceCache[ticker] = newPrice;
+      console.log("Updated", ticker, ". New price: ", newPrice);
     } else {
       console.log(
         "Price for",
@@ -102,6 +90,13 @@ const isWithinMarketHours = () => {
   const estTimeString = now.toLocaleTimeString("en-US", options);
   const [currentHour, currentMinute] = estTimeString.split(":").map(Number);
 
+  // Get the current day of the week in EST
+  const estDateString = now.toLocaleDateString("en-US", {
+    timeZone: "America/New_York",
+  });
+  const estDate = new Date(estDateString);
+  const currentDay = estDate.getDay(); // 0 (Sunday) to 6 (Saturday)
+
   // Check if current time is within the specified range
   const afterStart =
     currentHour > startHour ||
@@ -109,19 +104,35 @@ const isWithinMarketHours = () => {
   const beforeEnd =
     currentHour < endHour ||
     (currentHour === endHour && currentMinute <= endMinute);
+  const withinWeekdays = currentDay >= 2 && currentDay <= 6;
 
-  return afterStart && beforeEnd;
+  return afterStart && beforeEnd && withinWeekdays;
 };
 
-// Stock data
-module.exports = function () {
-  setInterval(async () => {
-    if (isWithinMarketHours()) {
-      updateCurrentPrice("AAPL");
-      updateCurrentPrice("GOOG");
-      updateCurrentPrice("TSLA");
-    } else {
-      console.log("Outside market hours. Skipping function.");
-    }
-  }, 20000);
-};
+router.get("/getStockPrice", async (req, res) => {
+  const { ticker } = req.query;
+  if (!ticker) {
+    return res.status(400).json({ error: "Ticker is required" });
+  } else if (!isWithinMarketHours()) {
+    return res.status(400).json({ error: "Outside market hours" });
+  }
+
+  try {
+    const stockData = await getCurrentPrice(ticker);
+    res.json(stockData);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to fetch stock price" });
+  }
+});
+
+setInterval(async () => {
+  if (isWithinMarketHours()) {
+    updateCurrentPrice("AAPL");
+    updateCurrentPrice("GOOG");
+    updateCurrentPrice("TSLA");
+  } else {
+    console.log("Outside market hours. Skipping function.");
+  }
+}, 20000);
+
+module.exports = router;

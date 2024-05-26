@@ -11,7 +11,7 @@ const {
 // // define routes here
 // router.use(
 //   // FOR DEMO PURPOSES ONLY
-// Use an actual secret key in production
+//   // Use an actual secret key in production
 //   session({ secret: "bosco", saveUninitialized: true, resave: true })
 // );
 
