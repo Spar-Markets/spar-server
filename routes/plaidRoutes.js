@@ -1,5 +1,6 @@
 const express = require("express");
 const router = express.Router();
+const session = require("express-session");
 
 const {
   Configuration,
@@ -8,12 +9,17 @@ const {
   AccountsGetRequest,
 } = require("plaid");
 
-// // define routes here
-// router.use(
-//   // FOR DEMO PURPOSES ONLY
-//   // Use an actual secret key in production
-//   session({ secret: "bosco", saveUninitialized: true, resave: true })
-// );
+/**
+ * plaidRoutes.js
+ * Configures the Plaid client and uses Express to defines routes that call Plaid endpoints in the Sandbox environment.
+ * Utilizes the official Plaid node.js client library to make calls to the Plaid API.
+ */
+
+router.use(
+  // FOR DEMO PURPOSES ONLY
+  // Use an actual secret key in production
+  session({ secret: "bosco", saveUninitialized: true, resave: true })
+);
 
 const PLAID_ENV = process.env.PLAID_ENV || "sandbox";
 
