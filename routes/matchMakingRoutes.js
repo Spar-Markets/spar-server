@@ -1,6 +1,5 @@
 const express = require("express");
 const router = express.Router();
-
 const Player = require("../models/Player");
 const Match = require("../models/Match");
 const User = require("../models/User");
@@ -31,30 +30,6 @@ router.post("/getMatchData", async function (req, res) {
     }
   } catch {
     console.error("Error getting match data");
-  }
-});
-
-// Removes the user from the matchmaking database
-router.post("/cancelMatchmaking", async (req, res) => {
-  try {
-    const { email } = req.body;
-
-    // Find the player in the matchmaking collection by username
-    const player = await Player.findOne({ email });
-
-    if (!player) {
-      // Player not found, send an error response
-      return res.status(404).json({ error: "Player not found in matchmaking" });
-    }
-
-    // Delete the player from the matchmaking collection
-    await Player.deleteOne({ email });
-
-    // Send a success response
-    res.json({ message: "Matchmaking canceled successfully" });
-  } catch (error) {
-    console.error("Error canceling matchmaking:", error);
-    res.status(500).json({ error: "Internal Server Error" });
   }
 });
 
@@ -92,7 +67,6 @@ router.post("/areTheyMatchmaking", async (req, res) => {
     const { email } = req.body;
 
     // Find the player in the matchmaking collection by username
-    const Player = sparDB.model("Player", playerSchema, "matchmakingplayers");
     const player = await Player.findOne({ email });
 
     if (!player) {
@@ -107,6 +81,30 @@ router.post("/areTheyMatchmaking", async (req, res) => {
     res.json({ result: true, message: "Matchmaking Player is in matchmaking" });
   } catch (error) {
     console.error("Error checking matchmaking:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+// Removes the user from the matchmaking database
+router.post("/cancelMatchmaking", async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    // Find the player in the matchmaking collection by username
+    const player = await Player.findOne({ email });
+
+    if (!player) {
+      // Player not found, send an error response
+      return res.status(404).json({ error: "Player not found in matchmaking" });
+    }
+
+    // Delete the player from the matchmaking collection
+    await Player.deleteOne({ email });
+
+    // Send a success response
+    res.json({ message: "Matchmaking canceled successfully" });
+  } catch (error) {
+    console.error("Error canceling matchmaking:", error);
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
