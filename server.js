@@ -20,16 +20,15 @@ const polygonKey = "_4BtZn3PRCLu6fsdu7dgddb4ucmB1sfp";
 
 const app = express();
 const PORT = process.env.PORT || 3000; // Use the PORT environment variable if provided, otherwise default to 3000
- 
-const WsPort = 3001;
-const wss = new WebSocket.Server({ server:app.listen(WsPort) });
 
+const WsPort = 3001;
+const wss = new WebSocket.Server({ server: app.listen(WsPort) });
 
 // Store all connected sockets
 const sockets = [];
 
-wss.on('connection', (socket) => {
-  console.log('Client connected');
+wss.on("connection", (socket) => {
+  console.log("Client connected");
 
   // Add the new socket to the list
   sockets.push(socket);
@@ -38,9 +37,9 @@ wss.on('connection', (socket) => {
     console.log("Received message from client:", message);
   });
 
-  socket.on('close', () => {
-    console.log('Client disconnected');
-    
+  socket.on("close", () => {
+    console.log("Client disconnected");
+
     // Remove the socket from the list when it's closed
     const index = sockets.indexOf(socket);
     if (index !== -1) {
@@ -50,39 +49,33 @@ wss.on('connection', (socket) => {
 });
 
 // Function to update the "currentPrice" field every 2 seconds
-// async function updateCurrentPriceAndBroadcast() {
-//   try {
-//     console.log("ws")
-//     // Find documents where currentPrice exists
-//     const stock = await oneDayStock.findOne({ ticker: "AAPL" });
-//     // Update each document's currentPrice by increasing it by one
-//     if (stock) {
-//       const previousPrice = stock.currentPrice;
-//       console.log(previousPrice)
-//       const newPrice = previousPrice + 1;
-//       console.log(newPrice)
-//       await Stock.findByIdAndUpdate(stock._id, { $inc: { currentPrice: 1 } });
-//       broadcast(`AAPL price updated: ${newPrice}`);
+async function updateCurrentPriceAndBroadcast() {
+  try {
+    // Find documents where currentPrice exists
+    const stock = await Stock.findOne({ symbol: "AAPL" });
 
-//     }
-  
+    // Update each document's currentPrice by increasing it by one
+    if (stock) {
+      const previousPrice = stock.currentPrice;
+      console.log(previousPrice);
+      const newPrice = previousPrice + 1;
+      console.log(newPrice);
+      await Stock.findByIdAndUpdate(stock._id, { $inc: { currentPrice: 1 } });
+      broadcast(`AAPL price updated: ${newPrice}`);
+    }
+  } catch (error) {
+    console.error("Error updating price:", error);
+  }
+}
 
-//   } catch (error) {
-//     console.error("Error updating price:", error);
-//   }
-// }
-
-// setInterval(updateCurrentPriceAndBroadcast, 2000);
-
+setInterval(updateCurrentPriceAndBroadcast, 2000);
 
 // Function to broadcast a message to all connected sockets
 function broadcast(message) {
-  sockets.forEach(socket => {
+  sockets.forEach((socket) => {
     socket.send(message);
   });
 }
-
-
 
 // app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
@@ -206,8 +199,8 @@ const stockSchema = new mongoose.Schema({
   },
   currentPrice: {
     type: Object,
-    required: true
-  }
+    required: true,
+  },
 });
 
 const stockDetailsSchema = new mongoose.Schema({
@@ -244,7 +237,6 @@ const prop1 = new mongoose.Schema({
   },
 });
 
-
 const User = sparDB.model("users", userSchema);
 const Player = sparDB.model("matchmakingPlayer", playerSchema);
 const Match = sparDB.model("Match", matchSchema);
@@ -252,8 +244,7 @@ const oneDayStock = stockDB.model("oneDayStock", stockSchema);
 const oneWeekStock = stockDB.model("oneWeekStock", stockSchema);
 const StockDetails = stockDB.model("tickerdetail", stockDetailsSchema);
 
-const prop2 = stockDB.model('prop', prop1);
-
+const prop2 = stockDB.model("prop", prop1);
 
 app.post("/createUser", async (req, res) => {
   try {
@@ -762,6 +753,19 @@ app.post("/areTheyMatchmaking", async (req, res) => {
   }
 });
 
+app.post("/purchaseStock", async (req, res) => {
+  try {
+    const { email, matchId, buyPrice, ticker } = req.body;
+    const match = await Match.findOneAndUpdate(
+      { matchId: matchId },
+      { $push: { "user1.assets": { ticker: ticker } } },
+      { new: true }
+    );
+  } catch (error) {
+    console.log(error);
+  }
+});
+
 async function createMatch() {
   try {
     const users = await Player.find({}).exec();
@@ -780,6 +784,7 @@ async function createMatch() {
           const match = new Match({
             matchId,
             wagerAmt: users[i].entryFeeInt,
+            timeframe: users[i].matchLengthInt,
             user1: { name: users[i].email, assets: [], buyingPower: 100000 },
             user2: { name: users[j].email, assets: [], buyingPower: 100000 },
           });
@@ -827,7 +832,7 @@ setInterval(async () => {
  * STOCK DATA
  */
 
-// Cache for prices for each ticker, updated whenever new price is written to DB
+// cache for prices for each ticker, updated whenever new price is written to DB
 // 1. so that we only write to DB if price is new (minimize write operations)
 // 2. to not read directly from DB to check whether price is new (minimize read operations)
 const priceCache = {}
@@ -922,6 +927,7 @@ setInterval(async () => {
   } else {
     console.log("Outside market hours. Skipping function.")
   }
+
 }, 20000)
 
 // Test Endpint
@@ -930,6 +936,42 @@ app.get("/ping", (req, res) => {
 });
 
 
+
+// Websocket
+
+// const { Server } = require("socket.io");
+// const { createServer } = require("http");
+// const httpServer = createServer();
+// const io = new Server(httpServer, { /* options */ });
+
+
+// io.on("connection", (socket) => {
+//   console.logo("a user has connected ")
+// })
+
+// httpServer.listen(3000);
+
+// app.use(express.json({ extended: false}));
+// app.use(express.static('public'));
+// const WebSocket = require("ws");
+// const http = require('http');
+
+// const server = http.createServer(app);
+// const wss = new WebSocket.Server({ server });
+
+
+// wss.on('connection', function connection(ws) {
+//   console.log('Client connected');
+
+//   ws.on('message', function incoming(message) {
+//     console.log('Received: %s', message);
+//   });
+
+//   ws.on('close', function close() {
+//     console.log('Client disconnected');
+//   });
+// });
+
 app.listen(PORT, function listening() {
-  console.log('Server started on port', PORT);
+  console.log("Server started on port", PORT);
 });
