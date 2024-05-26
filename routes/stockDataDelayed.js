@@ -1,3 +1,6 @@
+const express = require("express");
+const router = express.Router();
+
 /**
  * STOCK DATA
  */
@@ -12,7 +15,7 @@ const getCurrentPrice = async (ticker) => {
   let hoursAgo = 24;
   let millisAgo = hoursAgo * 60 * 60 * 1000;
   const now = Date.now();
-  const timestamp1 = now - millisAgo;
+  const timestamp1 = now - millisAgo - 60000;
   const timestamp2 = now - millisAgo + 60000;
 
   // get price from 24h ago timestamp
@@ -125,3 +128,21 @@ module.exports = function () {
     }
   }, 20000);
 };
+
+router.get("/getStockPrice", async (req, res) => {
+  const { ticker } = req.query;
+  if (!ticker) {
+    return res.status(400).json({ error: "Ticker is required" });
+  } else if (!isWithinMarketHours()) {
+    return res.status(400).json({ error: "Outside market hours" });
+  }
+
+  try {
+    const price = await getStockPrice(ticker);
+    res.json({ ticker, price });
+  } catch (error) {
+    res.status(500).json({ error: "Failed to fetch stock price" });
+  }
+});
+
+module.exports = router;
