@@ -1,5 +1,3 @@
-// old imports
-// TODO: move these to appropriate route files
 require("dotenv").config();
 const express = require("express");
 const bodyParser = require("body-parser");
