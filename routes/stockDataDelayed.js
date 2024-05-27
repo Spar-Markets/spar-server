@@ -159,6 +159,7 @@ router.get("/getStockPrice", async (req, res) => {
   }
 });
 
+// endpoint to get one day stock prices for most recent day where market is open
 router.post("/getMostRecentOneDayPrices", async (req, res) => {
   const tickers = req.body.tickers;
 
@@ -177,7 +178,7 @@ router.post("/getMostRecentOneDayPrices", async (req, res) => {
   const prices = {};
 
   for (let i = 0; i < tickers.length; i++) {
-    const url = `https://api.polygon.io/v2/aggs/ticker/${ticker}/range/1/day/${recentMarketOpen}/${recentMarketClose}?adjusted=true&sort=asc&apiKey=${polygonKey}`;
+    const url = `https://api.polygon.io/v2/aggs/ticker/${ticker}/range/5/minute/${recentMarketOpen}/${recentMarketClose}?adjusted=true&sort=asc&apiKey=${polygonKey}`;
     const response = await axios.get(url);
     prices[response.data.ticker] = [];
     for (let pricestamp of response.data.results) {
