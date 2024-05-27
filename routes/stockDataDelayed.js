@@ -4,6 +4,8 @@ const router = express.Router();
 const axios = require("axios");
 const polygonKey = "_4BtZn3PRCLu6fsdu7dgddb4ucmB1sfp";
 
+const isMarketOpenToday = require("../utility/isMarketOpenToday");
+
 /**
  * STOCK DATA
  */
@@ -109,6 +111,38 @@ const isWithinMarketHours = () => {
   return afterStart && beforeEnd && withinWeekdays;
 };
 
+// Function to get the previous day
+function getPreviousDay(date) {
+  const previousDay = new Date(date);
+  previousDay.setDate(date.getDate() - 1);
+  return previousDay;
+}
+
+// get most recent market open day
+function getMostRecentMarketOpenDay() {
+  const currentDate = new Date();
+
+  let previousDate = getPreviousDay(currentDate);
+
+  while (!isMarketOpenToday(previousDate)) {
+    previousDate = getPreviousDay(previousDate);
+  }
+
+  return previousDate;
+}
+
+// get milliseconds for a specified date, hour, and minute
+function getMilliseconds(date, hour, minute) {
+  // Create a Date object from the provided date string
+  const date = new Date(dateString);
+
+  // Set the provided hour and minute
+  date.setHours(hour, minute, 0, 0);
+
+  // Return the timestamp in milliseconds
+  return date.getTime();
+}
+
 router.get("/getStockPrice", async (req, res) => {
   const { ticker } = req.query;
   if (!ticker) {
@@ -123,6 +157,38 @@ router.get("/getStockPrice", async (req, res) => {
   } catch (error) {
     res.status(500).json({ error: "Failed to fetch stock price" });
   }
+});
+
+router.post("/getMostRecentOneDayPrices", async (req, res) => {
+  const tickers = req.body.tickers;
+
+  const mostRecentMarketDay = getMostRecentMarketOpenDay();
+
+  const recentMarketOpen = getMilliseconds(mostRecentMarketDay, 9, 30);
+  const recentMarketClose = getMilliseconds(mostRecentMarketDay, 4, 0);
+
+  // add a check for if tickers is an array otherwise throw error
+  if (!Array.isArray(tickers)) {
+    res
+      .status(400)
+      .json({ error: "invalid ticker input: tickers is not an array" });
+  }
+
+  const prices = {};
+
+  for (let i = 0; i < tickers.length; i++) {
+    const url = `https://api.polygon.io/v2/aggs/ticker/${ticker}/range/1/day/${recentMarketOpen}/${recentMarketClose}?adjusted=true&sort=asc&apiKey=${polygonKey}`;
+    const response = await axios.get(url);
+    prices[response.data.ticker] = [];
+    for (let pricestamp of response.data.results) {
+      prices[response.data.ticker].push({
+        timeField: pricestamp.t,
+        price: pricestamp.c,
+      });
+    }
+  }
+
+  res.json(prices);
 });
 
 setInterval(async () => {
