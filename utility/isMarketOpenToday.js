@@ -84,6 +84,9 @@ function isMarketOpenToday(inputDate) {
   }
 
   return true;
+
 }
 
-module.exports = isMarketOpenToday();
+module.exports = isMarketOpenToday;
+
+

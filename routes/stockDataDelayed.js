@@ -114,34 +114,65 @@ const isWithinMarketHours = () => {
 // Function to get the previous day
 function getPreviousDay(date) {
   const previousDay = new Date(date);
-  previousDay.setDate(date.getDate() - 1);
+  console.log("date!?",previousDay.getDate())
+  previousDay.setDate(previousDay.getDate() - 1);
+  console.log(previousDay)
   return previousDay;
 }
 
 // get most recent market open day
-function getMostRecentMarketOpenDay() {
-  const currentDate = new Date();
-
-  let previousDate = getPreviousDay(currentDate);
-
+function getMostRecentMarketOpenDay(now) {
+  console.log("this is what is being fed in", now)
+  let previousDate = getPreviousDay(now);
+  console.log("this is what is being fed in for prevDate", previousDate)
   while (!isMarketOpenToday(previousDate)) {
     previousDate = getPreviousDay(previousDate);
   }
-
+  console.log("this is what it thinks is previous market open date", previousDate)
   return previousDate;
 }
 
-// get milliseconds for a specified date, hour, and minute
-function getMilliseconds(dateString, hour, minute) {
-  // Create a Date object from the provided date string
+// // get milliseconds for a specified date, hour, and minute
+// function getMilliseconds(dateString, hour, minute) {
+//   // Create a Date object from the provided date string
+//   const date = new Date(dateString);
+
+//   // Set the provided hour and minute
+//   date.setHours(hour, minute, 0, 0);
+
+//   // Return the timestamp in milliseconds
+//   return date.getTime();
+// }
+
+
+
+function getMillisecondsEDT(dateString, hour, minute) {
+  // Create a Date object from the provided date string (assumed to be in UTC)
   const date = new Date(dateString);
 
-  // Set the provided hour and minute
-  date.setHours(hour, minute, 0, 0);
+  // Calculate the time zone offset for EDT (UTC-4)
+  const offset = -4 * 60; // -4 hours in minutes
+
+  // Convert the UTC date to local time (EDT)
+  const localTime = new Date(date.getTime() + offset * 60 * 1000);
+
+  // Set the provided hour and minute in local time (EDT)
+  localTime.setHours(hour, minute, 0, 0);
 
   // Return the timestamp in milliseconds
-  return date.getTime();
+  return localTime.getTime();
 }
+
+
+
+
+
+
+
+
+
+
+
 
 router.get("/getStockPrice", async (req, res) => {
   const { ticker } = req.query;
@@ -161,12 +192,17 @@ router.get("/getStockPrice", async (req, res) => {
 
 // endpoint to get one day stock prices for most recent day where market is open
 router.post("/getMostRecentOneDayPrices", async (req, res) => {
-  const tickers = req.body.tickers;
+  
+  const tickers = req.body; // req.body will contain the array sent by Axios
+  console.log("Stock request coming in:", tickers)
+  const now = Date.now();
+  console.log("The time right now, this should be correct:", now)
+  const mostRecentMarketDay = getMostRecentMarketOpenDay(now);
+  console.log("Printing what the most recent market day is:", mostRecentMarketDay)
+  const recentMarketOpen = getMillisecondsEDT(mostRecentMarketDay, 13, 30);
+  const recentMarketClose = getMillisecondsEDT(mostRecentMarketDay, 20, 0);
 
-  const mostRecentMarketDay = getMostRecentMarketOpenDay();
-
-  const recentMarketOpen = getMilliseconds(mostRecentMarketDay, 9, 30);
-  const recentMarketClose = getMilliseconds(mostRecentMarketDay, 4, 0);
+  console.log("getMostRecentMarketOpenDay", recentMarketClose, recentMarketOpen)
 
   // add a check for if tickers is an array otherwise throw error
   if (!Array.isArray(tickers)) {
@@ -178,9 +214,11 @@ router.post("/getMostRecentOneDayPrices", async (req, res) => {
   const prices = {};
 
   for (let i = 0; i < tickers.length; i++) {
-    const url = `https://api.polygon.io/v2/aggs/ticker/${ticker}/range/5/minute/${recentMarketOpen}/${recentMarketClose}?adjusted=true&sort=asc&apiKey=${polygonKey}`;
+    console.log(i, "trying", tickers[i])
+    const url = `https://api.polygon.io/v2/aggs/ticker/${tickers[i]}/range/5/minute/${recentMarketOpen}/${recentMarketClose}?adjusted=true&sort=asc&apiKey=${polygonKey}`;
     const response = await axios.get(url);
     prices[response.data.ticker] = [];
+    
     for (let pricestamp of response.data.results) {
       prices[response.data.ticker].push({
         timeField: pricestamp.t,
@@ -188,7 +226,6 @@ router.post("/getMostRecentOneDayPrices", async (req, res) => {
       });
     }
   }
-
   res.json(prices);
 });
 
