@@ -132,7 +132,7 @@ function getMostRecentMarketOpenDay() {
 }
 
 // get milliseconds for a specified date, hour, and minute
-function getMilliseconds(date, hour, minute) {
+function getMilliseconds(dateString, hour, minute) {
   // Create a Date object from the provided date string
   const date = new Date(dateString);
 
