@@ -10,22 +10,25 @@ const getMostRecentMarketOpenDay = require("../utility/getMostRecentMarketOpenDa
 
 router.post("/getTickerDetails", async function (req, res) {
   const { ticker } = req.body;
-  console.log("this is ticker",ticker)
+  console.log("getTickerDetails, This is ticker being passed:",ticker)
   try {
     const detailsResponse = await axios.get(
       `https://api.polygon.io/v3/reference/tickers/${ticker}?apiKey=${polygonKey}`
     ); //summary, market cap, etc.
     
     const now = Date.now();
+    console.log("getTickerDetails, Logging the time right now:", now)
     const mostRecentMarketDay = getMostRecentMarketOpenDay(now);
+    console.log("getTickerDetails, Logging the output for mostrecentmarketday:", mostRecentMarketDay)
 
     const year = mostRecentMarketDay.getFullYear();
+    console.log("getTickerDetails, Logging the year:", year)
     const month = String(mostRecentMarketDay.getMonth() + 1).padStart(2, '0'); // Months are zero-based
+    console.log("getTickerDetails, Logging the month:", month)
     const day = String(mostRecentMarketDay.getDate()).padStart(2, '0');
-
+    console.log("getTickerDetails, Logging the day:", day)
     const formattedDate = `${year}-${month}-${day}`;
-
-    console.log("Most recent market day is this: " + formattedDate)    
+    console.log("gettickerdetails, formatted most recent date is:" + formattedDate)    
 
     const priceDetailsResponse = await axios.get(
       `https://api.polygon.io/v1/open-close/${ticker}/${formattedDate}?adjusted=true&apiKey=${polygonKey}`

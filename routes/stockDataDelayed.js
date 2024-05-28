@@ -132,19 +132,13 @@ const isWithinMarketHours = () => {
 
 function getMillisecondsEDT(dateString, hour, minute) {
   // Create a Date object from the provided date string (assumed to be in UTC)
+  console.log("getmillisecondsedt",dateString, hour, minute)
   const date = new Date(dateString);
-
-  // Calculate the time zone offset for EDT (UTC-4)
-  const offset = -4 * 60; // -4 hours in minutes
-
-  // Convert the UTC date to local time (EDT)
-  const localTime = new Date(date.getTime() + offset * 60 * 1000);
-
-  // Set the provided hour and minute in local time (EDT)
-  localTime.setHours(hour, minute, 0, 0);
-
+  date.setHours(hour);
+  date.setMinutes(minute);
+  
   // Return the timestamp in milliseconds
-  return localTime.getTime();
+  return date.getTime();
 }
 
 router.get("/getStockPrice", async (req, res) => {
@@ -192,6 +186,7 @@ router.post("/getMostRecentOneDayPrices", async (req, res) => {
     const response = await axios.get(url);
     prices[response.data.ticker] = [];
     
+    // do a check if 
     for (let pricestamp of response.data.results) {
       prices[response.data.ticker].push({
         timeField: pricestamp.t,
