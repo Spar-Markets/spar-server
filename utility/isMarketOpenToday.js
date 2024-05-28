@@ -17,11 +17,7 @@ function isMarketOpenToday(inputDate) {
     ).getTime(),
     // Good Friday (date varies, usually in April)
     // Memorial Day (Last Monday in May)
-    new Date(
-      date.getFullYear(),
-      4,
-      31 - new Date(date.getFullYear(), 4, 31).getDay()
-    ).getTime(),
+    new Date(date.getFullYear(), 4, 27).getTime(),
     // Independence Day (July 4)
     new Date(date.getFullYear(), 6, 4).getTime(),
     // Labor Day (First Monday in September)

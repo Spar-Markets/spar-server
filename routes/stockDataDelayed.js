@@ -4,11 +4,11 @@ const router = express.Router();
 const axios = require("axios");
 const polygonKey = "_4BtZn3PRCLu6fsdu7dgddb4ucmB1sfp";
 
-const isMarketOpenToday = require("../utility/isMarketOpenToday");
+const getMostRecentMarketOpenDay = require('../utility/getMostRecentMarketOpenDay')
 
 /**
- * STOCK DATA
- */
+* STOCK DATA
+*/
 
 // cache for prices for each ticker, updated whenever new price is written to DB
 // 1. so that we only write to DB if price is new (minimize write operations)
@@ -111,26 +111,10 @@ const isWithinMarketHours = () => {
   return afterStart && beforeEnd && withinWeekdays;
 };
 
-// Function to get the previous day
-function getPreviousDay(date) {
-  const previousDay = new Date(date);
-  console.log("date!?",previousDay.getDate())
-  previousDay.setDate(previousDay.getDate() - 1);
-  console.log(previousDay)
-  return previousDay;
-}
+
 
 // get most recent market open day
-function getMostRecentMarketOpenDay(now) {
-  console.log("this is what is being fed in", now)
-  let previousDate = getPreviousDay(now);
-  console.log("this is what is being fed in for prevDate", previousDate)
-  while (!isMarketOpenToday(previousDate)) {
-    previousDate = getPreviousDay(previousDate);
-  }
-  console.log("this is what it thinks is previous market open date", previousDate)
-  return previousDate;
-}
+
 
 // // get milliseconds for a specified date, hour, and minute
 // function getMilliseconds(dateString, hour, minute) {
@@ -162,17 +146,6 @@ function getMillisecondsEDT(dateString, hour, minute) {
   // Return the timestamp in milliseconds
   return localTime.getTime();
 }
-
-
-
-
-
-
-
-
-
-
-
 
 router.get("/getStockPrice", async (req, res) => {
   const { ticker } = req.query;
@@ -214,7 +187,7 @@ router.post("/getMostRecentOneDayPrices", async (req, res) => {
   const prices = {};
 
   for (let i = 0; i < tickers.length; i++) {
-    console.log(i, "trying", tickers[i])
+    console.log(i, "Trying", tickers[i])
     const url = `https://api.polygon.io/v2/aggs/ticker/${tickers[i]}/range/5/minute/${recentMarketOpen}/${recentMarketClose}?adjusted=true&sort=asc&apiKey=${polygonKey}`;
     const response = await axios.get(url);
     prices[response.data.ticker] = [];
