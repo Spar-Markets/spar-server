@@ -4,40 +4,38 @@ const axios = require("axios");
 
 // These routes may be obselete now since we aren't storing in database
 
-const polygonKey = "_4BtZn3PRCLu6fsdu7dgddb4ucmB1sfp";
+const {polygonKey} = require("../config/constants")
 const getMostRecentMarketOpenDay = require("../utility/getMostRecentMarketOpenDay");
 
-
+// Gets information on a given ticker
 router.post("/getTickerDetails", async function (req, res) {
   const { ticker } = req.body;
-  console.log("getTickerDetails, This is ticker being passed:",ticker)
+
   try {
     const detailsResponse = await axios.get(
       `https://api.polygon.io/v3/reference/tickers/${ticker}?apiKey=${polygonKey}`
     ); //summary, market cap, etc.
     
     const now = Date.now();
-    console.log("getTickerDetails, Logging the time right now:", now)
+
     const mostRecentMarketDay = getMostRecentMarketOpenDay(now);
-    console.log("getTickerDetails, Logging the output for mostrecentmarketday:", mostRecentMarketDay)
 
     const year = mostRecentMarketDay.getFullYear();
-    console.log("getTickerDetails, Logging the year:", year)
+
     const month = String(mostRecentMarketDay.getMonth() + 1).padStart(2, '0'); // Months are zero-based
-    console.log("getTickerDetails, Logging the month:", month)
+
     const day = String(mostRecentMarketDay.getDate()).padStart(2, '0');
-    console.log("getTickerDetails, Logging the day:", day)
+   
     const formattedDate = `${year}-${month}-${day}`;
-    console.log("gettickerdetails, formatted most recent date is:" + formattedDate)    
 
     const priceDetailsResponse = await axios.get(
       `https://api.polygon.io/v1/open-close/${ticker}/${formattedDate}?adjusted=true&apiKey=${polygonKey}`
     ); //high, low, 52 week data, etc.
-    console.log("pass1")
+
     const newsResponse = await axios.get(
       `https://api.polygon.io/v2/reference/news?ticker=${ticker}&apiKey=${polygonKey}`
     ); //most recent news on ticker
-    console.log("pass2")
+
     const response = {
       detailsResponse: detailsResponse.data,
       priceDetails: priceDetailsResponse.data, 

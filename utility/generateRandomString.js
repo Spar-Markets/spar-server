@@ -14,7 +14,6 @@ function generateRandomString(length) {
     // Append the randomly selected character to the random string
     randomString += charset[randomIndex];
   }
-
   return randomString;
 }
 

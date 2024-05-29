@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 
 const axios = require("axios");
-const polygonKey = "_4BtZn3PRCLu6fsdu7dgddb4ucmB1sfp";
+const {polygonKey} = require("../config/constants")
 
 const getMostRecentMarketOpenDay = require('../utility/getMostRecentMarketOpenDay')
 
@@ -21,7 +21,7 @@ const getCurrentPrice = async (ticker) => {
   let millisAgo = hoursAgo * 60 * 60 * 1000;
   const now = Date.now();
   const timestamp1 = now - millisAgo - 60000;
-  const timestamp2 = now - millisAgo + 60000;
+  const timestamp2 = now - millisAgo + 60000; 
 
   // get price from 24h ago timestamp
   const response = await axios.get(
@@ -161,16 +161,16 @@ router.get("/getStockPrice", async (req, res) => {
 router.post("/getMostRecentOneDayPrices", async (req, res) => {
   
   const tickers = req.body; // req.body will contain the array sent by Axios
-  console.log("Stock request coming in:", tickers)
+  console.log("getMostRecentOneDayPrices, Stock request coming in:", tickers)
   const now = Date.now();
-  console.log("The time right now, this should be correct:", now)
+  console.log("getMostRecentOneDayPrices, The time right now, this should be correct:", now)
   const mostRecentMarketDay = getMostRecentMarketOpenDay(now);
-  console.log("Printing what the most recent market day is:", mostRecentMarketDay)
+  console.log("getMostRecentOneDayPrices, Printing what the most recent market day is:", mostRecentMarketDay)
   const recentMarketOpen = getMillisecondsEDT(mostRecentMarketDay, 13, 30);
   const recentMarketClose = getMillisecondsEDT(mostRecentMarketDay, 20, 0);
 
   console.log("getMostRecentMarketOpenDay", recentMarketClose, recentMarketOpen)
-
+ 
   // add a check for if tickers is an array otherwise throw error
   if (!Array.isArray(tickers)) {
     res
