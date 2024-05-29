@@ -2,13 +2,13 @@ const express = require("express");
 const router = express.Router();
 
 const axios = require("axios");
-const {polygonKey} = require("../config/constants")
+const { polygonKey } = require("../config/constants");
 
-const getMostRecentMarketOpenDay = require('../utility/getMostRecentMarketOpenDay')
+const getMostRecentMarketOpenDay = require("../utility/getMostRecentMarketOpenDay");
 
 /**
-* STOCK DATA
-*/
+ * STOCK DATA
+ */
 
 // cache for prices for each ticker, updated whenever new price is written to DB
 // 1. so that we only write to DB if price is new (minimize write operations)
@@ -21,7 +21,7 @@ const getCurrentPrice = async (ticker) => {
   let millisAgo = hoursAgo * 60 * 60 * 1000;
   const now = Date.now();
   const timestamp1 = now - millisAgo - 60000;
-  const timestamp2 = now - millisAgo + 60000; 
+  const timestamp2 = now - millisAgo + 60000;
 
   // get price from 24h ago timestamp
   const response = await axios.get(
@@ -111,32 +111,15 @@ const isWithinMarketHours = () => {
   return afterStart && beforeEnd && withinWeekdays;
 };
 
-
-
 // get most recent market open day
 
-
-// // get milliseconds for a specified date, hour, and minute
-// function getMilliseconds(dateString, hour, minute) {
-//   // Create a Date object from the provided date string
-//   const date = new Date(dateString);
-
-//   // Set the provided hour and minute
-//   date.setHours(hour, minute, 0, 0);
-
-//   // Return the timestamp in milliseconds
-//   return date.getTime();
-// }
-
-
-
-function getMillisecondsEDT(dateString, hour, minute) {
+function getMillisecondsForTime(dateString, hour, minute) {
   // Create a Date object from the provided date string (assumed to be in UTC)
-  console.log("getmillisecondsedt",dateString, hour, minute)
+  console.log("getmillisecondsedt", dateString, hour, minute);
   const date = new Date(dateString);
   date.setHours(hour);
   date.setMinutes(minute);
-  
+
   // Return the timestamp in milliseconds
   return date.getTime();
 }
@@ -159,18 +142,27 @@ router.get("/getStockPrice", async (req, res) => {
 
 // endpoint to get one day stock prices for most recent day where market is open
 router.post("/getMostRecentOneDayPrices", async (req, res) => {
-  
   const tickers = req.body; // req.body will contain the array sent by Axios
-  console.log("getMostRecentOneDayPrices, Stock request coming in:", tickers)
+  console.log("getMostRecentOneDayPrices, Stock request coming in:", tickers);
   const now = Date.now();
-  console.log("getMostRecentOneDayPrices, The time right now, this should be correct:", now)
+  console.log(
+    "getMostRecentOneDayPrices, The time right now, this should be correct:",
+    now
+  );
   const mostRecentMarketDay = getMostRecentMarketOpenDay(now);
-  console.log("getMostRecentOneDayPrices, Printing what the most recent market day is:", mostRecentMarketDay)
-  const recentMarketOpen = getMillisecondsEDT(mostRecentMarketDay, 13, 30);
-  const recentMarketClose = getMillisecondsEDT(mostRecentMarketDay, 20, 0);
+  console.log(
+    "getMostRecentOneDayPrices, Printing what the most recent market day is:",
+    mostRecentMarketDay
+  );
+  const recentMarketOpen = getMillisecondsForTime(mostRecentMarketDay, 13, 30);
+  const recentMarketClose = getMillisecondsForTime(mostRecentMarketDay, 20, 0);
 
-  console.log("getMostRecentMarketOpenDay", recentMarketClose, recentMarketOpen)
- 
+  console.log(
+    "getMostRecentMarketOpenDay",
+    recentMarketClose,
+    recentMarketOpen
+  );
+
   // add a check for if tickers is an array otherwise throw error
   if (!Array.isArray(tickers)) {
     res
@@ -181,12 +173,12 @@ router.post("/getMostRecentOneDayPrices", async (req, res) => {
   const prices = {};
 
   for (let i = 0; i < tickers.length; i++) {
-    console.log(i, "Trying", tickers[i])
+    console.log(i, "Trying", tickers[i]);
     const url = `https://api.polygon.io/v2/aggs/ticker/${tickers[i]}/range/5/minute/${recentMarketOpen}/${recentMarketClose}?adjusted=true&sort=asc&apiKey=${polygonKey}`;
     const response = await axios.get(url);
     prices[response.data.ticker] = [];
-    
-    // do a check if 
+
+    // do a check if
     for (let pricestamp of response.data.results) {
       prices[response.data.ticker].push({
         timeField: pricestamp.t,

@@ -20,13 +20,15 @@ router.post("/createUser", async (req, res) => {
     });
     await newUser.save();
     console.log("New User Created");
-    res.status(201).json({ message: "User created successfully" });
+    res
+      .status(201)
+      .json({ message: "User created successfully", UserDetails: newUser });
   } catch (error) {
     console.error("Error creating user:", error);
     res.status(500).json({ error: "Could not create user" });
   }
 });
- 
+
 router.post("/getActiveUser", async (req, res) => {
   const { email } = req.body;
   console.log("Called", email);

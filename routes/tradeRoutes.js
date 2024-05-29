@@ -12,9 +12,9 @@ router.post("/purchaseStock", async (req, res) => {
     }
 
     let updateField;
-    if (match.user1.email === email) {
+    if (match.user1.name === email) {
       updateField = "user1.assets";
-    } else if (match.user2.email === email) {
+    } else if (match.user2.name === email) {
       updateField = "user2.assets";
     } else {
       return res.status(400).send("User not found in this match");
