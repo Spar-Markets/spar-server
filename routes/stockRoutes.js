@@ -4,7 +4,7 @@ const axios = require("axios");
 
 // These routes may be obselete now since we aren't storing in database
 
-const {polygonKey} = require("../config/constants")
+const { polygonKey } = require("../config/constants");
 const getMostRecentMarketOpenDay = require("../utility/getMostRecentMarketOpenDay");
 
 // Gets information on a given ticker
@@ -15,17 +15,17 @@ router.post("/getTickerDetails", async function (req, res) {
     const detailsResponse = await axios.get(
       `https://api.polygon.io/v3/reference/tickers/${ticker}?apiKey=${polygonKey}`
     ); //summary, market cap, etc.
-    
+
     const now = Date.now();
 
     const mostRecentMarketDay = getMostRecentMarketOpenDay(now);
 
     const year = mostRecentMarketDay.getFullYear();
 
-    const month = String(mostRecentMarketDay.getMonth() + 1).padStart(2, '0'); // Months are zero-based
+    const month = String(mostRecentMarketDay.getMonth() + 1).padStart(2, "0"); // Months are zero-based
 
-    const day = String(mostRecentMarketDay.getDate()).padStart(2, '0');
-   
+    const day = String(mostRecentMarketDay.getDate()).padStart(2, "0");
+
     const formattedDate = `${year}-${month}-${day}`;
 
     const priceDetailsResponse = await axios.get(
@@ -38,14 +38,13 @@ router.post("/getTickerDetails", async function (req, res) {
 
     const response = {
       detailsResponse: detailsResponse.data,
-      priceDetails: priceDetailsResponse.data, 
-      news: newsResponse.data
+      priceDetails: priceDetailsResponse.data,
+      news: newsResponse.data,
     };
-    
-    res.send(response);
 
+    res.send(response);
   } catch {
-    console.log("this is ticker",ticker)
+    console.log("this is ticker", ticker);
 
     console.error("Error getting stock details, on endpoint: getTickerDetails");
   }
@@ -65,7 +64,7 @@ router.post("/getTickerDetails", async function (req, res) {
 //  * !! ADD a date to this
 //  * @param ticker
 //  * @param date most recent date to get high
-//  */ 
+//  */
 // const fetchPriceDetails = async (ticker, date) => {
 //   const response = await axios.get(
 //     `https://api.polygon.io/v1/open-close/${ticker}/2024-03-21?adjusted=true&apiKey=${polygonKey}`
