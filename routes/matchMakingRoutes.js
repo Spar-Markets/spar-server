@@ -36,7 +36,8 @@ router.post("/getMatchData", async function (req, res) {
 // Inputs user into the mathcmkaing database
 router.post("/userToMatchmaking", async (req, res) => {
   try {
-    const { username, email, skillRating, entryFee, matchLength } = req.body;
+    const { username, email, userID, skillRating, entryFee, matchLength } =
+      req.body;
 
     const entryFeeInt = parseInt(entryFee);
 
@@ -45,6 +46,7 @@ router.post("/userToMatchmaking", async (req, res) => {
     const newPlayer = new Player({
       username,
       email,
+      userID,
       skillRating,
       entryFeeInt,
       matchLengthInt,
@@ -128,8 +130,8 @@ async function createMatch() {
           const match = new Match({
             matchId,
             wagerAmt: users[i].entryFeeInt,
-            user1: { name: users[i].email, assets: [], buyingPower: 100000 },
-            user2: { name: users[j].email, assets: [], buyingPower: 100000 },
+            user1: { name: users[i].userID, assets: [], buyingPower: 100000 },
+            user2: { name: users[j].userID, assets: [], buyingPower: 100000 },
           });
           await match.save();
           console.log("Updating user:", users[i].email);
@@ -138,7 +140,7 @@ async function createMatch() {
           console.log(users[i].email, match.matchId);
           // Add the match to both users' activematches field
           await User.findOneAndUpdate(
-            { email: users[i].email },
+            { userID: users[i].userID },
             { $addToSet: { activematches: match.matchId } },
             { new: true } // Return the updated document
           );
@@ -156,9 +158,8 @@ async function createMatch() {
         }
       }
     }
-  } 
-  catch(error) {
-    console.log("Eror in matchmaking", error)
+  } catch (error) {
+    console.log("Eror in matchmaking", error);
   }
 }
 

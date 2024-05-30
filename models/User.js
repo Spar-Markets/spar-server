@@ -34,6 +34,11 @@ const userSchema = new mongoose.Schema({
     default: [],
     required: true,
   },
+  pastmatches: {
+    type: [Object],
+    default: [],
+    required: true,
+  },
   plaidPersonalAccess: {
     type: String,
     default: "",
