@@ -15,65 +15,6 @@ const getMostRecentMarketOpenDay = require("../utility/getMostRecentMarketOpenDa
 // 2. to not read directly from DB to check whether price is new (minimize read operations)
 const priceCache = {};
 
-const getCurrentPrice = async (ticker) => {
-  // constants
-  let hoursAgo = 24;
-  let millisAgo = hoursAgo * 60 * 60 * 1000;
-  const now = Date.now();
-  const timestamp1 = now - millisAgo - 60000;
-  const timestamp2 = now - millisAgo + 60000;
-
-  // get price from 24h ago timestamp
-  const response = await axios.get(
-    `https://api.polygon.io/v2/aggs/ticker/${ticker}/range/1/minute/${timestamp1}/${timestamp2}?adjusted=true&sort=asc&limit=1000&apiKey=${polygonKey}`
-  );
-
-  if (response.data.queryCount == 0 || response.data.resultsCount == 0) {
-    console.error("No data was found for specified timestamp.");
-    return null;
-  }
-
-  const data = response.data.results;
-
-  const closestBefore = data.reduce((prev, curr) => {
-    // Ignore objects where `t` is not before `time`
-    if (curr.t > timestamp1) return prev;
-    // If prev is null (initial state) or the current object's `t` is closer to `time`, update prev
-    return prev === null ||
-      Math.abs(curr.t - timestamp1) < Math.abs(prev.t - timestamp1)
-      ? curr
-      : prev;
-  }, null);
-
-  return { timeField: closestBefore.t, price: closestBefore.c };
-};
-
-const updateCurrentPrice = async (ticker) => {
-  const newPrice = await getCurrentPrice(ticker);
-  try {
-    const cachedPrice = priceCache[ticker];
-
-    // write price to DB if price is changed or not cached
-    if (
-      !cachedPrice ||
-      cachedPrice.price !== newPrice.price ||
-      cachedPrice.timeField !== newPrice.timeField
-    ) {
-      // update the cache
-      priceCache[ticker] = newPrice;
-      console.log("Updated", ticker, ". New price: ", newPrice);
-    } else {
-      console.log(
-        "Price for",
-        ticker,
-        "not updated because price hasn't changed."
-      );
-    }
-  } catch (error) {
-    console.error("Error updating price: ", error);
-  }
-};
-
 const isWithinMarketHours = () => {
   const startHour = 9;
   const startMinute = 30;
@@ -124,22 +65,6 @@ function getMillisecondsForTime(dateString, hour, minute) {
   return date.getTime();
 }
 
-router.get("/getStockPrice", async (req, res) => {
-  const { ticker } = req.query;
-  if (!ticker) {
-    return res.status(400).json({ error: "Ticker is required" });
-  } else if (!isWithinMarketHours()) {
-    return res.status(400).json({ error: "Outside market hours" });
-  }
-
-  try {
-    const stockData = await getCurrentPrice(ticker);
-    res.json(stockData);
-  } catch (error) {
-    res.status(500).json({ error: "Failed to fetch stock price" });
-  }
-});
-
 // endpoint to get one day stock prices for most recent day where market is open
 router.post("/getMostRecentOneDayPrices", async (req, res) => {
   const tickers = req.body; // req.body will contain the array sent by Axios
@@ -188,15 +113,5 @@ router.post("/getMostRecentOneDayPrices", async (req, res) => {
   }
   res.json(prices);
 });
-
-setInterval(async () => {
-  if (isWithinMarketHours()) {
-    updateCurrentPrice("AAPL");
-    updateCurrentPrice("GOOG");
-    updateCurrentPrice("TSLA");
-  } else {
-    console.log("Outside market hours. Skipping function.");
-  }
-}, 20000);
 
 module.exports = router;
