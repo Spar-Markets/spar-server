@@ -9,8 +9,8 @@ const playerSchema = new mongoose.Schema({
   },
   userID: {
     type: String,
-    required: true,
-    unique: true,
+    required: false,
+    unique: false,
   },
   skillRating: {
     type: mongoose.Schema.Types.Decimal128,
