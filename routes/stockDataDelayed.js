@@ -100,6 +100,7 @@ router.post("/getMostRecentOneDayPrices", async (req, res) => {
   for (let i = 0; i < tickers.length; i++) {
     console.log(i, "Trying", tickers[i]);
     const url = `https://api.polygon.io/v2/aggs/ticker/${tickers[i]}/range/5/minute/${recentMarketOpen}/${recentMarketClose}?adjusted=true&sort=asc&apiKey=${polygonKey}`;
+    console.log("Polygon URL request: " + url);
     const response = await axios.get(url);
     prices[response.data.ticker] = [];
 
