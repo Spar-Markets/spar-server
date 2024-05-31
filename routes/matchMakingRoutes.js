@@ -10,7 +10,7 @@ const generateRandomString = require("../utility/generateRandomString");
 // Returns Users Matches
 router.post("/getUserMatches", async function (req, res) {
   try {
-    const userID = req.body;
+    const { userID } = req.body;
     const user = await User.findOne({ userID: userID });
     if (user) {
       res.send(user.activematches);
@@ -23,7 +23,7 @@ router.post("/getUserMatches", async function (req, res) {
 // Returns one match to the user as a match object
 router.post("/getMatchData", async function (req, res) {
   try {
-    const matchId = req.body;
+    const { matchId } = req.body;
     const match = await Match.findOne({ matchId: matchId });
     if (match) {
       res.send(match);
@@ -66,10 +66,11 @@ router.post("/areTheyMatchmaking", async (req, res) => {
   try {
     console.log("Are they matchmaking called");
 
-    const userID = req.body;
-
+    const { userID } = req.body;
+    console.log("are they matchmaking:");
+    console.log(userID);
     // Find the player in the matchmaking collection by username
-    const player = await Player.findOne({ userID });
+    const player = await Player.findOne({ userID: userID });
 
     if (!player) {
       // Player not found, send an error response
@@ -90,7 +91,7 @@ router.post("/areTheyMatchmaking", async (req, res) => {
 // Removes the user from the matchmaking database
 router.post("/cancelMatchmaking", async (req, res) => {
   try {
-    const userID = req.body;
+    const { userID } = req.body;
 
     // Find the player in the matchmaking collection by username
     const player = await Player.findOne({ userID });
@@ -129,6 +130,7 @@ async function createMatch() {
           // Insert the matched users into the "matches" collection
           const match = new Match({
             matchId,
+            timeframe: users[i].matchLengthInt,
             wagerAmt: users[i].entryFeeInt,
             user1: { name: users[i].userID, assets: [], buyingPower: 100000 },
             user2: { name: users[j].userID, assets: [], buyingPower: 100000 },
