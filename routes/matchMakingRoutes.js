@@ -10,7 +10,7 @@ const generateRandomString = require("../utility/generateRandomString");
 // Returns Users Matches
 router.post("/getUserMatches", async function (req, res) {
   try {
-    const { userID } = req.body;
+    const userID = req.body;
     const user = await User.findOne({ userID: userID });
     if (user) {
       res.send(user.activematches);
@@ -23,7 +23,7 @@ router.post("/getUserMatches", async function (req, res) {
 // Returns one match to the user as a match object
 router.post("/getMatchData", async function (req, res) {
   try {
-    const { matchId } = req.body;
+    const matchId = req.body;
     const match = await Match.findOne({ matchId: matchId });
     if (match) {
       res.send(match);
@@ -66,7 +66,7 @@ router.post("/areTheyMatchmaking", async (req, res) => {
   try {
     console.log("Are they matchmaking called");
 
-    const { userID } = req.body;
+    const userID = req.body;
 
     // Find the player in the matchmaking collection by username
     const player = await Player.findOne({ userID });
