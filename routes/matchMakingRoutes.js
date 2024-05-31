@@ -10,8 +10,8 @@ const generateRandomString = require("../utility/generateRandomString");
 // Returns Users Matches
 router.post("/getUserMatches", async function (req, res) {
   try {
-    const { email } = req.body;
-    const user = await User.findOne({ email: email });
+    const { userID } = req.body;
+    const user = await User.findOne({ userID: userID });
     if (user) {
       res.send(user.activematches);
     }
@@ -36,8 +36,7 @@ router.post("/getMatchData", async function (req, res) {
 // Inputs user into the mathcmkaing database
 router.post("/userToMatchmaking", async (req, res) => {
   try {
-    const { username, email, userID, skillRating, entryFee, matchLength } =
-      req.body;
+    const { username, userID, skillRating, entryFee, matchLength } = req.body;
 
     const entryFeeInt = parseInt(entryFee);
 
@@ -45,7 +44,6 @@ router.post("/userToMatchmaking", async (req, res) => {
 
     const newPlayer = new Player({
       username,
-      email,
       userID,
       skillRating,
       entryFeeInt,
@@ -55,7 +53,7 @@ router.post("/userToMatchmaking", async (req, res) => {
 
     await newPlayer.save();
 
-    res.send(email + "Entered Matchmaking");
+    res.send(userID + "Entered Matchmaking");
   } catch (err) {
     console.log("inmatchmaking " + err);
   }
@@ -66,10 +64,10 @@ router.post("/areTheyMatchmaking", async (req, res) => {
   try {
     console.log("Are they matchmaking called");
 
-    const { email } = req.body;
+    const { userID } = req.body;
 
     // Find the player in the matchmaking collection by username
-    const player = await Player.findOne({ email });
+    const player = await Player.findOne({ userID });
 
     if (!player) {
       // Player not found, send an error response
@@ -90,10 +88,10 @@ router.post("/areTheyMatchmaking", async (req, res) => {
 // Removes the user from the matchmaking database
 router.post("/cancelMatchmaking", async (req, res) => {
   try {
-    const { email } = req.body;
+    const { userID } = req.body;
 
     // Find the player in the matchmaking collection by username
-    const player = await Player.findOne({ email });
+    const player = await Player.findOne({ userID });
 
     if (!player) {
       // Player not found, send an error response
@@ -101,7 +99,7 @@ router.post("/cancelMatchmaking", async (req, res) => {
     }
 
     // Delete the player from the matchmaking collection
-    await Player.deleteOne({ email });
+    await Player.deleteOne({ userID });
 
     // Send a success response
     res.json({ message: "Matchmaking canceled successfully" });
@@ -134,10 +132,10 @@ async function createMatch() {
             user2: { name: users[j].userID, assets: [], buyingPower: 100000 },
           });
           await match.save();
-          console.log("Updating user:", users[i].email);
+          console.log("Updating user:", users[i].userID);
           console.log("Match ID:", matchId);
           // Create an object representing the match
-          console.log(users[i].email, match.matchId);
+          console.log(users[i].userID, match.matchId);
           // Add the match to both users' activematches field
           await User.findOneAndUpdate(
             { userID: users[i].userID },
@@ -146,7 +144,7 @@ async function createMatch() {
           );
 
           await User.findOneAndUpdate(
-            { email: users[j].email },
+            { userID: users[j].userID },
             { $addToSet: { activematches: match.matchId } },
             { new: true } // Return the updated document
           );
