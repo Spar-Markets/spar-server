@@ -50,8 +50,10 @@ router.post("/userToMatchmaking", async (req, res) => {
       matchLengthInt,
     });
     console.log("Logging player creds in Usertomatchmaking " + newPlayer);
+    console.log("New Player email: " + newPlayer.email);
 
     await newPlayer.save();
+    console.log("Saved player to DB");
 
     res.send(userID + "Entered Matchmaking");
   } catch (err) {
@@ -88,7 +90,7 @@ router.post("/areTheyMatchmaking", async (req, res) => {
 // Removes the user from the matchmaking database
 router.post("/cancelMatchmaking", async (req, res) => {
   try {
-    const { userID } = req.body;
+    const userID = req.body;
 
     // Find the player in the matchmaking collection by username
     const player = await Player.findOne({ userID });
