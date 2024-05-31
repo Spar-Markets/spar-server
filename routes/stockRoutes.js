@@ -50,37 +50,4 @@ router.post("/getTickerDetails", async function (req, res) {
   }
 });
 
-// // DIRECTIONS: Choose ticker and database, then run "node oneday.js" in the terminal.
-
-// const fetchDetails = async (ticker) => {
-//   const response = await axios.get(
-//     `https://api.polygon.io/v3/reference/tickers/${ticker}?apiKey=${polygonKey}`
-//   );
-//   return response.data.results;
-// };
-
-// /**
-//  * This gets the open, close, high, and low, worth of prices from one date
-//  * !! ADD a date to this
-//  * @param ticker
-//  * @param date most recent date to get high
-//  */
-// const fetchPriceDetails = async (ticker, date) => {
-//   const response = await axios.get(
-//     `https://api.polygon.io/v1/open-close/${ticker}/2024-03-21?adjusted=true&apiKey=${polygonKey}`
-//   );
-//   return response.data;
-// };
-
-// /**
-//  * Grabs most recent news for given ticker
-//  * @param ticker
-//  */
-// const fetchNews = async (ticker) => {
-//   const response = await axios.get(
-//     `https://api.polygon.io/v2/reference/news?ticker=${ticker}&apiKey=${polygonKey}`
-//   );
-//   return response.data;
-// };
-
 module.exports = router;

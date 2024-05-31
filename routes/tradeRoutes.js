@@ -4,7 +4,7 @@ const Match = require("../models/Match");
 
 router.post("/purchaseStock", async (req, res) => {
   try {
-    const { email, matchId, buyPrice, ticker } = req.body;
+    const { userID, matchId, buyPrice, ticker } = req.body;
     const match = await Match.findOne({ matchId: matchId });
 
     if (!match) {
@@ -12,9 +12,9 @@ router.post("/purchaseStock", async (req, res) => {
     }
 
     let updateField;
-    if (match.user1.name === email) {
+    if (match.user1.userID === userID) {
       updateField = "user1.assets";
-    } else if (match.user2.name === email) {
+    } else if (match.user2.userID === userID) {
       updateField = "user2.assets";
     } else {
       return res.status(400).send("User not found in this match");

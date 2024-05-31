@@ -67,7 +67,7 @@ function getMillisecondsForTime(dateString, hour, minute) {
 
 // endpoint to get one day stock prices for most recent day where market is open
 router.post("/getMostRecentOneDayPrices", async (req, res) => {
-  const tickers = req.body; // req.body will contain the array sent by Axios
+  const { tickers, timeframe } = req.body; // req.body will contain the array sent by Axios
   console.log("getMostRecentOneDayPrices, Stock request coming in:", tickers);
   const now = Date.now();
   console.log(
@@ -82,36 +82,81 @@ router.post("/getMostRecentOneDayPrices", async (req, res) => {
   const recentMarketOpen = getMillisecondsForTime(mostRecentMarketDay, 13, 30);
   const recentMarketClose = getMillisecondsForTime(mostRecentMarketDay, 20, 0);
 
-  console.log(
-    "getMostRecentMarketOpenDay",
-    recentMarketClose,
-    recentMarketOpen
-  );
+  if (timeframe == "1D") {
+    console.log(
+      "getMostRecentMarketOpenDay",
+      recentMarketClose,
+      recentMarketOpen
+    );
 
-  // add a check for if tickers is an array otherwise throw error
-  if (!Array.isArray(tickers)) {
-    res
-      .status(400)
-      .json({ error: "invalid ticker input: tickers is not an array" });
-  }
-
-  const prices = {};
-
-  for (let i = 0; i < tickers.length; i++) {
-    console.log(i, "Trying", tickers[i]);
-    const url = `https://api.polygon.io/v2/aggs/ticker/${tickers[i]}/range/5/minute/${recentMarketOpen}/${recentMarketClose}?adjusted=true&sort=asc&apiKey=${polygonKey}`;
-    console.log("Polygon URL request: " + url);
-    const response = await axios.get(url);
-    prices[response.data.ticker] = [];
-
-    // do a check if
-    for (let pricestamp of response.data.results) {
-      prices[response.data.ticker].push({
-        timeField: pricestamp.t,
-        price: pricestamp.c,
-      });
+    // add a check for if tickers is an array otherwise throw error
+    if (!Array.isArray(tickers)) {
+      res
+        .status(400)
+        .json({ error: "invalid ticker input: tickers is not an array" });
     }
+
+    const prices = {};
+
+    for (let i = 0; i < tickers.length; i++) {
+      console.log(i, "Trying", tickers[i]);
+      const url = `https://api.polygon.io/v2/aggs/ticker/${tickers[i]}/range/5/minute/${recentMarketOpen}/${recentMarketClose}?adjusted=true&sort=asc&apiKey=${polygonKey}`;
+      console.log("Polygon URL request: " + url);
+      const response = await axios.get(url);
+      prices[response.data.ticker] = [];
+
+      // do a check if
+      for (let pricestamp of response.data.results) {
+        prices[response.data.ticker].push({
+          timeField: pricestamp.t,
+          price: pricestamp.c,
+        });
+      }
+    }
+  } else if (timeframe == "1W") {
+    const oneWeek = Date.now();
+    oneWeek = getMillisecondsForTime(oneWeek);
+    //makes it est and 6 days ago
+    oneWeek = oneWeek - 14400000 - 518400000;
+    const mostRecentMarketDay = getMostRecentMarketOpenDay(oneWeek);
+    const recentMarketOpen = getMillisecondsForTime(
+      mostRecentMarketDay,
+      13,
+      30
+    );
+
+    // add a check for if tickers is an array otherwise throw error
+    if (!Array.isArray(tickers)) {
+      res
+        .status(400)
+        .json({ error: "invalid ticker input: tickers is not an array" });
+    }
+
+    const prices = {};
+
+    for (let i = 0; i < tickers.length; i++) {
+      console.log(i, "Trying", tickers[i]);
+      const url = `https://api.polygon.io/v2/aggs/ticker/${tickers[i]}/range/5/minute/${recentMarketOpen}/${recentMarketClose}?adjusted=true&sort=asc&apiKey=${polygonKey}`;
+      console.log("Polygon URL request: " + url);
+      const response = await axios.get(url);
+      prices[response.data.ticker] = [];
+
+      // do a check if
+      for (let pricestamp of response.data.results) {
+        prices[response.data.ticker].push({
+          timeField: pricestamp.t,
+          price: pricestamp.c,
+        });
+      }
+    }
+  } else if (timeframe == "1M") {
+  } else if (timeframe == "3M") {
+  } else if (timeframe == "YTD") {
+  } else if (timeframe == "1Y") {
+  } else if (timeframe == "5Y") {
+  } else if (timeframe == "MAX") {
   }
+
   res.json(prices);
 });
 

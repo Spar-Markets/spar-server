@@ -24,7 +24,9 @@ router.post("/getUserMatches", async function (req, res) {
 router.post("/getMatchData", async function (req, res) {
   try {
     const { matchId } = req.body;
+    console.log("MatchId: " + matchId);
     const match = await Match.findOne({ matchId: matchId });
+
     if (match) {
       res.send(match);
     }
