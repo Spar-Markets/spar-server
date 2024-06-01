@@ -67,7 +67,13 @@ function getMillisecondsForTime(dateString, hour, minute) {
 
 // endpoint to get one day stock prices for most recent day where market is open
 router.post("/getMostRecentOneDayPrices", async (req, res) => {
-  const { tickers, timeframe } = req.body; // req.body will contain the array sent by Axios
+  console.log("hello",req.body)
+  const { ticker, timeframe } = req.body; // req.body will contain the array sent by Axios
+
+  console.log("what",ticker, timeframe)
+  const tickers = [ticker]
+
+  console.log("printing tickers array", tickers, ticker )
   console.log("getMostRecentOneDayPrices, Stock request coming in:", tickers);
   const now = Date.now();
   console.log(
@@ -112,13 +118,16 @@ router.post("/getMostRecentOneDayPrices", async (req, res) => {
           price: pricestamp.c,
         });
       }
+      res.json(prices);
     }
   } else if (timeframe == "1W") {
+    console.log("getting 1W")
+    //get the date in milliseconds
     const oneWeek = Date.now();
-    oneWeek = getMillisecondsForTime(oneWeek);
+    
     //makes it est and 6 days ago
-    oneWeek = oneWeek - 14400000 - 518400000;
-    const mostRecentMarketDay = getMostRecentMarketOpenDay(oneWeek);
+    oneWeekMilliEDT = oneWeek - 14400000 - 518400000;
+    const mostRecentMarketDay = getMostRecentMarketOpenDay(oneWeekMilliEDT);
     const recentMarketOpen = getMillisecondsForTime(
       mostRecentMarketDay,
       13,
@@ -147,8 +156,12 @@ router.post("/getMostRecentOneDayPrices", async (req, res) => {
           timeField: pricestamp.t,
           price: pricestamp.c,
         });
+
       }
+
+      res.json(prices);
     }
+
   } else if (timeframe == "1M") {
   } else if (timeframe == "3M") {
   } else if (timeframe == "YTD") {
@@ -157,7 +170,7 @@ router.post("/getMostRecentOneDayPrices", async (req, res) => {
   } else if (timeframe == "MAX") {
   }
 
-  res.json(prices);
+  
 });
 
 module.exports = router;

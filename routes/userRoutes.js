@@ -53,12 +53,13 @@ router.post("/getMongoAccount", async function (req, res) {
 });
 
 router.post("/checkUserExists", async function (req, res) {
+  // HAS TO BE EMAIL
   const { email } = req.body; // Destructure email from request body
   console.log(email); // Check if email is correctly received
 
   try {
     // Find user by email in the User collection
-    const user = await User.findOne({ email: email });
+    const user = await User.findOne({ email: email});
 
     if (user) {
       // If user exists, send true
