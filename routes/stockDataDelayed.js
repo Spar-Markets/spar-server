@@ -67,13 +67,13 @@ function getMillisecondsForTime(dateString, hour, minute) {
 
 // endpoint to get one day stock prices for most recent day where market is open
 router.post("/getMostRecentOneDayPrices", async (req, res) => {
-  console.log("hello",req.body)
+  console.log("hello", req.body);
   const { ticker, timeframe } = req.body; // req.body will contain the array sent by Axios
 
-  console.log("what",ticker, timeframe)
-  const tickers = [ticker]
+  console.log("what", ticker, timeframe);
+  const tickers = [ticker];
 
-  console.log("printing tickers array", tickers, ticker )
+  console.log("printing tickers array", tickers, ticker);
   console.log("getMostRecentOneDayPrices, Stock request coming in:", tickers);
   const now = Date.now();
   console.log(
@@ -111,7 +111,6 @@ router.post("/getMostRecentOneDayPrices", async (req, res) => {
       const response = await axios.get(url);
       prices[response.data.ticker] = [];
 
-      // do a check if
       for (let pricestamp of response.data.results) {
         prices[response.data.ticker].push({
           timeField: pricestamp.t,
@@ -121,10 +120,10 @@ router.post("/getMostRecentOneDayPrices", async (req, res) => {
       res.json(prices);
     }
   } else if (timeframe == "1W") {
-    console.log("getting 1W")
+    console.log("getting 1W");
     //get the date in milliseconds
     const oneWeek = Date.now();
-    
+
     //makes it est and 6 days ago
     oneWeekMilliEDT = oneWeek - 14400000 - 518400000;
     const mostRecentMarketDay = getMostRecentMarketOpenDay(oneWeekMilliEDT);
@@ -145,23 +144,20 @@ router.post("/getMostRecentOneDayPrices", async (req, res) => {
 
     for (let i = 0; i < tickers.length; i++) {
       console.log(i, "Trying", tickers[i]);
-      const url = `https://api.polygon.io/v2/aggs/ticker/${tickers[i]}/range/5/minute/${recentMarketOpen}/${recentMarketClose}?adjusted=true&sort=asc&apiKey=${polygonKey}`;
+      const url = `https://api.polygon.io/v2/aggs/ticker/${tickers[i]}/range/1/hour/${recentMarketOpen}/${recentMarketClose}?adjusted=true&sort=asc&apiKey=${polygonKey}`;
       console.log("Polygon URL request: " + url);
       const response = await axios.get(url);
       prices[response.data.ticker] = [];
 
-      // do a check if
       for (let pricestamp of response.data.results) {
         prices[response.data.ticker].push({
           timeField: pricestamp.t,
           price: pricestamp.c,
         });
-
       }
 
       res.json(prices);
     }
-
   } else if (timeframe == "1M") {
   } else if (timeframe == "3M") {
   } else if (timeframe == "YTD") {
@@ -169,8 +165,6 @@ router.post("/getMostRecentOneDayPrices", async (req, res) => {
   } else if (timeframe == "5Y") {
   } else if (timeframe == "MAX") {
   }
-
-  
 });
 
 module.exports = router;

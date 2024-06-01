@@ -70,7 +70,7 @@ router.post("/areTheyMatchmaking", async (req, res) => {
 
     const { userID } = req.body;
     console.log("Are they matchmaking:");
-    console.log("user id being logged",userID);
+    console.log("user id being logged", userID);
     // Find the player in the matchmaking collection by username
     const player = await Player.findOne({ userID: userID });
 

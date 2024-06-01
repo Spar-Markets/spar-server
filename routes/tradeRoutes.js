@@ -2,9 +2,26 @@ const express = require("express");
 const router = express.Router();
 const Match = require("../models/Match");
 
+
+// UNFINISHED
+async function addOrderToTrades(matchId, orderObject, ticker, updateField) {
+  try {
+    const result = await Match.updateOne(
+      { matchId: matchId, [`${updateField}.ticker`]: ticker },
+      { $push: { [`${updateField}.$.trades`]: orderObject } }
+    )
+
+    if (result.nModified === 0) {
+      console.log('No document matched or updated.');
+    } else {
+      console.log('Trade object added successfully.');
+    }
+  }
+}
+
 router.post("/purchaseStock", async (req, res) => {
   try {
-    const { userID, matchId, buyPrice, ticker } = req.body;
+    const { userID, matchId, ticker, buyPrice, shares } = req.body;
     const match = await Match.findOne({ matchId: matchId });
 
     if (!match) {
@@ -13,7 +30,7 @@ router.post("/purchaseStock", async (req, res) => {
 
     let updateField;
     if (match.user1.userID === userID) {
-      updateField = "user1.assets";
+      if (match.user1.assets.includes(ticker)) updateField = "user1.assets";
     } else if (match.user2.userID === userID) {
       updateField = "user2.assets";
     } else {
