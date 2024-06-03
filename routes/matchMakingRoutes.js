@@ -134,8 +134,18 @@ async function createMatch() {
             matchId,
             timeframe: users[i].matchLengthInt,
             wagerAmt: users[i].entryFeeInt,
-            user1: { userID: users[i].userID, assets: [], buyingPower: 100000 },
-            user2: { userID: users[j].userID, assets: [], buyingPower: 100000 },
+            user1: {
+              userID: users[i].userID,
+              assets: [],
+              trades: [],
+              buyingPower: 100000,
+            },
+            user2: {
+              userID: users[j].userID,
+              assets: [],
+              trades: [],
+              buyingPower: 100000,
+            },
           });
           await match.save();
           console.log("Updating user:", users[i].userID);
