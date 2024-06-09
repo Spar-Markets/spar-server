@@ -4,6 +4,7 @@ const bodyParser = require("body-parser");
 
 // import websocket
 const { setupWebSocket, broadcast, sockets } = require("./websockets/sockets");
+const setupPolySocket = require("./websockets/polysocket");
 
 // import routes
 const balanceRoutes = require("./routes/balanceRoutes");
@@ -33,6 +34,7 @@ app.use(stockDataDelayed);
 
 // websockets
 setupWebSocket(app, WsPort);
+setupPolySocket();
 
 // listen on port
 app.listen(PORT, function listening() {

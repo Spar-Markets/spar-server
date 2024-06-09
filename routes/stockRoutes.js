@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const axios = require("axios");
+const { sparDB } = require("../config/mongoConnection");
 
 // These routes may be obselete now since we aren't storing in database
 
@@ -48,6 +49,31 @@ router.post("/getTickerDetails", async function (req, res) {
 
     console.error("Error getting stock details, on endpoint: getTickerDetails");
   }
+});
+
+router.get("/getTickerList", async (req, res) => {
+  // return JSON of tickers
+  // hardcode for now
+  // next step: request tickers from polygon. get ticker and company name. parse out other unnecessary data
+  const tickerCollection = sparDB.db.collection("stockTicker");
+  const allTickerData = await tickerCollection.findOne();
+
+  const allTickers = [];
+
+  if (allTickerData) {
+    // loop over everything
+    Object.keys(allTickerData).forEach((key) => {
+      console.log(`${key}: ${allTickerData[key]}`);
+      const rawticker = allTickerData[key];
+      const stockObject = {
+        ticker: rawticker.ticker,
+        companyName: rawticker.title,
+      };
+      allTickers.push(stockObject);
+    });
+  }
+
+  res.send(allTickers);
 });
 
 module.exports = router;

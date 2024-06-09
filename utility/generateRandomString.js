@@ -1,6 +1,6 @@
 const crypto = require("crypto");
 
-// Function for random string generation:
+// Function to generate a random string:
 
 function generateRandomString(length) {
   // Define the characters that can be used in the random string

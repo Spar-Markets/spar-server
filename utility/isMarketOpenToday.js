@@ -1,3 +1,4 @@
+// Function that gets whether the market is open on a given day, including all holidays
 function isMarketOpenToday(inputDate) {
   const date = new Date(inputDate);
   const holidays = [
@@ -18,7 +19,7 @@ function isMarketOpenToday(inputDate) {
     // Good Friday (date varies, usually in April)
     // Memorial Day (Last Monday in May)
     new Date(date.getFullYear(), 4, 27).getTime(),
-    // Independence Day (July 4) 
+    // Independence Day (July 4)
     new Date(date.getFullYear(), 6, 4).getTime(),
     // Labor Day (First Monday in September)
     new Date(
@@ -80,9 +81,6 @@ function isMarketOpenToday(inputDate) {
   }
 
   return true;
-
 }
 
 module.exports = isMarketOpenToday;
-
-
