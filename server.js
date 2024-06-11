@@ -35,10 +35,10 @@ app.use(feedRoutes);
 app.use(stockDataDelayed);
 
 // websockets
-setupWebSocket(app, WsPort);
-setupPolySocket();
+//setupWebSocket(app, WsPort);
+//setupPolySocket();
 
 // listen on port
-app.listen(PORT, function listening() {
+app.listen(PORT, "0.0.0.0", function listening() {
   console.log("Server started on port", PORT);
 });

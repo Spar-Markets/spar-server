@@ -21,7 +21,10 @@ router.post("/postToDatabase", async function (req, res) {
     });
 
     await newPost.save();
+    res.send("Success posting to database");
   } catch (error) {
-    //handle error posting to database
+    res.send(error);
   }
 });
+
+module.exports = router;
