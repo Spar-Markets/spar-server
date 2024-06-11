@@ -59,7 +59,7 @@ router.post("/checkUserExists", async function (req, res) {
 
   try {
     // Find user by email in the User collection
-    const user = await User.findOne({ email: email});
+    const user = await User.findOne({ email: email });
 
     if (user) {
       // If user exists, send true

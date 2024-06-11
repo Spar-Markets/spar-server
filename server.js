@@ -14,6 +14,7 @@ const stockRoutes = require("./routes/stockRoutes");
 const tradeRoutes = require("./routes/tradeRoutes");
 const userRoutes = require("./routes/userRoutes");
 const stockDataDelayed = require("./routes/stockDataDelayed");
+const feedRoutes = require("./routes/feedRoutes");
 
 // initialize express app and ports
 const app = express();
@@ -30,6 +31,7 @@ app.use(plaidRoutes);
 app.use(stockRoutes);
 app.use(tradeRoutes);
 app.use(userRoutes);
+app.use(feedRoutes);
 app.use(stockDataDelayed);
 
 // websockets
