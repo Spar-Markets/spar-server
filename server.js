@@ -2,9 +2,8 @@ require("dotenv").config();
 const express = require("express");
 const bodyParser = require("body-parser");
 
-// import websocket
-const { setupWebSocket, broadcast, sockets } = require("./websockets/sockets");
-const setupPolySocket = require("./websockets/polysocket");
+// import websockets
+const { setupPolySocket, setupWebSocket } = require("./websockets/polysocket");
 
 // import routes
 const balanceRoutes = require("./routes/balanceRoutes");
