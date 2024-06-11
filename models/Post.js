@@ -1,9 +1,9 @@
-const { sparDB } = require("../config/mongoConnection");
+const { feedDB } = require("../config/mongoConnection");
 const mongoose = require("mongoose");
 
 const postSchema = new mongoose.Schema({
   postId: {
-    type: number,
+    type: String,
     required: true,
     unique: true,
   },
@@ -29,7 +29,7 @@ const postSchema = new mongoose.Schema({
     required: true,
   },
   votes: {
-    type: number,
+    type: Number,
     default: 0,
   },
   comments: {
@@ -39,13 +39,13 @@ const postSchema = new mongoose.Schema({
     type: [Object],
   },
   upvotes: {
-    type: number,
+    type: Number,
     default: 0,
   },
   downvotes: {
-    type: number,
+    type: Number,
     default: 0,
   },
 });
 
-module.exports = sparDB.model("Post", postSchema);
+module.exports = feedDB.model("Post", postSchema);

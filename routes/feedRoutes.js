@@ -27,4 +27,18 @@ router.post("/postToDatabase", async function (req, res) {
   }
 });
 
+/*Dynamically gets Posts */
+router.get("/posts", async function (req, res) {
+  try {
+    const posts = await Post.find({});
+    const totalPosts = await Post.countDocuments();
+
+    res.send({ posts, totalPosts });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+router.post("");
+
 module.exports = router;
