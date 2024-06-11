@@ -32,6 +32,8 @@ router.post("/purchaseStock", async (req, res) => {
       return res.status(400).send("User not found in this match");
     }
 
+    // TODO: Update buying power
+
     const updatedMatchTrades = await Match.findOneAndUpdate(
       { matchId: matchId },
       {
