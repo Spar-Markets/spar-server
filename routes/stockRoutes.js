@@ -63,7 +63,6 @@ router.get("/getTickerList", async (req, res) => {
   if (allTickerData) {
     // loop over everything
     Object.keys(allTickerData).forEach((key) => {
-      console.log(`${key}: ${allTickerData[key]}`);
       const rawticker = allTickerData[key];
       const stockObject = {
         ticker: rawticker.ticker,
