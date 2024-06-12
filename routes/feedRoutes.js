@@ -9,28 +9,27 @@ const Post = require("../models/Post");
 // Inputs post into database
 router.post("/postToDatabase", async function (req, res) {
   try {
-    const { username, postedTime, type, title, body } = req.body;
+    const { postId, username, postedTime, type, title, message } = req.body;
 
     const newPost = new Post({
-      postId: generateRandomString(40),
+      postId: postId,
       username: username,
       postedTime: postedTime,
       type: type,
       title: title,
-      body: body,
+      body: message,
     });
-
     await newPost.save();
-    res.send("Success posting to database");
+    res.send(newPost);
   } catch (error) {
-    res.send(error);
+    console.log(error);
   }
 });
 
-/*Dynamically gets Posts */
+/*Dynamically gets Posts in reverse order which effectively makes them most recent*/
 router.get("/posts", async function (req, res) {
   try {
-    const posts = await Post.find({});
+    const posts = await Post.find({}).sort({ _id: -1 });
     const totalPosts = await Post.countDocuments();
 
     res.send({ posts, totalPosts });
