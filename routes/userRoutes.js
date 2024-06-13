@@ -10,12 +10,12 @@ const generateRandomString = require("../utility/generateRandomString");
 router.post("/createUser", async (req, res) => {
   try {
     console.log(req.body);
-    const { email } = req.body;
+    const { email, uid, username } = req.body;
     console.log("Received email:", email);
 
     const newUser = new User({
-      username: getLeftOfAtSymbol(email),
-      userID: generateRandomString(40),
+      username: String(username),
+      userID: String(uid),
       email: String(email),
     });
     await newUser.save();
@@ -30,13 +30,17 @@ router.post("/createUser", async (req, res) => {
 });
 
 router.post("/getActiveUser", async (req, res) => {
-  const { email } = req.body;
-  console.log("Called", email);
-
-  User.findOne({ email: email }).then((user) => {
-    console.log(user);
-    res.send(user);
-  });
+  const { uid } = req.body;
+  try {
+    const user = await User.findOne({ userID: uid });
+    if (user) {
+      res.status(200).send(user);
+    } else {
+      res.status(404).send("User not found");
+    }
+  } catch (error) {
+    res.status(500).send("Error getting active user " + error);
+  }
 });
 
 router.post("/getMongoAccount", async function (req, res) {

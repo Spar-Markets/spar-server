@@ -18,11 +18,11 @@ const userSchema = new mongoose.Schema({
     unique: false,
   },
   balance: {
-    type: mongoose.Schema.Types.Decimal128,
+    type: Number,
     default: 0.0,
   },
   skillRating: {
-    type: mongoose.Schema.Types.Decimal128,
+    type: Number,
     default: 50.0,
   },
   createdAt: {
@@ -43,6 +43,12 @@ const userSchema = new mongoose.Schema({
     type: String,
     default: "",
   },
+  postsVotedOn: [
+    {
+      postId: String,
+      vote: Number,
+    },
+  ],
 });
 
 module.exports = sparDB.model("User", userSchema);

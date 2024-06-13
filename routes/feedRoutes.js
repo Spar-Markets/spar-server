@@ -3,6 +3,7 @@ const router = express.Router();
 const generateRandomString = require("../utility/generateRandomString");
 
 const Post = require("../models/Post");
+const User = require("../models/User");
 
 //!!!! still need to implement images
 
@@ -38,6 +39,42 @@ router.get("/posts", async function (req, res) {
   }
 });
 
-router.post("");
+router.post("/upvotePost", async function (req, res) {
+  try {
+    const { uid, postId } = req.body;
+    //update number of updates on post itself
+    await Post.findOneAndUpdate(
+      { postId: postId },
+      { $inc: { votes: 1 } },
+      { new: true }
+    );
+    await User.findOneAndUpdate(
+      { userId: uid },
+      { $push: { postsVotedOn: { postId: postId, vote: 1 } } },
+      { new: true }
+    );
+    res.status(200).send("Successful Upvote");
+  } catch {
+    res.status(500).send("Server error on upvote");
+  }
+});
+
+router.post("/downvotePost", async function (req, res) {
+  try {
+    const { uid, postId } = req.body;
+    //update number of updates on post itself
+    await Post.findOneAndUpdate(
+      { postId: postId },
+      { $dec: { votes: 1 } },
+      { new: true }
+    );
+    await User.findOneAndUpdate(
+      { userId: uid },
+      { $push: { postsVotedOn: { postId: postId, vote: -1 } } },
+      { new: true }
+    );
+    res.status(200).send("Successful downvote");
+  } catch {}
+});
 
 module.exports = router;
