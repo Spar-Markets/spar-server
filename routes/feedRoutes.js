@@ -153,18 +153,27 @@ router.post("/downvotePost", async function (req, res) {
 
 router.post("/commentOnPost", async function (req, res) {
   try {
-    const { postId, uid } = req.body;
+    const { postId, uid, commentId, username, postedTime, body } = req.body;
 
-    const newPost = new Post({
-      postId: postId,
-      username: username,
-      postedTime: postedTime,
-      type: type,
-      title: title,
-      body: message,
-    });
-    await newPost.save();
-    res.send(newPost);
+    await Post.findOneAndUpdate(
+      { postId: postId },
+      {
+        $push: {
+          comments: {
+            uid: uid,
+            username: username,
+            postedTime: postedTime,
+            commentId: commentId,
+            body: body,
+            comments: [],
+            votes: 0,
+          },
+        },
+      },
+      { new: true }
+    );
+
+    res.send("Comment Post Success");
   } catch (error) {
     console.log(error);
   }
