@@ -2,7 +2,7 @@ const { sparDB } = require("../config/mongoConnection");
 const mongoose = require("mongoose");
 
 const matchSchema = new mongoose.Schema({
-  matchId: {
+  matchID: {
     type: String,
     required: true,
     unique: true,

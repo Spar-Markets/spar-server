@@ -5,16 +5,16 @@ const Match = require("../models/Match");
 router.post("/purchaseStock", async (req, res) => {
   try {
     console.log("purchaseStock: hit endpoint");
-    const { userID, matchId, ticker, buyPrice, shares } = req.body;
+    const { userID, matchID, ticker, buyPrice, shares } = req.body;
     console.log(
       "purchaseStock: received request: ",
       userID,
-      matchId,
+      matchID,
       ticker,
       buyPrice,
       shares
     );
-    const match = await Match.findOne({ matchId: matchId });
+    const match = await Match.findOne({ matchID: matchID });
     console.log("purchaseStock: got match: ", match);
     now = Date.now();
     if (!match) {
@@ -35,7 +35,7 @@ router.post("/purchaseStock", async (req, res) => {
     // TODO: Update buying power
 
     const updatedMatchTrades = await Match.findOneAndUpdate(
-      { matchId: matchId },
+      { matchID: matchID },
       {
         $push: {
           [`${user}.trades`]: {
@@ -70,8 +70,8 @@ router.post("/purchaseStock", async (req, res) => {
 
       // update share amount and average cost basis
       const updatedMatchAssets = await Match.updateOne(
-        // grabs doc with matchId and queries for object in "assets" array that matches ticker
-        { matchId, [`${user}.assets.ticker`]: ticker },
+        // grabs doc with matchID and queries for object in "assets" array that matches ticker
+        { matchID, [`${user}.assets.ticker`]: ticker },
         // sets the queried object to have the new fields defined above
         { $set: { [`${user}.assets.$`]: newFields } }
       );
@@ -92,8 +92,8 @@ router.post("/purchaseStock", async (req, res) => {
       };
 
       const updatedMatchAssets = await Match.updateOne(
-        // grabs doc with matchId and queries for object in "assets" array that matches ticker
-        { matchId },
+        // grabs doc with matchID and queries for object in "assets" array that matches ticker
+        { matchID },
         // sets the queried object to have the new fields defined above
         { $push: { [`${user}.assets`]: newFields } }
       );

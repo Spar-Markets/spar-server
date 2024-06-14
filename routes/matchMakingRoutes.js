@@ -23,9 +23,9 @@ router.post("/getUserMatches", async function (req, res) {
 // Returns one match to the user as a match object
 router.post("/getMatchData", async function (req, res) {
   try {
-    const { matchId } = req.body;
-    console.log("MatchId: " + matchId);
-    const match = await Match.findOne({ matchId: matchId });
+    const { matchID } = req.body;
+    console.log("MatchID: " + matchID);
+    const match = await Match.findOne({ matchID: matchID });
 
     if (match) {
       res.send(match);
@@ -127,48 +127,50 @@ async function createMatch() {
         console.log(users[i]);
         if (skillDifference <= 10) {
           // Create a unique match ID (you might want to use a more sophisticated approach)
-          const matchId = generateRandomString(45);
+          const matchID = generateRandomString(45);
 
           // Insert the matched users into the "matches" collection
           const match = new Match({
-            matchId,
+            matchID,
             timeframe: users[i].matchLengthInt,
             wagerAmt: users[i].entryFeeInt,
             user1: {
               userID: users[i].userID,
               assets: [],
               trades: [],
+              portfolioSnapShots: [],
               buyingPower: 100000,
             },
             user2: {
               userID: users[j].userID,
               assets: [],
               trades: [],
+              portfolioSnapShots: [],
               buyingPower: 100000,
             },
           });
           await match.save();
           console.log("Updating user:", users[i].userID);
-          console.log("Match ID:", matchId);
+          console.log("Match ID:", matchID);
           // Create an object representing the match
-          console.log(users[i].userID, match.matchId);
+          console.log(users[i].userID, match.matchID);
           // Add the match to both users' activematches field
           await User.findOneAndUpdate(
             { userID: users[i].userID },
-            { $addToSet: { activematches: match.matchId } },
+            { $addToSet: { activematches: match.matchID } },
             { new: true } // Return the updated document
           );
 
           await User.findOneAndUpdate(
             { userID: users[j].userID },
-            { $addToSet: { activematches: match.matchId } },
+            { $addToSet: { activematches: match.matchID } },
             { new: true } // Return the updated document
           );
           // Remove matched users from the "matchmaking" collection
           await Player.deleteMany({
             _id: { $in: [users[i]._id, users[j]._id] },
           });
-          console.log(`Match found and created: ${matchId}`);
+          console.log(`Match found and created: ${matchID}`);
         }
       }
     }
