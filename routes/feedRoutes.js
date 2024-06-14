@@ -30,7 +30,7 @@ router.post("/postToDatabase", async function (req, res) {
 /*Dynamically gets Posts in reverse order which effectively makes them most recent*/
 router.get("/posts", async function (req, res) {
   try {
-    const posts = await Post.find({}).sort({ _id: -1 });
+    const posts = await Post.find({}, "-comments").sort({ _id: -1 }); //excludes comments array
     const totalPosts = await Post.countDocuments();
 
     res.send({ posts, totalPosts });
@@ -169,13 +169,26 @@ router.post("/commentOnPost", async function (req, res) {
             votes: 0,
           },
         },
+        $inc: { numComments: 1 }, // Move $inc inside the update object
       },
-      { new: true }
+      { new: true } // Ensure this is within the options object
     );
 
     res.send("Comment Post Success");
   } catch (error) {
     console.log(error);
+    res.status(500).send("Error posting comment");
+  }
+});
+
+router.post("/getComments", async function (req, res) {
+  try {
+    const { postId } = req.body;
+    const comments = await Post.findOne({ postId: postId }, "comments");
+
+    res.status(200).send(comments);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
   }
 });
 
