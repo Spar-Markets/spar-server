@@ -101,4 +101,19 @@ async function updatePortfolioValues() {
   // 4. append that johnson to the portfolio snapshots array, along with a timeField for current timestamp
 }
 
-cron.schedule();
+cron.schedule("*/30 9-16 * * 1-5", () => {
+  const now = new Date();
+  const hours = now.getHours();
+  const minutes = now.getMinutes();
+
+  // Ensure it's within the specific time range
+  if (
+    (hours === 9 && minutes >= 45) ||
+    (hours === 16 && minutes <= 15) ||
+    (hours > 9 && hours < 16)
+  ) {
+    console.log("Running the scheduled task:", new Date().toLocaleTimeString());
+    // Add your task here
+    updatePortfolioValues();
+  }
+});
