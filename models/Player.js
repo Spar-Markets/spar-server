@@ -32,6 +32,11 @@ const playerSchema = new mongoose.Schema({
     required: true,
     unique: false,
   },
+  matchType: {
+    type: String,
+    required: true,
+    unique: false,
+  },
 });
 
 module.exports = sparDB.model("matchmakingPlayer", playerSchema);

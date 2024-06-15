@@ -38,7 +38,8 @@ router.post("/getMatchData", async function (req, res) {
 // Inputs user into the mathcmkaing database
 router.post("/userToMatchmaking", async (req, res) => {
   try {
-    const { username, userID, skillRating, entryFee, matchLength } = req.body;
+    const { username, userID, skillRating, entryFee, matchLength, matchType } =
+      req.body;
 
     const entryFeeInt = parseInt(entryFee);
 
@@ -50,6 +51,7 @@ router.post("/userToMatchmaking", async (req, res) => {
       skillRating,
       entryFeeInt,
       matchLengthInt,
+      matchType,
     });
     console.log("Logging player creds in Usertomatchmaking " + newPlayer);
     console.log("New Player email: " + newPlayer.email);
