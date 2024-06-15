@@ -68,7 +68,7 @@ router.post("/upvotePost", async function (req, res) {
       if (existingVoter) {
         if (existingVoter.voteType == 1) {
           post.votes -= 1;
-          existingVoter.voteType = 0;
+          post.voters = post.voters.filter((voter) => voter.uid !== uid);
         } else if (existingVoter.voteType == "down") {
           post.votes += 2;
           existingVoter.voteType = 1;
