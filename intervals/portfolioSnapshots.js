@@ -112,10 +112,14 @@ async function updatePortfolioValues() {
     }
 
     function formatTime(time) {
-      // round time to nearest 30s
       // !!!accounting for the 15 minute delay
-      time = time - 15 * 60 * 1000;
-      return (time / (1000 * 30)) * (1000 * 30);
+      const estTime = time - 15 * 60 * 1000;
+
+      // milliseconds in 30 seconds
+      const millisIn30s = 30000;
+
+      // round est time to nearest 30s using advanced number theory
+      return Math.round(estTime / millisIn30s) * millisIn30s;
     }
 
     updateUserPortfolio("user1");

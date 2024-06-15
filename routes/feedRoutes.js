@@ -43,9 +43,9 @@ router.post("/getVoteStatus", async function (req, res) {
   try {
     const { uid, postId } = req.body;
 
-    const user = await User.findOne({ userID: uid });
+    const post = await Post.findOne({ postId: postId });
     const existingVote =
-      user.postsVotedOn.find((vote) => vote.postId === postId) ?? "";
+      post.userVoteData.find((vote) => vote.uid === uid) ?? "";
 
     res.status(200).send(existingVote);
   } catch {
@@ -57,42 +57,35 @@ router.post("/upvotePost", async function (req, res) {
   try {
     const { uid, postId } = req.body;
 
-    const user = await User.findOne({ userID: uid });
-    existingVote = user.postsVotedOn.find((vote) => vote.postId === postId);
+    existingVote = Post.userVoteData.find((vote) => vote.uid === uid);
     //console.log("Existing Vote: " + existingVote.voteType);
     if (existingVote) {
       if (existingVote.voteType == "up") {
         await Post.findOneAndUpdate(
           { postId: postId },
-          { $inc: { votes: -1 } },
-          { new: true }
-        );
-        await User.findOneAndUpdate(
-          { userID: uid },
-          { $pull: { postsVotedOn: { postId: postId } } },
+          {
+            $inc: { votes: -1 },
+            $pull: { userVoteData: { uid: uid } },
+          },
           { new: true }
         );
       } else if (existingVote.voteType == "down") {
         await Post.findOneAndUpdate(
           { postId: postId },
-          { $inc: { votes: 2 } },
-          { new: true }
-        );
-        await User.findOneAndUpdate(
-          { userID: uid, "postsVotedOn.postId": postId },
-          { $set: { "postsVotedOn.$.voteType": "up" } },
+          {
+            $inc: { votes: 2 },
+            $set: { "userVoteData.$.voteType": "up" },
+          },
           { new: true }
         );
       }
     } else {
       await Post.findOneAndUpdate(
         { postId: postId },
-        { $inc: { votes: 1 } },
-        { new: true }
-      );
-      await User.findOneAndUpdate(
-        { userID: uid },
-        { $push: { postsVotedOn: { postId: postId, voteType: "up" } } },
+        {
+          $inc: { votes: 1 },
+          $push: { userVoteData: { uid: uid, voteType: "up" } },
+        },
         { new: true }
       );
     }
@@ -107,41 +100,29 @@ router.post("/downvotePost", async function (req, res) {
     const { uid, postId } = req.body;
 
     const user = await User.findOne({ userID: uid });
-    existingVote = user.postsVotedOn.find((vote) => vote.postId === postId);
+    existingVote = user.userVoteData.find((vote) => vote.uid === uid);
     //console.log("Existing Vote: " + existingVote.voteType);
     if (existingVote) {
       if (existingVote.voteType == "down") {
         await Post.findOneAndUpdate(
           { postId: postId },
-          { $inc: { votes: 1 } },
-          { new: true }
-        );
-        await User.findOneAndUpdate(
-          { userID: uid },
-          { $pull: { postsVotedOn: { postId: postId } } },
+          { $inc: { votes: 1 }, $pull: { userVoteData: { uid: uid } } },
           { new: true }
         );
       } else if (existingVote.voteType == "up") {
         await Post.findOneAndUpdate(
           { postId: postId },
-          { $inc: { votes: -2 } },
-          { new: true }
-        );
-        await User.findOneAndUpdate(
-          { userID: uid, "postsVotedOn.postId": postId },
-          { $set: { "postsVotedOn.$.voteType": "down" } },
+          { $inc: { votes: -2 }, $set: { "userVoteData.$.voteType": "down" } },
           { new: true }
         );
       }
     } else {
       await Post.findOneAndUpdate(
         { postId: postId },
-        { $inc: { votes: -1 } },
-        { new: true }
-      );
-      await User.findOneAndUpdate(
-        { userID: uid },
-        { $push: { postsVotedOn: { postId: postId, voteType: "down" } } },
+        {
+          $inc: { votes: -1 },
+          $push: { userVoteData: { uid: uid, voteType: "down" } },
+        },
         { new: true }
       );
     }
