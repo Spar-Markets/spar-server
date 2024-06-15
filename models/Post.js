@@ -43,7 +43,7 @@ const postSchema = new mongoose.Schema({
     type: [Object],
     default: [],
   },
-  voters: {
+  userVoteData: {
     type: [Object],
     default: [],
   },
