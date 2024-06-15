@@ -2,8 +2,7 @@ const cron = require("node-cron");
 const { sparDB } = require("../config/mongoConnection");
 const Match = require("../models/Match");
 const axios = require("axios");
-const express = require("express");
-const router = express.Router();
+
 const secondsInOneDay = 86400;
 const secondsInOneHour = 3600;
 const secondsIn15min = 900;
@@ -22,6 +21,7 @@ async function updatePortfolioValues() {
   // always add to 15 min
   let matches = [];
   matches.push(await Match.find({ timeframe: secondsIn15min }));
+
   if (counter % 2 == 0) {
     matches.push(await Match.find({ timeframe: secondsInOneHour }));
   }
@@ -34,13 +34,8 @@ async function updatePortfolioValues() {
   // for each user in match:
   matches.forEach((match) => {
     function updateUserPortfolio(user) {
-      console.log("Portfolio Snapshots:", match);
-      //console.log("match user object portfolio snapshots 39 " + match);
       // do user assets
-
-      //for some reason the actual match data is the first element an array
-      const assets = match[0][user].assets;
-      console.log("Portfolio Snapshots:", assets);
+      const assets = match[user].assets;
 
       // calculate gain/loss on each stock
       let sharesValue = 0;
@@ -51,9 +46,7 @@ async function updatePortfolioValues() {
         const { ticker, totalShares, avgCostBasis } = asset;
 
         // In the array of ticker objects from polygon, find the one with the same ticker as this asset
-
-        //had to add .data to work
-        const tickerObject = allTickers.data.tickers.find(
+        const tickerObject = alltickers.tickers.find(
           (object) => object.ticker == ticker
         );
 
@@ -65,7 +58,7 @@ async function updatePortfolioValues() {
       });
 
       // user's portfolio value
-      const userPortfolioValue = match[0][user].buyingPower + sharesValue;
+      const userPortfolioValue = match[user].buyingPower + sharesValue;
 
       const timeToNearest30s = formatTime(Date.now());
 
@@ -75,13 +68,11 @@ async function updatePortfolioValues() {
         timeField: timeToNearest30s,
       };
 
-      console.log("Portfolio Snapshot for", user + ":", portfolioSnapshot);
-
       // update in DB
       // round to nearest 30s
       // push { value: value, timeField: time }
-      /*Match.updateOne(
-        { matchID: match[0].matchID },
+      Match.updateOne(
+        { matchID: match.matchID },
         {
           // push in portfolio snapshot to snapshots array
           $push: { [`${user}.snapshots`]: portfolioSnapshot },
@@ -89,32 +80,16 @@ async function updatePortfolioValues() {
           $setOnInsert: { [`${user}.snapshots`]: [] },
         },
         { upsert: true }
-      );*/
-
-      const updateMatchSnapshots = async () => {
-        try {
-          // Step 1: Ensure the snapshots array exists
-          //await initializeSnapshotsArray(match, user);
-
-          // Step 2: Push the new snapshot to the snapshots array
-          const result = await Match.findOneAndUpdate(
-            { matchID: match[0].matchID },
-            { $push: { [`${user}.snapshots`]: portfolioSnapshot } },
-            { upsert: true, returnDocument: "after" }
-          );
-          console.log("Match updated successfully:", result);
-        } catch (err) {
-          console.error("Error updating match:", err);
-        }
-      };
-
-      updateMatchSnapshots();
+      );
     }
 
     function formatTime(time) {
-      // round time to nearest 30s
       // !!!accounting for the 15 minute delay
-      time = time - 15 * 60 * 1000;
+      const estTime = time - 15 * 60 * 1000;
+
+      // round time to nearest 30s
+      // convert to seconds
+
       return (time / (1000 * 30)) * (1000 * 30);
     }
 
@@ -129,27 +104,19 @@ async function updatePortfolioValues() {
   // 4. append that johnson to the portfolio snapshots array, along with a timeField for current timestamp
 }
 
-const portfolioInterval = cron.schedule("*/30 * * * * *", () => {
-  console.log("Running interval in portfolioSnapshots");
+cron.schedule("*/30 9-16 * * 1-5", () => {
   const now = new Date();
-  // convert to EST
-  const hours = now.getHours() - 6;
+  const hours = now.getHours();
   const minutes = now.getMinutes();
-  console.log("minutes:", minutes + ", hours", hours);
-  //minutes: 50, hours 17
+
   // Ensure it's within the specific time range
   if (
     (hours === 9 && minutes >= 45) ||
     (hours === 16 && minutes <= 15) ||
     (hours > 9 && hours < 16)
   ) {
-    console.log(
-      "Running the scheduled task, because we are in correct time range:",
-      new Date().toLocaleTimeString()
-    );
+    console.log("Running the scheduled task:", new Date().toLocaleTimeString());
     // Add your task here
     updatePortfolioValues();
   }
 });
-
-module.exports = { portfolioInterval };
