@@ -8,6 +8,7 @@ const { setupPolySocket, setupWebSocket } = require("./websockets/polysocket");
 // import routes
 const balanceRoutes = require("./routes/balanceRoutes");
 const matchMakingRoutes = require("./routes/matchMakingRoutes");
+const { portfolioInterval } = require("./intervals/portfolioSnapshots");
 const plaidRoutes = require("./routes/plaidRoutes");
 const stockRoutes = require("./routes/stockRoutes");
 const tradeRoutes = require("./routes/tradeRoutes");
@@ -36,6 +37,9 @@ app.use(stockDataDelayed);
 // websockets
 setupWebSocket(app, WsPort);
 setupPolySocket();
+
+// intervals
+portfolioInterval.start();
 
 // listen on port
 app.listen(PORT, function listening() {

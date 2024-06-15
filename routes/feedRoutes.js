@@ -57,45 +57,26 @@ router.post("/upvotePost", async function (req, res) {
   try {
     const { uid, postId } = req.body;
 
-    const user = await User.findOne({ userID: uid });
-    existingVote = user.postsVotedOn.find((vote) => vote.postId === postId);
-    //console.log("Existing Vote: " + existingVote.voteType);
-    if (existingVote) {
-      if (existingVote.voteType == "up") {
-        await Post.findOneAndUpdate(
-          { postId: postId },
-          { $inc: { votes: -1 } },
-          { new: true }
-        );
-        await User.findOneAndUpdate(
-          { userID: uid },
-          { $pull: { postsVotedOn: { postId: postId } } },
-          { new: true }
-        );
-      } else if (existingVote.voteType == "down") {
-        await Post.findOneAndUpdate(
-          { postId: postId },
-          { $inc: { votes: 2 } },
-          { new: true }
-        );
-        await User.findOneAndUpdate(
-          { userID: uid, "postsVotedOn.postId": postId },
-          { $set: { "postsVotedOn.$.voteType": "up" } },
-          { new: true }
-        );
-      }
+    const post = await Post.findOne({ postId: postId });
+    //await updateVote(post, uid, 1);
+    const existingVoter = post.voters.find((voter) => voter.uid === uid);
+    if (!existingVoter || existingVoter == []) {
+      // If the voter with uid does not exist, push a new object to the voters array
+      post.voters.push({ uid: uid, voteType: 1 });
+      post.votes += 1;
     } else {
-      await Post.findOneAndUpdate(
-        { postId: postId },
-        { $inc: { votes: 1 } },
-        { new: true }
-      );
-      await User.findOneAndUpdate(
-        { userID: uid },
-        { $push: { postsVotedOn: { postId: postId, voteType: "up" } } },
-        { new: true }
-      );
+      if (existingVoter) {
+        if (existingVoter.voteType == 1) {
+          post.votes -= 1;
+          existingVoter.voteType = 0;
+        } else if (existingVoter.voteType == "down") {
+          post.votes += 2;
+          existingVoter.voteType = 1;
+        }
+      }
     }
+
+    await post.save();
   } catch (error) {
     console.log("ERROR:", error);
     res.status(500).send("Server error on upvote");

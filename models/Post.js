@@ -37,9 +37,15 @@ const postSchema = new mongoose.Schema({
   },
   comments: {
     type: [Object],
+    default: [],
   },
   reposts: {
     type: [Object],
+    default: [],
+  },
+  voters: {
+    type: [Object],
+    default: [],
   },
 });
 
