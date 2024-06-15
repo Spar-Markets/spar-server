@@ -30,9 +30,9 @@ router.post("/createUser", async (req, res) => {
 });
 
 router.post("/getActiveUser", async (req, res) => {
-  const { uid } = req.body;
+  const { userID } = req.body;
   try {
-    const user = await User.findOne({ userID: uid });
+    const user = await User.findOne({ userID: userID });
     if (user) {
       res.status(200).send(user);
     } else {
