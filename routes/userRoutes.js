@@ -10,12 +10,12 @@ const generateRandomString = require("../utility/generateRandomString");
 router.post("/createUser", async (req, res) => {
   try {
     console.log(req.body);
-    const { email, uid, username } = req.body;
+    const { email, userID, username } = req.body;
     console.log("Received email:", email);
 
     const newUser = new User({
       username: String(username),
-      userID: String(uid),
+      userID: String(userID),
       email: String(email),
     });
     await newUser.save();

@@ -41,11 +41,11 @@ router.get("/posts", async function (req, res) {
 
 router.post("/getVoteStatus", async function (req, res) {
   try {
-    const { uid, postId } = req.body;
+    const { userID, postId } = req.body;
 
     const post = await Post.findOne({ postId: postId });
     const existingVote =
-      post.userVoteData.find((vote) => vote.uid === uid) ?? "";
+      post.userVoteData.find((vote) => vote.userID === userID) ?? "";
 
     res.status(200).send(existingVote);
   } catch {
@@ -55,9 +55,10 @@ router.post("/getVoteStatus", async function (req, res) {
 
 router.post("/upvotePost", async function (req, res) {
   try {
-    const { uid, postId } = req.body;
-
-    existingVote = Post.userVoteData.find((vote) => vote.uid === uid);
+    const { userID, postId } = req.body;
+    console.log("UserID:", userID);
+    const post = await Post.findOne({ postId: postId });
+    existingVote = post.userVoteData.find((vote) => vote.userID === userID);
     //console.log("Existing Vote: " + existingVote.voteType);
     if (existingVote) {
       if (existingVote.voteType == "up") {
@@ -65,13 +66,13 @@ router.post("/upvotePost", async function (req, res) {
           { postId: postId },
           {
             $inc: { votes: -1 },
-            $pull: { userVoteData: { uid: uid } },
+            $pull: { userVoteData: { userID: userID } },
           },
           { new: true }
         );
       } else if (existingVote.voteType == "down") {
         await Post.findOneAndUpdate(
-          { postId: postId },
+          { postId: postId, "userVoteData.userID": userID },
           {
             $inc: { votes: 2 },
             $set: { "userVoteData.$.voteType": "up" },
@@ -84,34 +85,37 @@ router.post("/upvotePost", async function (req, res) {
         { postId: postId },
         {
           $inc: { votes: 1 },
-          $push: { userVoteData: { uid: uid, voteType: "up" } },
+          $push: { userVoteData: { userID: userID, voteType: "up" } },
         },
         { new: true }
       );
     }
+    res.status(200).send("Upvote successful");
   } catch (error) {
     console.log("ERROR:", error);
-    res.status(500).send("Server error on upvote");
+    res.status(500).send("Mongo error: " + error);
   }
 });
 
 router.post("/downvotePost", async function (req, res) {
   try {
-    const { uid, postId } = req.body;
+    const { userID, postId } = req.body;
 
-    const user = await User.findOne({ userID: uid });
-    existingVote = user.userVoteData.find((vote) => vote.uid === uid);
-    //console.log("Existing Vote: " + existingVote.voteType);
+    const post = await Post.findOne({ postId: postId });
+    const existingVote = post.userVoteData.find(
+      (vote) => vote.userID === userID
+    );
+
     if (existingVote) {
       if (existingVote.voteType == "down") {
         await Post.findOneAndUpdate(
           { postId: postId },
-          { $inc: { votes: 1 }, $pull: { userVoteData: { uid: uid } } },
+          { $inc: { votes: 1 }, $pull: { userVoteData: { userID: userID } } },
           { new: true }
         );
       } else if (existingVote.voteType == "up") {
         await Post.findOneAndUpdate(
-          { postId: postId },
+          { postId: postId, "userVoteData.userID": userID },
           { $inc: { votes: -2 }, $set: { "userVoteData.$.voteType": "down" } },
           { new: true }
         );
@@ -121,11 +125,12 @@ router.post("/downvotePost", async function (req, res) {
         { postId: postId },
         {
           $inc: { votes: -1 },
-          $push: { userVoteData: { uid: uid, voteType: "down" } },
+          $push: { userVoteData: { userID: userID, voteType: "down" } },
         },
         { new: true }
       );
     }
+    res.status(200).send("Downvote successful");
   } catch (error) {
     console.log("ERROR:", error);
     res.status(500).send("Server error on downvote");
@@ -134,14 +139,14 @@ router.post("/downvotePost", async function (req, res) {
 
 router.post("/commentOnPost", async function (req, res) {
   try {
-    const { postId, uid, commentId, username, postedTime, body } = req.body;
+    const { postId, userID, commentId, username, postedTime, body } = req.body;
 
     await Post.findOneAndUpdate(
       { postId: postId },
       {
         $push: {
           comments: {
-            uid: uid,
+            userID: userID,
             username: username,
             postedTime: postedTime,
             commentId: commentId,

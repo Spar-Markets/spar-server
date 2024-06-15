@@ -4,7 +4,7 @@ const router = express.Router();
 const multer = require("multer");
 const aws = require("aws-sdk");
 const path = require("path");
-const { v4: uuidv4 } = require("uuid");
+const { v4: uuserIDv4 } = require("uuserID");
 
 const Photo = mongoose.model("Photo", photoSchema);
 
@@ -25,7 +25,7 @@ app.post("/upload", upload.single("photo"), async (req, res) => {
 
   const uploadParams = {
     Bucket: process.env.S3_BUCKET_NAME,
-    Key: `${uuidv4()}-${req.file.originalname}`,
+    Key: `${uuserIDv4()}-${req.file.originalname}`,
     Body: req.file.buffer,
     ContentType: req.file.mimetype,
     ACL: "public-read",
