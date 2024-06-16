@@ -119,14 +119,14 @@ router.post("/cancelMatchmaking", async (req, res) => {
 // Creates valid matches, runs on an interval
 async function createMatch() {
   try {
-    const users = await Player.find({}).exec();
+    const players = await Player.find({}).exec();
 
-    for (let i = 0; i < users.length; i++) {
-      for (let j = i + 1; j < users.length; j++) {
+    for (let i = 0; i < players.length; i++) {
+      for (let j = i + 1; j < players.length; j++) {
         const skillDifference = Math.abs(
-          users[i].skillRating - users[j].skillRating
+          players[i].skillRating - players[j].skillRating
         );
-        console.log(users[i]);
+        console.log(players[i]);
         if (skillDifference <= 10) {
           // Create a unique match ID (you might want to use a more sophisticated approach)
           const matchID = generateRandomString(45);
@@ -134,17 +134,19 @@ async function createMatch() {
           // Insert the matched users into the "matches" collection
           const match = new Match({
             matchID,
-            timeframe: users[i].matchLengthInt,
-            wagerAmt: users[i].entryFeeInt,
+            timeframe: players[i].matchLengthInt,
+            endAt: Date.now() + players[i].matchLengthInt,
+            matchType: players[i].matchType,
+            wagerAmt: players[i].entryFeeInt,
             user1: {
-              userID: users[i].userID,
+              userID: players[i].userID,
               assets: [],
               trades: [],
               portfolioSnapShots: [],
               buyingPower: 100000,
             },
             user2: {
-              userID: users[j].userID,
+              userID: players[j].userID,
               assets: [],
               trades: [],
               portfolioSnapShots: [],
@@ -152,25 +154,25 @@ async function createMatch() {
             },
           });
           await match.save();
-          console.log("Updating user:", users[i].userID);
+          console.log("Updating user:", players[i].userID);
           console.log("Match ID:", matchID);
           // Create an object representing the match
-          console.log(users[i].userID, match.matchID);
-          // Add the match to both users' activematches field
+          console.log(players[i].userID, match.matchID);
+          // Add the match to both players' activematches field
           await User.findOneAndUpdate(
-            { userID: users[i].userID },
+            { userID: players[i].userID },
             { $addToSet: { activematches: match.matchID } },
             { new: true } // Return the updated document
           );
 
           await User.findOneAndUpdate(
-            { userID: users[j].userID },
+            { userID: players[j].userID },
             { $addToSet: { activematches: match.matchID } },
             { new: true } // Return the updated document
           );
-          // Remove matched users from the "matchmaking" collection
+          // Remove matched players from the "matchmaking" collection
           await Player.deleteMany({
-            _id: { $in: [users[i]._id, users[j]._id] },
+            _id: { $in: [players[i]._id, players[j]._id] },
           });
           console.log(`Match found and created: ${matchID}`);
         }

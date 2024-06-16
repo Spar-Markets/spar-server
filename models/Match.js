@@ -7,6 +7,10 @@ const matchSchema = new mongoose.Schema({
     required: true,
     unique: true,
   },
+  matchType: {
+    type: String,
+    required: true,
+  },
   user1: {
     type: Object, // Array of usernames participating in the match
     required: true,
@@ -25,7 +29,10 @@ const matchSchema = new mongoose.Schema({
   },
   createdAt: {
     type: Date,
-    default: Date.now,
+    required: true,
+  },
+  endAt: {
+    type: Date,
     required: true,
   },
   // You can add more fields as needed for your specific application
