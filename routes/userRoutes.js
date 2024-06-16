@@ -94,9 +94,17 @@ router.post("/accounts", async function (request, response, next) {
 });
 
 router.post("/getUsernameByID", async (req, res) => {
-  const userID = request.body;
-  const username = await User.findOne({ userID: userID });
-  res.status(500).json({ username: username });
+  const { userID } = req.body;
+  try {
+    const user = await User.findOne({ userID: userID });
+    if (user) {
+      res.status(200).json({ username: user.username });
+    } else {
+      res.status(400).json({ error: "User not found in /getUsernameByID endpoint"})
+    }
+  } catch (error) {
+    res.status(500).json({ error: "Internal server error on /getUsernameByID endpoint"});
+  }
 })
 
 module.exports = router;
