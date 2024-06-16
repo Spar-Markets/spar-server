@@ -108,8 +108,21 @@ router.post("/purchaseStock", async (req, res) => {
 
     res.status(200).send(returnData);
   } catch (error) {
-    console.log(error);
-    res.status(500).send("An error occurred while processing the request");
+    console.error("Error in purchaseStock endpoint:", error);
+    res
+      .status(500)
+      .send("An error occurred while processing the purchaseStock request");
+  }
+});
+
+router.post("/sellStock", async (req, res) => {
+  try {
+    // sell stock logic
+  } catch (error) {
+    console.error("Error in purchaseStock endpoint:", error);
+    res
+      .status(500)
+      .send("An error occurred while processing the purchaseStock request");
   }
 });
 

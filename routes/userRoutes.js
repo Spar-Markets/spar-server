@@ -93,4 +93,10 @@ router.post("/accounts", async function (request, response, next) {
   }
 });
 
+router.post("/getUsernameByID", async (req, res) => {
+  const userID = request.body;
+  const username = await User.findOne({ userID: userID });
+  res.status(500).json({ username: username });
+})
+
 module.exports = router;
