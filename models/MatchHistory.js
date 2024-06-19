@@ -1,7 +1,7 @@
 const { sparDB } = require("../config/mongoConnection");
 const mongoose = require("mongoose");
 
-const PastMatchesSchema = new mongoose.Schema({
+const MatchHistorySchema = new mongoose.Schema({
   userID: {
     type: String,
     required: true,
@@ -15,4 +15,8 @@ const PastMatchesSchema = new mongoose.Schema({
   ],
 });
 
-module.exports = sparDB.model("Match", matchSchema);
+module.exports = sparDB.model(
+  "MatchHistory",
+  MatchHistorySchema,
+  "matchhistory"
+);

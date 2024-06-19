@@ -101,15 +101,23 @@ router.post("/exchangePublicToken", async function (request, response, next) {
   }
 });
 
+// a debit payment means its coming out of the users account
+
 router.post("/transfer", async function (req, res) {
-  //request with access_token, account_id, legal_name, amount, debit/credit, network
-  //for ACH, ach_class also required.
-  //idempotency_key - recommended to avoid duplicate transfers
+  // request with access_token, account_id, legal_name, amount, debit/credit, network
+  // for ACH, ach_class also required.
+  // idempotency_key - recommended to avoid duplicate transfers
 
   try {
     console.log("STARTING TRANSFER");
     const { access_token, account_id } = req.body;
-    const authId = await client.transferAuthorizationCreate(req.body);
+    const authId = await client.transferAuthorizationCreate({
+      access_token: access_token,
+      account_id: account_id,
+      // i don't know what idempotency_key
+      // idempotency_key:
+    });
+
     const transferReq = {
       access_token: access_token,
       account_id: account_id,
@@ -117,10 +125,9 @@ router.post("/transfer", async function (req, res) {
       description: "Deposit",
     };
     console.log(authId.data);
-    //console.log("transfer data:");
-    //console.log(transferReq.body);
+    // this is to create the actual pending ACH
     const response = await client.transferCreate(transferReq);
-    //console.log(transfer.amount + ", " + transfer.id);
+    //
     res.send(authId.data.authorization.decision);
   } catch (error) {
     console.error(error);
