@@ -68,9 +68,9 @@ function getMillisecondsForTime(dateString, hour, minute) {
 // endpoint to get one day stock prices for most recent day where market is open
 router.post("/getMostRecentOneDayPrices", async (req, res) => {
   console.log("hello", req.body);
-  const { ticker, timeframe } = req.body; // req.body will contain the array sent by Axios
+  const { ticker } = req.body; // req.body will contain the array sent by Axios
 
-  console.log("what", ticker, timeframe);
+  console.log("what", ticker);
   const tickers = [ticker];
 
   console.log("printing tickers array", tickers, ticker);
@@ -88,7 +88,7 @@ router.post("/getMostRecentOneDayPrices", async (req, res) => {
   const recentMarketOpen = getMillisecondsForTime(mostRecentMarketDay, 13, 30);
   const recentMarketClose = getMillisecondsForTime(mostRecentMarketDay, 20, 0);
 
-  if (timeframe == "1D") {
+  const getOneDayData = async () => {
     console.log(
       "getMostRecentMarketOpenDay",
       recentMarketClose,
@@ -117,11 +117,10 @@ router.post("/getMostRecentOneDayPrices", async (req, res) => {
           price: pricestamp.c,
         });
       }
-      res.json(prices);
+      return prices;
     }
-  } else if (timeframe == "1W") {
-    console.log("getting 1W");
-    //get the date in milliseconds
+  };
+  const getOneWeekData = async () => {
     const oneWeek = Date.now();
 
     //makes it est and 6 days ago
@@ -156,15 +155,25 @@ router.post("/getMostRecentOneDayPrices", async (req, res) => {
         });
       }
 
-      res.json(prices);
+      return prices;
     }
-  } else if (timeframe == "1M") {
+  };
+
+  const sendData = async () => {
+    oneDay = await getOneDayData();
+    oneWeek = await getOneWeekData();
+    res.send({ "1D": oneDay, "1W": oneWeek });
+  };
+
+  sendData();
+
+  /*} else if (timeframe == "1M") {
   } else if (timeframe == "3M") {
   } else if (timeframe == "YTD") {
   } else if (timeframe == "1Y") {
   } else if (timeframe == "5Y") {
   } else if (timeframe == "MAX") {
-  }
+  }*/
 });
 
 module.exports = router;

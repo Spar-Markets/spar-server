@@ -1,5 +1,7 @@
 // TODO: make sure it works
 // TODO: timeframe is being passed in MILLISECONDS but i think bro quaratiello expected hours so make it handle millis
+// TODO: handle ties (both will be passed in as 1's)
+// TODO: implement non linear K multiplier. aka, winning 5 oneday matches should give you more than winning 1 fiveday match. K value
 function rankingAlgo(
   oldSkillRatingA,
   oldSkillRatingB,

@@ -4,7 +4,7 @@ const router = express.Router();
 const User = require("../models/User");
 const getLeftOfAtSymbol = require("../utility/getLeftOfAtSymbol.js");
 const generateRandomString = require("../utility/generateRandomString");
-const pastMatches = require("../models/PastMatches");
+const MatchHistory = require("../models/MatchHistory");
 
 // define routes here
 
@@ -20,7 +20,7 @@ router.post("/createUser", async (req, res) => {
       email: String(email),
     });
 
-    const userForPastMathces = new pastMatches({
+    const userForPastMathces = new MatchHistory({
       userID: String(userID),
     });
     await userForPastMathces.save();
