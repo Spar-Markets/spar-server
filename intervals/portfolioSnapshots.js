@@ -7,14 +7,14 @@ const router = express.Router();
 const secondsInOneDay = 86400;
 const secondsInOneHour = 3600;
 const secondsIn15min = 900;
+const { polygonKey } = require("../config/constants");
 let counter;
 
 async function updatePortfolioValues() {
   // grab all tickers current price
   // polygon call
   // grab current price for ALL tickers
-  const url =
-    "https://api.polygon.io/v2/snapshot/locale/us/markets/stocks/tickers?apiKey=vLyw12bgkKE1ICVMl72E4YBpJwpmmCwh";
+  const url = `https://api.polygon.io/v2/snapshot/locale/us/markets/stocks/tickers?apiKey=${polygonKey}`;
   const allTickers = await axios.get(url);
   counter = counter + 1;
   // grab every match in mongo that meets timeframe condition

@@ -4,6 +4,7 @@ const router = express.Router();
 const User = require("../models/User");
 const getLeftOfAtSymbol = require("../utility/getLeftOfAtSymbol.js");
 const generateRandomString = require("../utility/generateRandomString");
+const pastMatches = require("../models/PastMatches");
 
 // define routes here
 
@@ -18,6 +19,11 @@ router.post("/createUser", async (req, res) => {
       userID: String(userID),
       email: String(email),
     });
+
+    const userForPastMathces = new pastMatches({
+      userID: String(userID),
+    });
+    await userForPastMathces.save();
     await newUser.save();
     console.log("New User Created");
     res
@@ -90,6 +96,18 @@ router.post("/accounts", async function (request, response, next) {
   } catch (error) {
     console.log(error);
     return response.json(formatError(error.response));
+  }
+});
+
+router.post("/getUsernameByID", async (req, res) => {
+  try {
+    const { userID } = req.body;
+    const user = await User.findOne({ userID: userID });
+    res.status(200).json({ user: user });
+    console.log("Opponent User:", user);
+  } catch (error) {
+    res.status(500).json({ oppUsernameError: error });
+    console.log("error in gamecard:", error);
   }
 });
 

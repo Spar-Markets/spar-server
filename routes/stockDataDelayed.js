@@ -109,12 +109,17 @@ router.post("/getMostRecentOneDayPrices", async (req, res) => {
       const url = `https://api.polygon.io/v2/aggs/ticker/${tickers[i]}/range/5/minute/${recentMarketOpen}/${recentMarketClose}?adjusted=true&sort=asc&apiKey=${polygonKey}`;
       console.log("Polygon URL request: " + url);
       const response = await axios.get(url);
+
+      const tickerPrices = response.data.results;
+      const firstPrice = tickerPrices[0].c;
       prices[response.data.ticker] = [];
 
-      for (let pricestamp of response.data.results) {
+      for (let index = 0; index < tickerPrices.length; index++) {
         prices[response.data.ticker].push({
-          timeField: pricestamp.t,
-          price: pricestamp.c,
+          date: pricestamp.t,
+          value: pricestamp.c,
+          normalizedValue: pricestamp.c - firstPrice,
+          index: index,
         });
       }
       res.json(prices);
@@ -155,7 +160,7 @@ router.post("/getMostRecentOneDayPrices", async (req, res) => {
           price: pricestamp.c,
         });
       }
-
+      console.log(prices);
       res.json(prices);
     }
   } else if (timeframe == "1M") {

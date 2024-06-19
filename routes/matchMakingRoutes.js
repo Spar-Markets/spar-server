@@ -4,8 +4,46 @@ const Player = require("../models/Player");
 const Match = require("../models/Match");
 const User = require("../models/User");
 const generateRandomString = require("../utility/generateRandomString");
+const schedule = require("node-schedule");
+const { polygonKey } = require("../config/constants");
 
 // Define routes here
+
+/**
+ * Logic to finish match
+ * 1. grab match from matchID
+ * 2. determine winner
+ * 3. update rank
+ * 4. distribute winnings
+ * 5. put in each user's match history
+ * 6. delete match from 'matches' collection
+ */
+const finishMatch = async (matchID) => {
+  // 1. grab match
+  matchToFinish = await Match.findOne({ matchID: matchID });
+
+  // 2. determine winner
+  // calculate portfolio value of each user
+  async function calculatePortfolioValue(user) {
+    const assets = matchToFinish[user].assets;
+
+    // get current price for each ticker
+    for (tickerObject in assets) {
+      const response = await axios.get(
+        `https://api.polygon.io/v2/snapshot/locale/us/markets/stocks/tickers/${tickerObject.ticker}?apiKey=${polygonKey}`
+      );
+      const currentPrice = reponse.data.ticker.min.c;
+    }
+
+    // make api request
+    now = Date.now();
+    // 15 minute adjustment and UTC to EST
+    now = now + 900000 - 14400000;
+
+    const url = `https://api.polygon.io/v2/snapshot/locale/us/markets/stocks/tickers?apiKey=${polygonKey}`;
+    const response = await axios.get(url);
+  }
+};
 
 // Returns Users Matches
 router.post("/getUserMatches", async function (req, res) {
@@ -154,6 +192,7 @@ async function createMatch() {
             },
           });
           await match.save();
+
           console.log("Updating user:", players[i].userID);
           console.log("Match ID:", matchID);
           // Create an object representing the match
@@ -174,8 +213,16 @@ async function createMatch() {
           await Player.deleteMany({
             _id: { $in: [players[i]._id, players[j]._id] },
           });
-          console.log(`Match found and created: ${matchID}`);
+
+          // Function to schedule tasks
+          const scheduleTasks = async () => {
+            const endDate = new Date(match.endAt);
+            schedule.scheduleJob(endDate, () => finishMatch(match.matchID));
+          };
+          scheduleTasks();
         }
+
+        console.log(`Match found and created: ${matchID}`);
       }
     }
   } catch (error) {
