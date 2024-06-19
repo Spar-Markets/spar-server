@@ -100,14 +100,20 @@ router.post("/accounts", async function (request, response, next) {
 });
 
 router.post("/getUsernameByID", async (req, res) => {
+  const { userID } = req.body;
   try {
-    const { userID } = req.body;
     const user = await User.findOne({ userID: userID });
-    res.status(200).json({ user: user });
-    console.log("Opponent User:", user);
+    if (user) {
+      res.status(200).json({ username: user.username });
+    } else {
+      res
+        .status(400)
+        .json({ error: "User not found in /getUsernameByID endpoint" });
+    }
   } catch (error) {
-    res.status(500).json({ oppUsernameError: error });
-    console.log("error in gamecard:", error);
+    res
+      .status(500)
+      .json({ error: "Internal server error on /getUsernameByID endpoint" });
   }
 });
 
