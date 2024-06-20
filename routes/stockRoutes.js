@@ -55,6 +55,10 @@ router.get("/getTickerList", async (req, res) => {
   // return JSON of tickers
   // hardcode for now
   // next step: request tickers from polygon. get ticker and company name. parse out other unnecessary data
+
+  // NEW METHOD: from polygon. bypass 1000 limit using pagination
+
+  // OLD METHOD: using imported data in MongoDB
   const tickerCollection = sparDB.db.collection("stockTicker");
   const allTickerData = await tickerCollection.findOne();
 
@@ -73,6 +77,27 @@ router.get("/getTickerList", async (req, res) => {
   }
 
   res.send(allTickers);
+});
+
+router.get("/getTodaysPrices/:ticker", async (req, res) => {
+  const ticker = req.params.ticker;
+  const today = new Date().toISOString().split("T")[0]; // Get today's date in YYYY-MM-DD format
+  try {
+    const response = await axios.get(
+      `https://api.polygon.io/v2/aggs/ticker/${ticker}/range/1/minute/${today}/${today}?apiKey=${polygonKey}`
+    );
+
+    if (response.data.results) {
+      res.json(response.data.results);
+    } else {
+      res
+        .status(404)
+        .json({ message: "No data found for the specified ticker and date." });
+    }
+  } catch (error) {
+    console.error("Error fetching data from Polygon.io:", error.message);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
 });
 
 module.exports = router;

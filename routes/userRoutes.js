@@ -117,4 +117,68 @@ router.post("/getUsernameByID", async (req, res) => {
   }
 });
 
+//adds stock to watchlist
+router.post("/watchStock", async (req, res) => {
+  const { userID, ticker } = req.body;
+  try {
+    const updatedUser = await User.findOneAndUpdate(
+      { userID },
+      { $addToSet: { watchedStocks: ticker } }, // $addToSet ensures no duplicates in the array
+      { new: true, upsert: true } // upsert creates the document if it doesn't exist
+    );
+
+    if (!updatedUser) {
+      return res.status(404).send("User not found");
+    }
+    res.status(200).send(updatedUser);
+  } catch (error) {
+    console.error(error);
+    res
+      .status(500)
+      .send("An error occurred while updating the user's watched stocks");
+  }
+});
+
+//removes stock to watchlist
+router.post("/unwatchStock", async (req, res) => {
+  const { userID, ticker } = req.body;
+  try {
+    const updatedUser = await User.findOneAndUpdate(
+      { userID },
+      { $pull: { watchedStocks: ticker } }, // $pull removes the specified value from the array
+      { new: true } // return the updated document
+    );
+
+    if (!updatedUser) {
+      return res.status(404).send("User not found");
+    }
+    res.status(200).send(updatedUser);
+  } catch (error) {
+    console.error("Error updating user's watched stocks:", error);
+    res
+      .status(500)
+      .send("An error occurred while updating the user's watched stocks");
+  }
+});
+
+// Endpoint to check if a ticker is in watchedStocks
+router.post("/isWatchedStock", async (req, res) => {
+  const { userID, ticker } = req.body; // Use query parameters for GET requests
+  try {
+    const user = await User.findOne({ userID });
+
+    if (!user) {
+      return res.status(404).send("User not found");
+    }
+
+    const isWatched = user.watchedStocks.includes(ticker);
+    res.status(200).send(isWatched);
+  } catch (error) {
+    console.error("Error checking user's watched stocks:", error);
+    res
+      .status(500)
+      .send("An error occurred while checking the user's watched stocks");
+  }
+});
+
 module.exports = router;

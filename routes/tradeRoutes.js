@@ -118,6 +118,11 @@ router.post("/purchaseStock", async (req, res) => {
 router.post("/sellStock", async (req, res) => {
   try {
     // sell stock logic
+    // 1. check whether they have asset
+    // 2. check whether they have enough shares
+    // 3. remove that many shares from their share count
+    // 4. calculate the money earned from the sale
+    // 5. add their money earned to their buying power
   } catch (error) {
     console.error("Error in purchaseStock endpoint:", error);
     res

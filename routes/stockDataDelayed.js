@@ -81,51 +81,64 @@ router.post("/getMostRecentOneDayPrices", async (req, res) => {
     now
   );
   const mostRecentMarketDay = getMostRecentMarketOpenDay(now);
-  console.log(
-    "getMostRecentOneDayPrices, Printing what the most recent market day is:",
-    mostRecentMarketDay
+  // most recent time where the market was open
+  const mostRecentMarketTime = getMillisecondsForTime(
+    mostRecentMarketDay,
+    20,
+    0
   );
   const recentMarketOpen = getMillisecondsForTime(mostRecentMarketDay, 13, 30);
-  const recentMarketClose = getMillisecondsForTime(mostRecentMarketDay, 20, 0);
 
-  const getOneDayData = async () => {
-    console.log(
-      "getMostRecentMarketOpenDay",
-      recentMarketClose,
-      recentMarketOpen
-    );
-
-    // add a check for if tickers is an array otherwise throw error
-    if (!Array.isArray(tickers)) {
-      res
-        .status(400)
-        .json({ error: "invalid ticker input: tickers is not an array" });
-    }
-
-    const prices = {};
-
-    for (let i = 0; i < tickers.length; i++) {
-      console.log(i, "Trying", tickers[i]);
-      const url = `https://api.polygon.io/v2/aggs/ticker/${tickers[i]}/range/5/minute/${recentMarketOpen}/${recentMarketClose}?adjusted=true&sort=asc&apiKey=${polygonKey}`;
-      console.log("Polygon URL request: " + url);
-      const response = await axios.get(url);
-      prices[response.data.ticker] = [];
-
-      for (let pricestamp of response.data.results) {
-        prices[response.data.ticker].push({
-          timeField: pricestamp.t,
-          price: pricestamp.c,
-        });
+  const getChartData = async (timeframe) => {
+    const now = Date.now();
+    console.log("this is the timeframe going in", timeframe);
+    if (timeframe == "1D") {
+      // Gets the time for 1 day ago
+      desiredOpenDay = now - 14400000;
+      range = "1/minute";
+    } else if (timeframe == "1W") {
+      // Gets the time for 1 week ago
+      desiredOpenDay = now - 14400000 - 518400000;
+      range = "5/minute";
+    } else if (timeframe == "1M") {
+      // Gets the time for one month ago
+      desiredOpenDay = now - 14400000 - 2628000000;
+      range = "30/minute";
+    } else if (timeframe == "3M") {
+      // Gets the time for 3 months ago
+      desiredOpenDay = now - 14400000 - 2628000000 * 3;
+      range = "2/hour";
+    } else if (timeframe == "YTD") {
+      // Finds what year it is then gets the first day
+      function getYearFromUnixTime(unixTime) {
+        const date = new Date(unixTime);
+        return date.getFullYear();
       }
-      return prices;
-    }
-  };
-  const getOneWeekData = async () => {
-    const oneWeek = Date.now();
 
-    //makes it est and 6 days ago
-    oneWeekMilliEDT = oneWeek - 14400000 - 518400000;
-    const mostRecentMarketDay = getMostRecentMarketOpenDay(oneWeekMilliEDT);
+      function getFirstDayOfYear(unixTime) {
+        const year = getYearFromUnixTime(unixTime);
+        // Create the first day of the year in UTC
+        const firstDayOfYearUTC = new Date(Date.UTC(year, 0, 1));
+        return firstDayOfYearUTC;
+      }
+
+      desiredOpenDay = getFirstDayOfYear(now);
+      range = "4/hour";
+    } else if (timeframe == "1Y") {
+      // Gets the time for 1 year ago
+      desiredOpenDay = now - 14400000 - 2628000000 * 12;
+      range = "1/day";
+    } else if (timeframe == "5Y") {
+      // Gets the time for 5 years ago
+      desiredOpenDay = now - 14400000 - 2628000000 * 60;
+      range = "1/week";
+    } else if (timeframe == "MAX") {
+      // Gets the time 15 years ago
+      desiredOpenDay = now - 14400000 - 2628000000 * 60 * 15;
+      range = "7/day";
+    }
+
+    const mostRecentMarketDay = getMostRecentMarketOpenDay(desiredOpenDay);
     const recentMarketOpen = getMillisecondsForTime(
       mostRecentMarketDay,
       13,
@@ -143,7 +156,7 @@ router.post("/getMostRecentOneDayPrices", async (req, res) => {
 
     for (let i = 0; i < tickers.length; i++) {
       console.log(i, "Trying", tickers[i]);
-      const url = `https://api.polygon.io/v2/aggs/ticker/${tickers[i]}/range/1/hour/${recentMarketOpen}/${recentMarketClose}?adjusted=true&sort=asc&apiKey=${polygonKey}`;
+      const url = `https://api.polygon.io/v2/aggs/ticker/${tickers[i]}/range/${range}/${recentMarketOpen}/${mostRecentMarketTime}?adjusted=true&sort=asc&limit=49999&apiKey=${polygonKey}`;
       console.log("Polygon URL request: " + url);
       const response = await axios.get(url);
       prices[response.data.ticker] = [];
@@ -160,20 +173,18 @@ router.post("/getMostRecentOneDayPrices", async (req, res) => {
   };
 
   const sendData = async () => {
-    oneDay = await getOneDayData();
-    oneWeek = await getOneWeekData();
-    res.send({ "1D": oneDay, "1W": oneWeek });
+    const timeframes = ["1D", "1W", "1M", "3M", "YTD", "1Y", "5Y"];
+
+    let response = {};
+
+    for (const timeframe of timeframes) {
+      response[timeframe] = await getChartData(timeframe);
+    }
+
+    res.send(response);
   };
 
   sendData();
-
-  /*} else if (timeframe == "1M") {
-  } else if (timeframe == "3M") {
-  } else if (timeframe == "YTD") {
-  } else if (timeframe == "1Y") {
-  } else if (timeframe == "5Y") {
-  } else if (timeframe == "MAX") {
-  }*/
 });
 
 module.exports = router;
