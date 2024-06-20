@@ -46,6 +46,9 @@ const userSchema = new mongoose.Schema({
   postsVotedOn: {
     type: [Object],
   },
+  watchedStocks: {
+    type: [String],
+  },
 });
 
 module.exports = sparDB.model("User", userSchema);

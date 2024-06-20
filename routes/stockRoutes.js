@@ -27,7 +27,7 @@ router.post("/getTickerDetails", async function (req, res) {
 
     const day = String(mostRecentMarketDay.getDate()).padStart(2, "0");
 
-    const formattedDate = `${year}-${month}-${day}`;
+    const formattedDate = "2024-06-18"; //`${year}-${month}-${day}`;
 
     const priceDetailsResponse = await axios.get(
       `https://api.polygon.io/v1/open-close/${ticker}/${formattedDate}?adjusted=true&apiKey=${polygonKey}`
@@ -44,10 +44,13 @@ router.post("/getTickerDetails", async function (req, res) {
     };
 
     res.send(response);
-  } catch {
+  } catch (error) {
     console.log("this is ticker", ticker);
 
-    console.error("Error getting stock details, on endpoint: getTickerDetails");
+    console.error(
+      "Error getting stock details, on endpoint: getTickerDetails:",
+      error
+    );
   }
 });
 

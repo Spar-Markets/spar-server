@@ -35,8 +35,7 @@ function isMarketOpenToday(inputDate) {
     ).getTime(),
     // Christmas Day (December 25)
     new Date(date.getFullYear(), 11, 25).getTime(),
-    // juneteenth
-    new Date(date.getFullYear(), 6, 19).getTime(),
+    new Date(date.getFullYear(), 5, 19).getTime(),
   ];
 
   const dayOfWeek = date.getDay();

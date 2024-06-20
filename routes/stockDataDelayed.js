@@ -67,31 +67,45 @@ function getMillisecondsForTime(dateString, hour, minute) {
 
 // endpoint to get one day stock prices for most recent day where market is open
 router.post("/getMostRecentOneDayPrices", async (req, res) => {
-  console.log("hello", req.body);
-  const { ticker } = req.body; // req.body will contain the array sent by Axios
-
-  console.log("what", ticker);
+  //timeframe is optional
+  const { ticker, isOneDayData } = req.body; // req.body will contain the array sent by Axios
   const tickers = [ticker];
+  const delayedNow = new Date(Date.now() - 900000); /*- 14400000*/
+  let mostRecentMarketDay = getMostRecentMarketOpenDay(delayedNow);
+  let mostRecentMarketTime = getMillisecondsForTime(mostRecentMarketDay, 20, 0);
 
-  console.log("printing tickers array", tickers, ticker);
-  console.log("getMostRecentOneDayPrices, Stock request coming in:", tickers);
-  const now = Date.now();
-  console.log(
-    "getMostRecentOneDayPrices, The time right now, this should be correct:",
-    now
-  );
-  const mostRecentMarketDay = getMostRecentMarketOpenDay(now);
   // most recent time where the market was open
-  const mostRecentMarketTime = getMillisecondsForTime(
-    mostRecentMarketDay,
-    20,
-    0
-  );
+  // if date is not today, OR it's not within market hours, put in 4pm for mostRecentMarketTime. otherwise give it right now.
+  // 1. if time - 15 mins is before 9:30am, show previous day
+  if (
+    delayedNow.getUTCHours() < 13 ||
+    (delayedNow.getUTCHours() == 13 && delayedNow.getUTCMinutes() < 30)
+  ) {
+    // set most recent market day to PREVIOUS market day, not today
+    mostRecentMarketDay = getMostRecentMarketOpenDay(
+      new Date(delayedNow - 86400000)
+    );
+    mostRecentMarketTime = getMillisecondsForTime(mostRecentMarketDay, 20, 0);
+  }
+
+  // // 2. if it's past 4pm, set most recent market time to 4pm
+  else if (delayedNow.getUTCHours() > 20) {
+    mostRecentMarketTime = getMillisecondsForTime(mostRecentMarketDay, 20, 0);
+  }
+
+  // // 3. if it's within market hours, set most recent market time to right now
+  else {
+    mostRecentMarketTime = getMillisecondsForTime(
+      mostRecentMarketDay,
+      delayedNow.getUTCHours(),
+      delayedNow.getUTCMinutes()
+    );
+  }
+
   const recentMarketOpen = getMillisecondsForTime(mostRecentMarketDay, 13, 30);
 
   const getChartData = async (timeframe) => {
     const now = Date.now();
-    console.log("this is the timeframe going in", timeframe);
     if (timeframe == "1D") {
       // Gets the time for 1 day ago
       desiredOpenDay = now - 14400000;
@@ -167,23 +181,26 @@ router.post("/getMostRecentOneDayPrices", async (req, res) => {
           price: pricestamp.c,
         });
       }
-
       return prices;
     }
   };
 
+  //Modified for stockcards, for main details page it gets all data, for stock cards it only gets 1D
   const sendData = async () => {
     const timeframes = ["1D", "1W", "1M", "3M", "YTD", "1Y", "5Y"];
 
     let response = {};
 
-    for (const timeframe of timeframes) {
-      response[timeframe] = await getChartData(timeframe);
+    if (isOneDayData != true) {
+      for (const timeframe of timeframes) {
+        response[timeframe] = await getChartData(timeframe);
+      }
+      res.send(response);
+    } else {
+      response["1D"] = await getChartData("1D");
+      res.send(response);
     }
-
-    res.send(response);
   };
-
   sendData();
 });
 
