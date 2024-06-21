@@ -108,7 +108,7 @@ router.post("/getMostRecentOneDayPrices", async (req, res) => {
     const now = Date.now();
     if (timeframe == "1D") {
       // Gets the time for 1 day ago
-      desiredOpenDay = now - 14400000;
+      desiredOpenDay = now; //- 14400000;
       range = "1/minute";
     } else if (timeframe == "1W") {
       // Gets the time for 1 week ago
@@ -167,7 +167,12 @@ router.post("/getMostRecentOneDayPrices", async (req, res) => {
     }
 
     const prices = {};
-
+    console.log(
+      "Recent market open:",
+      recentMarketOpen,
+      "RecentMarketTime:",
+      mostRecentMarketTime
+    );
     for (let i = 0; i < tickers.length; i++) {
       console.log(i, "Trying", tickers[i]);
       const url = `https://api.polygon.io/v2/aggs/ticker/${tickers[i]}/range/${range}/${recentMarketOpen}/${mostRecentMarketTime}?adjusted=true&sort=asc&limit=49999&apiKey=${polygonKey}`;
