@@ -34,13 +34,8 @@ async function updatePortfolioValues() {
   // for each user in match:
   matches.forEach((match) => {
     function updateUserPortfolio(user) {
-      console.log("Portfolio Snapshots:", match);
-      //console.log("match user object portfolio snapshots 39 " + match);
-      // do user assets
-
       //for some reason the actual match data is the first element an array
       const assets = match[0][user].assets;
-      console.log("Portfolio Snapshots:", assets);
 
       // calculate gain/loss on each stock
       let sharesValue = 0;
@@ -74,8 +69,6 @@ async function updatePortfolioValues() {
         value: userPortfolioValue,
         timeField: timeToNearest30s,
       };
-
-      console.log("Portfolio Snapshot for", user + ":", portfolioSnapshot);
 
       // update in DB
       // round to nearest 30s

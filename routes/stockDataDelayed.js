@@ -10,70 +10,31 @@ const getMostRecentMarketOpenDay = require("../utility/getMostRecentMarketOpenDa
  * STOCK DATA
  */
 
-// cache for prices for each ticker, updated whenever new price is written to DB
-// 1. so that we only write to DB if price is new (minimize write operations)
-// 2. to not read directly from DB to check whether price is new (minimize read operations)
-const priceCache = {};
-
-const isWithinMarketHours = () => {
-  const startHour = 9;
-  const startMinute = 30;
-  const endHour = 16;
-  const endMinute = 0;
-
-  const now = new Date();
-
-  // Convert to EST
-  const options = {
-    timeZone: "America/New_York",
-    hour: "numeric",
-    minute: "numeric",
-    hour12: false,
-  };
-  const estTimeString = now.toLocaleTimeString("en-US", options);
-  const [currentHour, currentMinute] = estTimeString.split(":").map(Number);
-
-  // Get the current day of the week in EST
-  const estDateString = now.toLocaleDateString("en-US", {
-    timeZone: "America/New_York",
-  });
-  const estDate = new Date(estDateString);
-  const currentDay = estDate.getDay(); // 0 (Sunday) to 6 (Saturday)
-
-  // Check if current time is within the specified range
-  const afterStart =
-    currentHour > startHour ||
-    (currentHour === startHour && currentMinute >= startMinute);
-  const beforeEnd =
-    currentHour < endHour ||
-    (currentHour === endHour && currentMinute <= endMinute);
-  const withinWeekdays = currentDay >= 2 && currentDay <= 6;
-
-  return afterStart && beforeEnd && withinWeekdays;
-};
-
-// get most recent market open day
-
 function getMillisecondsForTime(dateString, hour, minute) {
   // Create a Date object from the provided date string (assumed to be in UTC)
-  console.log("getmillisecondsedt", dateString, hour, minute);
+  console.log("Get Millis", dateString, hour, minute);
   const date = new Date(dateString);
   date.setHours(hour);
   date.setMinutes(minute);
-
   // Return the timestamp in milliseconds
   return date.getTime();
 }
 
-// endpoint to get one day stock prices for most recent day where market is open
+// Eendpoint to get one day stock prices for most recent day where market is open
 router.post("/getMostRecentOneDayPrices", async (req, res) => {
   //timeframe is optional
   const { ticker, isOneDayData } = req.body; // req.body will contain the array sent by Axios
   const tickers = [ticker];
-  const delayedNow = new Date(Date.now() - 900000); /*- 14400000*/
+  // set time to 15 minutes ago
+  const delayedNow = new Date(Date.now() - 900000);
   let mostRecentMarketDay = getMostRecentMarketOpenDay(delayedNow);
   let mostRecentMarketTime = getMillisecondsForTime(mostRecentMarketDay, 20, 0);
 
+  console.log(
+    "cream",
+    delayedNow.getUTCDate(),
+    getMostRecentMarketOpenDay(delayedNow).getUTCDate()
+  );
   // most recent time where the market was open
   // if date is not today, OR it's not within market hours, put in 4pm for mostRecentMarketTime. otherwise give it right now.
   // 1. if time - 15 mins is before 9:30am, show previous day
@@ -82,9 +43,7 @@ router.post("/getMostRecentOneDayPrices", async (req, res) => {
     (delayedNow.getUTCHours() == 13 && delayedNow.getUTCMinutes() < 30)
   ) {
     // set most recent market day to PREVIOUS market day, not today
-    mostRecentMarketDay = getMostRecentMarketOpenDay(
-      new Date(delayedNow - 86400000)
-    );
+    mostRecentMarketDay = getMostRecentMarketOpenDay(delayedNow);
     mostRecentMarketTime = getMillisecondsForTime(mostRecentMarketDay, 20, 0);
   }
 
@@ -93,7 +52,14 @@ router.post("/getMostRecentOneDayPrices", async (req, res) => {
     mostRecentMarketTime = getMillisecondsForTime(mostRecentMarketDay, 20, 0);
   }
 
-  // // 3. if it's within market hours, set most recent market time to right now
+  // MISSED THE WEEKEND
+  else if (
+    delayedNow.getUTCDate != getMostRecentMarketOpenDay(delayedNow).getUTCDate()
+  ) {
+    weekendCalc = getMostRecentMarketOpenDay(delayedNow);
+    mostRecentMarketTime = getMillisecondsForTime(weekendCalc, 20, 0);
+  }
+  // // 4. if it's within market hours, set most recent market time to right now
   else {
     mostRecentMarketTime = getMillisecondsForTime(
       mostRecentMarketDay,
@@ -101,8 +67,6 @@ router.post("/getMostRecentOneDayPrices", async (req, res) => {
       delayedNow.getUTCMinutes()
     );
   }
-
-  const recentMarketOpen = getMillisecondsForTime(mostRecentMarketDay, 13, 30);
 
   const getChartData = async (timeframe) => {
     const now = Date.now();
@@ -152,12 +116,20 @@ router.post("/getMostRecentOneDayPrices", async (req, res) => {
       range = "7/day";
     }
 
+    // passing desired open date to retrieve the most recent open day from that time and prior
     const mostRecentMarketDay = getMostRecentMarketOpenDay(desiredOpenDay);
+    console.log(
+      "stockdatadelayed; this is the most recent market day",
+      mostRecentMarketDay,
+      timeframe
+    );
+
     const recentMarketOpen = getMillisecondsForTime(
       mostRecentMarketDay,
       13,
       30
     );
+    console.log("stockdatadelayed", recentMarketOpen);
 
     // add a check for if tickers is an array otherwise throw error
     if (!Array.isArray(tickers)) {
@@ -169,7 +141,7 @@ router.post("/getMostRecentOneDayPrices", async (req, res) => {
     const prices = {};
 
     for (let i = 0; i < tickers.length; i++) {
-      console.log(i, "Trying", tickers[i]);
+      console.log(i, "Stock Data Delayed, trying", tickers[i]);
       const url = `https://api.polygon.io/v2/aggs/ticker/${tickers[i]}/range/${range}/${recentMarketOpen}/${mostRecentMarketTime}?adjusted=true&sort=asc&limit=49999&apiKey=${polygonKey}`;
       console.log("Polygon URL request: " + url);
       const response = await axios.get(url);
