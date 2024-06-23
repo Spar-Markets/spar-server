@@ -128,13 +128,14 @@ async function updatePortfolioValues() {
 
 const portfolioInterval = cron.schedule("*/30 * * * * *", () => {
   console.log("Running interval in portfolioSnapshots");
-  const now = new Date();
+  const now = new Date(Date.now() - 900000);
   // convert to EST
   const hours = now.getHours() - 6;
   const minutes = now.getMinutes();
   console.log("minutes:", minutes + ", hours", hours);
-  //minutes: 50, hours 17
+  // Minutes: 50, hours 17
   // Ensure it's within the specific time range
+  // did we make it so that it isn't running on weekends
   if (
     (hours === 9 && minutes >= 45) ||
     (hours === 16 && minutes <= 15) ||
