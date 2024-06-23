@@ -95,7 +95,6 @@ async function updatePortfolioValues() {
             { $push: { [`${user}.snapshots`]: portfolioSnapshot } },
             { upsert: true, returnDocument: "after" }
           );
-          console.log("Match updated successfully:", result);
         } catch (err) {
           console.error("Error updating match:", err);
         }
@@ -132,7 +131,6 @@ const portfolioInterval = cron.schedule("*/30 * * * * *", () => {
   // convert to EST
   const hours = now.getHours() - 6;
   const minutes = now.getMinutes();
-  console.log("minutes:", minutes + ", hours", hours);
   //minutes: 50, hours 17
   // Ensure it's within the specific time range
   if (

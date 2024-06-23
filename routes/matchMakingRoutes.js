@@ -191,7 +191,6 @@ router.post("/getUserMatches", async function (req, res) {
 router.post("/getMatchData", async function (req, res) {
   try {
     const { matchID } = req.body;
-    console.log("MatchID: " + matchID);
     const match = await Match.findOne({ matchID: matchID });
 
     if (match) {
