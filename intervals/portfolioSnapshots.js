@@ -95,7 +95,6 @@ async function updatePortfolioValues() {
             { $push: { [`${user}.snapshots`]: portfolioSnapshot } },
             { upsert: true, returnDocument: "after" }
           );
-          console.log("Match updated successfully:", result);
         } catch (err) {
           console.error("Error updating match:", err);
         }

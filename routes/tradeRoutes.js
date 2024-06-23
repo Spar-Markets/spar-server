@@ -99,8 +99,6 @@ router.post("/purchaseStock", async (req, res) => {
         { $push: { [`${user}.assets`]: newFields } }
       );
 
-      console.log("Updated match assets:", updatedMatchAssets);
-
       returnData = {
         updatedMatchAssets,
         updatedMatchTrades,
