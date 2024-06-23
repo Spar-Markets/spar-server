@@ -131,6 +131,7 @@ const portfolioInterval = cron.schedule("*/30 * * * * *", () => {
   // convert to EST
   const hours = now.getHours() - 6;
   const minutes = now.getMinutes();
+  console.log("HOURS:", hours);
   //minutes: 50, hours 17
   // Ensure it's within the specific time range
   if (

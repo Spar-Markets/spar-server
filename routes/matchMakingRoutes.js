@@ -191,8 +191,41 @@ router.post("/getUserMatches", async function (req, res) {
 router.post("/getMatchData", async function (req, res) {
   try {
     const { matchID } = req.body;
+    console.log(
+      "MATCH DATA FROM GAME SCREEN BEFORE:",
+      new Date(Date.now()).toString()
+    );
     const match = await Match.findOne({ matchID: matchID });
-
+    console.log(
+      "MATCH DATA FROM GAME SCREEN AFTER:",
+      new Date(Date.now()).toString()
+    );
+    console.log(
+      "STATS DATA FROM GAME SCREEN BEFORE:",
+      new Date(Date.now()).toString()
+    );
+    const stats = await Match.findOne({ matchID: matchID }).explain(
+      "executionStats"
+    );
+    console.log(
+      "STATS DATA FROM GAME SCREEN AFTER:",
+      new Date(Date.now()).toString()
+    );
+    console.log(
+      "Execution time (ms): " + stats.executionStats.executionTimeMillis
+    );
+    console.log(
+      "Total documents examined: " + stats.executionStats.totalDocsExamined
+    );
+    console.log(
+      "Total documents returned: " + stats.executionStats.totalDocsReturned
+    );
+    console.log(
+      "Number of documents returned: " + stats.executionStats.nReturned
+    );
+    console.log(
+      "Total index keys examined: " + stats.executionStats.totalKeysExamined
+    );
     if (match) {
       res.send(match);
     }
