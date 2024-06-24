@@ -6,15 +6,15 @@ const getCurrentPrice = require("../utility/getCurrentPrice");
 router.post("/purchaseStock", async (req, res) => {
   try {
     console.log("purchaseStock: hit endpoint");
-    const { userID, matchID, ticker, buyPrice, shares } = req.body;
+    const { userID, matchID, ticker, shares } = req.body;
     console.log(
       "purchaseStock: received request: ",
       userID,
       matchID,
       ticker,
-      buyPrice,
       shares
     );
+
     const match = await Match.findOne({ matchID: matchID });
     console.log("purchaseStock: got match: ", match);
     now = Date.now();
@@ -33,7 +33,21 @@ router.post("/purchaseStock", async (req, res) => {
       return res.status(400).send("User not found in this match");
     }
 
-    // TODO: Update buying power
+    // get current price
+    const price = getCurrentPrice(ticker);
+
+    // check how much this trade will cost
+    const tradeCost = price * shares;
+
+    if (match[user].buyingPower < tradeCost) {
+      return res
+        .status(404)
+        .send("Buy order failed: not enough buying power to execute order");
+    } else {
+      // update buying power
+      match[user].buyingPower -= tradeCost;
+      await match.save();
+    }
 
     const updatedMatchTrades = await Match.findOneAndUpdate(
       { matchID: matchID },
@@ -50,7 +64,7 @@ router.post("/purchaseStock", async (req, res) => {
       { new: true }
     );
 
-    console.log("about to check if has asset");
+    console.log("About to check if has asset");
     // check if ticker is inside of asset
     const asset = match[user].assets.find((asset) => asset.ticker === ticker);
     if (asset) {
@@ -139,9 +153,11 @@ router.post("/sellStock", async (req, res) => {
     }
 
     // ensure that user owns asset
-    const asset = match[user].assets.find(obj => obj.ticker == ticker);
+    const asset = match[user].assets.find((obj) => obj.ticker == ticker);
     if (!asset) {
-      return res.status(400).send("User does not own asset that they tried to sell");
+      return res
+        .status(400)
+        .send("User does not own asset that they tried to sell");
     }
 
     // 2. check whether they have enough shares
@@ -165,7 +181,9 @@ router.post("/sellStock", async (req, res) => {
 
     // case 1: they sold all of their shares, remove asset from their assets
     if (shares == totalShares) {
-      match[user].assets = match[user].assets.filter(asset => asset.ticker != ticker);
+      match[user].assets = match[user].assets.filter(
+        (asset) => asset.ticker != ticker
+      );
     }
     // case 2: they sold less than all of their shares, so remove shares sold
     else {
@@ -174,7 +192,6 @@ router.post("/sellStock", async (req, res) => {
 
     // 6. save match object
     await match.save();
-
   } catch (error) {
     console.error("Error in purchaseStock endpoint:", error);
     res
