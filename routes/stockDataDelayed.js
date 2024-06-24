@@ -32,7 +32,8 @@ router.post("/getMostRecentOneDayPrices", async (req, res) => {
 
   console.log(
     "cream",
-    delayedNow.getUTCDate(),
+    delayedNow.getUTCHours(),
+    delayedNow.getUTCMinutes(),
     getMostRecentMarketOpenDay(delayedNow).getUTCDate()
   );
   // most recent time where the market was open
@@ -44,6 +45,7 @@ router.post("/getMostRecentOneDayPrices", async (req, res) => {
   ) {
     // set most recent market day to PREVIOUS market day, not today
     mostRecentMarketDay = getMostRecentMarketOpenDay(delayedNow);
+    console.log("MOST RECENT MARKET DAY", mostRecentMarketDay);
     mostRecentMarketTime = getMillisecondsForTime(mostRecentMarketDay, 20, 0);
   }
 
