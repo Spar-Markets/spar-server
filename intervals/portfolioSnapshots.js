@@ -63,6 +63,7 @@ async function updatePortfolioValues() {
       const userPortfolioValue = match[0][user].buyingPower + sharesValue;
 
       const timeToNearest30s = formatTime(Date.now());
+      const realTime = Date.now();
 
       // create object to put in DB
       const portfolioSnapshot = {
@@ -72,17 +73,6 @@ async function updatePortfolioValues() {
 
       // update in DB
       // round to nearest 30s
-      // push { value: value, timeField: time }
-      /*Match.updateOne(
-        { matchID: match[0].matchID },
-        {
-          // push in portfolio snapshot to snapshots array
-          $push: { [`${user}.snapshots`]: portfolioSnapshot },
-          // make sure snapshots array exists
-          $setOnInsert: { [`${user}.snapshots`]: [] },
-        },
-        { upsert: true }
-      );*/
 
       const updateMatchSnapshots = async () => {
         try {
@@ -105,12 +95,12 @@ async function updatePortfolioValues() {
 
     function formatTime(time) {
       // !!!accounting for the 15 minute delay
-      const estTime = time - 15 * 60 * 1000;
+      const estTime = time - 900000;
 
       // milliseconds in 30 seconds
       const millisIn30s = 30000;
 
-      // round est time to nearest 30s using advanced number theory
+      // round est time to nearest 30s
       return Math.round(estTime / millisIn30s) * millisIn30s;
     }
 
@@ -126,22 +116,22 @@ async function updatePortfolioValues() {
 }
 
 const portfolioInterval = cron.schedule("*/30 * * * * *", () => {
-  console.log("Running interval in portfolioSnapshots");
-  const now = new Date();
+  console.log("Running cron schedule");
+  //this is the 15 min delay
+  const now = new Date(Date.now() - 900000);
   // convert to EST
-  const hours = now.getHours() - 6;
+  const hours = now.getHours();
   const minutes = now.getMinutes();
-  console.log("HOURS:", hours);
-  //minutes: 50, hours 17
   // Ensure it's within the specific time range
+  // only runs if it is weekend and within market hours
   if (
-    (hours === 9 && minutes >= 45) ||
-    (hours === 16 && minutes <= 15) ||
-    (hours > 9 && hours < 16)
+    now.getUTCDate() != getMostRecentMarketOpenDay(now).getUTCDate() ||
+    (hours === 13 && minutes >= 45) ||
+    (hours === 20 && minutes <= 15) ||
+    (hours > 13 && hours < 20)
   ) {
     console.log(
-      "Running the scheduled task, because we are in correct time range:",
-      new Date().toLocaleTimeString()
+      "Running the scheduled task, because we are in correct time range"
     );
     // Add your task here
     updatePortfolioValues();

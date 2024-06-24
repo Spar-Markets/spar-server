@@ -21,11 +21,11 @@ router.post("/getTickerDetails", async function (req, res) {
 
     const mostRecentMarketDay = getMostRecentMarketOpenDay(now);
 
-    const year = mostRecentMarketDay.getFullYear();
+    // const year = mostRecentMarketDay.getFullYear();
 
-    const month = String(mostRecentMarketDay.getMonth() + 1).padStart(2, "0"); // Months are zero-based
+    // const month = String(mostRecentMarketDay.getMonth() + 1).padStart(2, "0"); // Months are zero-based
 
-    const day = String(mostRecentMarketDay.getDate()).padStart(2, "0");
+    // const day = String(mostRecentMarketDay.getDate()).padStart(2, "0");
 
     const formattedDate = "2024-06-18"; //`${year}-${month}-${day}`;
 
