@@ -1,3 +1,3 @@
-const polygonKey = "vLyw12bgkKE1ICVMl72E4YBpJwpmmCwh";
+const polygonKey = "Xr4ESsQJKShHeqROFIfTsVVvb9rppThs";
 
 module.exports = { polygonKey };

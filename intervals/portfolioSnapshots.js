@@ -120,12 +120,13 @@ const portfolioInterval = cron.schedule("*/30 * * * * *", () => {
   //this is the 15 min delay
   const now = new Date(Date.now() - 900000);
   // convert to EST
-  const hours = now.getHours();
-  const minutes = now.getMinutes();
+  const hours = now.getUTCHours();
+  const minutes = now.getUTCMinutes();
   // Ensure it's within the specific time range
   // only runs if it is weekend and within market hours
+  console.log(`SNAPSHOT STUFF --- Hours: ${hours}, Minutes: ${minutes}`);
   if (
-    now.getUTCDate() != getMostRecentMarketOpenDay(now).getUTCDate() ||
+    //now.getUTCDate() != getMostRecentMarketOpenDay(now).getUTCDate() ||
     (hours === 13 && minutes >= 45) ||
     (hours === 20 && minutes <= 15) ||
     (hours > 13 && hours < 20)

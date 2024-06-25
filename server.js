@@ -2,7 +2,6 @@ require("dotenv").config();
 const express = require("express");
 const bodyParser = require("body-parser");
 
-// import websockets
 const { setupPolySocket, setupWebSocket } = require("./websockets/polysocket");
 
 // import routes
@@ -18,10 +17,9 @@ const feedRoutes = require("./routes/feedRoutes");
 
 // initialize express app and ports
 const app = express();
-const PORT = process.env.PORT || 3000; // Use the PORT environment variable if provided, otherwise default to 3000
+const PORT = process.env.PORT || 3000;
 const WsPort = 3001;
 
-// app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
 
 // use routes
@@ -34,12 +32,12 @@ app.use(userRoutes);
 app.use(feedRoutes);
 app.use(stockDataDelayed);
 
-// websockets
-setupWebSocket(app, WsPort);
-setupPolySocket();
-
 // intervals
 portfolioInterval.start();
+
+// websockets
+setupPolySocket();
+setupWebSocket(app, WsPort);
 
 // listen on port
 app.listen(PORT, function listening() {

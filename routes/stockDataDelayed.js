@@ -75,19 +75,19 @@ router.post("/getMostRecentOneDayPrices", async (req, res) => {
     if (timeframe == "1D") {
       // Gets the time for 1 day ago
       desiredOpenDay = now - 14400000;
-      range = "1/minute";
+      range = "5/minute";
     } else if (timeframe == "1W") {
       // Gets the time for 1 week ago
       desiredOpenDay = now - 14400000 - 518400000;
-      range = "5/minute";
+      range = "30/minute";
     } else if (timeframe == "1M") {
       // Gets the time for one month ago
       desiredOpenDay = now - 14400000 - 2628000000;
-      range = "30/minute";
+      range = "1/hour";
     } else if (timeframe == "3M") {
       // Gets the time for 3 months ago
       desiredOpenDay = now - 14400000 - 2628000000 * 3;
-      range = "2/hour";
+      range = "1/day";
     } else if (timeframe == "YTD") {
       // Finds what year it is then gets the first day
       function getYearFromUnixTime(unixTime) {
@@ -103,7 +103,7 @@ router.post("/getMostRecentOneDayPrices", async (req, res) => {
       }
 
       desiredOpenDay = getFirstDayOfYear(now);
-      range = "4/hour";
+      range = "1/day";
     } else if (timeframe == "1Y") {
       // Gets the time for 1 year ago
       desiredOpenDay = now - 14400000 - 2628000000 * 12;
@@ -126,11 +126,7 @@ router.post("/getMostRecentOneDayPrices", async (req, res) => {
       timeframe
     );
 
-    const recentMarketOpen = getMillisecondsForTime(
-      mostRecentMarketDay,
-      13,
-      30
-    );
+    const recentMarketOpen = getMillisecondsForTime(mostRecentMarketDay, 9, 30); //WHY IS THIS 9 ALL THE SUDDEN????
     console.log("stockdatadelayed", recentMarketOpen);
 
     // add a check for if tickers is an array otherwise throw error

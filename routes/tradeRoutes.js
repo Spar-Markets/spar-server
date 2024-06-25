@@ -16,7 +16,7 @@ router.post("/purchaseStock", async (req, res) => {
     );
 
     const match = await Match.findOne({ matchID: matchID });
-    console.log("purchaseStock: got match: ", match);
+    //console.log("purchaseStock: got match: ", match);
     now = Date.now();
     if (!match) {
       console.log("purchaseStock: MATCH NOT FOUND");
@@ -34,20 +34,36 @@ router.post("/purchaseStock", async (req, res) => {
     }
 
     // get current price
-    const price = getCurrentPrice(ticker);
+    const buyPrice = await getCurrentPrice(ticker);
+    console.log(`purchaseStock: current price of ${ticker}: ${buyPrice}`);
 
     // check how much this trade will cost
-    const tradeCost = price * shares;
+    const tradeCost = parseFloat(buyPrice) * parseFloat(shares);
+    console.log("purchaseStock: trade cost:", tradeCost);
 
     if (match[user].buyingPower < tradeCost) {
+      console.log("purchaseStock: not enough buying power");
       return res
         .status(404)
         .send("Buy order failed: not enough buying power to execute order");
     } else {
       // update buying power
+      console.log(
+        "purchaseStock: updating buying power from:",
+        match[user].buyingPower
+      );
       match[user].buyingPower -= tradeCost;
-      await match.save();
+      console.log(
+        "purchaseStock: updated buying power to:",
+        match[user].buyingPower
+      );
     }
+
+    // Save the match with updated buying power
+    await Match.updateOne(
+      { matchID: matchID },
+      { $set: { [`${user}.buyingPower`]: match[user].buyingPower } }
+    );
 
     const updatedMatchTrades = await Match.findOneAndUpdate(
       { matchID: matchID },
@@ -72,7 +88,7 @@ router.post("/purchaseStock", async (req, res) => {
       const { totalShares, avgCostBasis } = asset;
 
       // calculate correct share amount and avaerage cost basis
-      const updatedTotalShares = totalShares + shares;
+      const updatedTotalShares = parseFloat(totalShares) + parseFloat(shares);
       const updatedAvgCostBasis =
         (avgCostBasis * totalShares + buyPrice * shares) / updatedTotalShares;
 
