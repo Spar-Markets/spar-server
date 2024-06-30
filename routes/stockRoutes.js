@@ -103,4 +103,21 @@ router.get("/getTodaysPrices/:ticker", async (req, res) => {
   }
 });
 
+router.post("/getGainers", async (req, res) => {
+  try {
+    const response = await axios.get(
+      `https://api.polygon.io/v2/snapshot/locale/us/markets/stocks/gainers?apiKey=${polygonKey}`
+    );
+
+    if (response.data) {
+      res.status(200).send(response.data); // Send only the data part of the response
+    } else {
+      res.status(404).send({ message: "No data found" });
+    }
+  } catch (error) {
+    console.error("Error fetching gainers:", error);
+    res.status(500).send({ message: "Internal Server Error", error });
+  }
+});
+
 module.exports = router;

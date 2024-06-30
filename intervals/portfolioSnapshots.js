@@ -1,5 +1,6 @@
 const cron = require("node-cron");
 const { sparDB } = require("../config/mongoConnection");
+const MatchSnapshots = require("../models/MatchSnapshots");
 const Match = require("../models/Match");
 const axios = require("axios");
 const express = require("express");
@@ -25,7 +26,6 @@ async function updatePortfolioValues() {
   if (counter % 2 == 0) {
     matches.push(await Match.find({ timeframe: secondsInOneHour }));
   }
-
   if (counter % 10 == 0) {
     matches.push(await Match.find({ timeframe: secondsInOneDay }));
   }
@@ -80,9 +80,9 @@ async function updatePortfolioValues() {
           //await initializeSnapshotsArray(match, user);
 
           // Step 2: Push the new snapshot to the snapshots array
-          const result = await Match.findOneAndUpdate(
+          const result = await MatchSnapshots.findOneAndUpdate(
             { matchID: match[0].matchID },
-            { $push: { [`${user}.snapshots`]: portfolioSnapshot } },
+            { $push: { [`${user}Snapshots`]: portfolioSnapshot } },
             { upsert: true, returnDocument: "after" }
           );
         } catch (err) {

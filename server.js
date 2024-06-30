@@ -1,8 +1,13 @@
 require("dotenv").config();
+
 const express = require("express");
 const bodyParser = require("body-parser");
 
-const { setupPolySocket, setupWebSocket } = require("./websockets/polysocket");
+const {
+  setupPolySocket,
+  setupWebSocket,
+  changeStream,
+} = require("./websockets/polysocket");
 
 // import routes
 const balanceRoutes = require("./routes/balanceRoutes");
@@ -14,6 +19,7 @@ const tradeRoutes = require("./routes/tradeRoutes");
 const userRoutes = require("./routes/userRoutes");
 const stockDataDelayed = require("./routes/stockDataDelayed");
 const feedRoutes = require("./routes/feedRoutes");
+const snapshotRoutes = require("./routes/snapshot");
 
 // initialize express app and ports
 const app = express();
@@ -31,6 +37,7 @@ app.use(tradeRoutes);
 app.use(userRoutes);
 app.use(feedRoutes);
 app.use(stockDataDelayed);
+app.use(snapshotRoutes);
 
 // intervals
 portfolioInterval.start();
@@ -38,6 +45,7 @@ portfolioInterval.start();
 // websockets
 setupPolySocket();
 setupWebSocket(app, WsPort);
+changeStream();
 
 // listen on port
 app.listen(PORT, function listening() {

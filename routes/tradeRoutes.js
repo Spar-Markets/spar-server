@@ -89,14 +89,12 @@ router.post("/purchaseStock", async (req, res) => {
 
       // calculate correct share amount and avaerage cost basis
       const updatedTotalShares = parseFloat(totalShares) + parseFloat(shares);
-      const updatedAvgCostBasis =
-        (avgCostBasis * totalShares + buyPrice * shares) / updatedTotalShares;
 
       // define new fields for assets
       const newFields = {
         ticker: ticker,
-        totalShares: updatedTotalShares,
-        avgCostBasis: updatedAvgCostBasis,
+        totalShares: parseFloat(updatedTotalShares),
+        avgCostBasis: asset.avgCostBasis,
       };
 
       // update share amount and average cost basis
@@ -118,7 +116,7 @@ router.post("/purchaseStock", async (req, res) => {
 
       const newFields = {
         ticker: ticker,
-        totalShares: shares,
+        totalShares: parseFloat(shares),
         avgCostBasis: buyPrice,
       };
 
@@ -146,19 +144,28 @@ router.post("/purchaseStock", async (req, res) => {
 
 router.post("/sellStock", async (req, res) => {
   try {
-    // sell stock logic
-    // 1. check whether they have asset
+    console.log("sellStock: hit endpoint");
+    const { userID, matchID, ticker, shares } = req.body;
+    console.log(
+      "sellStock: received request: ",
+      userID,
+      matchID,
+      ticker,
+      shares
+    );
 
-    let { usedID, matchID, ticker, shares } = req.body;
     const match = await Match.findOne({ matchID: matchID });
-    // console.log("purchaseStock: got match: ", match);
+    //console.log("purchaseStock: got match: ", match);
+
+    // determine whether match exists
     now = Date.now();
     if (!match) {
-      console.log("purchaseStock: MATCH NOT FOUND");
+      console.log("sell: MATCH NOT FOUND");
       return res.status(404).send("Match not found");
     }
+    console.log("sellStock: match found");
 
-    // determine if user is user1 or user2
+    // determine user 1 an duser 2
     let user;
     if (match.user1.userID === userID) {
       user = "user1";
@@ -168,46 +175,120 @@ router.post("/sellStock", async (req, res) => {
       return res.status(400).send("User not found in this match");
     }
 
-    // ensure that user owns asset
-    const asset = match[user].assets.find((obj) => obj.ticker == ticker);
-    if (!asset) {
+    // get current price
+    const sellPrice = await getCurrentPrice(ticker);
+    console.log(`sellStock: current price of ${ticker}: ${sellPrice}`);
+
+    // check how much this trade will be worth
+    const tradeCredit = parseFloat(sellPrice) * parseFloat(shares);
+    console.log("sellStock: trade cost:", tradeCredit);
+
+    // find the asset to sell
+    const sellAsset = match[user].assets.find(
+      (asset) => asset.ticker === ticker
+    );
+    //return asset ? asset.totalShares : undefined;
+
+    // make sure user owns the asset
+    if (!sellAsset) {
+      return res.status(500).send("User does not own asset");
+    }
+
+    // check whetehr they have enough shares
+    if (shares > sellAsset.totalShares) {
+      console.log("selling stock: not enough shares");
       return res
-        .status(400)
-        .send("User does not own asset that they tried to sell");
+        .status(404)
+        .send("Sell order failed: not enough shares to execute order");
     }
 
-    // 2. check whether they have enough shares
+    // update buying power
+    console.log(
+      "selling Stock: updating buying power from:",
+      match[user].buyingPower
+    );
+    match[user].buyingPower += tradeCredit;
+    console.log(
+      "selling Stock: updated buying power to:",
+      match[user].buyingPower
+    );
 
-    // get shares from db
-    const totalShares = asset.totalShares;
+    // Save the match with updated buying power
+    await Match.updateOne(
+      { matchID: matchID },
+      { $set: { [`${user}.buyingPower`]: match[user].buyingPower } }
+    );
 
-    // reduce shares if they put in more than they own
-    if (shares > totalShares) {
-      shares = totalShares;
-    }
+    // update trades array
+    const updatedMatchTrades = await Match.findOneAndUpdate(
+      { matchID: matchID },
+      {
+        $push: {
+          [`${user}.trades`]: {
+            ticker: ticker,
+            sellPrice: sellPrice,
+            time: now,
+            shares: shares,
+          },
+        },
+      },
+      { new: true }
+    );
 
-    // 3. calculate the money earned from the sale
-    const currentPrice = getCurrentPrice(ticker);
-    const moneyEarned = shares * currentPrice;
+    console.log("About to check if has asset");
+    // check if ticker is inside of asset
 
-    // 4. add their money earned to their buying power
-    match[user].buyingPower += moneyEarned;
+    // get share amount and average cost basis
+    const { totalShares } = sellAsset;
 
-    // 5. remove that many shares from their share count
+    // calculate correct share amount and avaerage cost basis
+    const updatedTotalShares = parseFloat(totalShares) - parseFloat(shares);
 
-    // case 1: they sold all of their shares, remove asset from their assets
-    if (shares == totalShares) {
+    // check whether they sell all of their shares
+    if (shares >= totalShares) {
+      console.log("We boutta delete the whole asset baby");
+      // remove asset from user's assets
+      // this filters out all assets with a matching ticker
       match[user].assets = match[user].assets.filter(
         (asset) => asset.ticker != ticker
       );
-    }
-    // case 2: they sold less than all of their shares, so remove shares sold
-    else {
-      asset.totalShares -= shares;
+
+      // update assets for user
+      const updatedMatchAssets = await Match.updateOne(
+        { matchID: matchID },
+        { $set: { [`${user}.assets`]: match[user].assets } }
+      );
+
+      // return successful
+      returnData = {
+        updatedMatchTrades,
+        updatedMatchAssets,
+      };
+
+      return res.status(200).send(returnData);
     }
 
-    // 6. save match object
-    await match.save();
+    // define new fields for assets
+    const newFields = {
+      ticker: ticker,
+      totalShares: updatedTotalShares,
+      avgCostBasis: sellAsset.avgCostBasis,
+    };
+
+    // update share amount and average cost basis
+    const updatedMatchAssets = await Match.updateOne(
+      // grabs doc with matchID and queries for object in "assets" array that matches ticker
+      { matchID, [`${user}.assets.ticker`]: ticker },
+      // sets the queried object to have the new fields defined above
+      { $set: { [`${user}.assets.$`]: newFields } }
+    );
+
+    returnData = {
+      updatedMatchTrades,
+      updatedMatchAssets,
+    };
+
+    return res.status(200).send(returnData);
   } catch (error) {
     console.error("Error in purchaseStock endpoint:", error);
     res

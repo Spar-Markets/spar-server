@@ -1,19 +1,17 @@
 const express = require("express");
 const router = express.Router();
-const Match = require("../models/Match");
+const MatchSnapshots = require("../models/MatchSnapshots");
 
 router.post("/getSnapshots", async (req, res) => {
   try {
     console.log("getSnapshots: hit endpoint");
     const { matchID } = req.body;
 
-    const match = await Match.findOne({ matchID: matchID });
+    const snapshots = await MatchSnapshots.findOne({ matchID: matchID });
 
     const response = {
-      user1ID: match.user1.userID,
-      user1Snapshots: match.user1.snapshots,
-      user2ID: match.user2.userID,
-      user2Snapshots: match.user2.snapshots,
+      user1Snapshots: snapshots.user1Snapshots,
+      user2Snapshots: snapshots.user2Snapshots,
     };
 
     res.send(response);

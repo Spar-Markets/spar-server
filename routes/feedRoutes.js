@@ -10,15 +10,26 @@ const User = require("../models/User");
 // Inputs post into database
 router.post("/postToDatabase", async function (req, res) {
   try {
-    const { postId, username, postedTime, type, title, message } = req.body;
+    const {
+      postId,
+      username,
+      postedTime,
+      type,
+      title,
+      message,
+      hasImage,
+      posterId,
+    } = req.body;
 
     const newPost = new Post({
       postId: postId,
+      posterId: posterId,
       username: username,
       postedTime: postedTime,
       type: type,
       title: title,
       body: message,
+      hasImage: hasImage,
     });
     await newPost.save();
     res.send(newPost);
@@ -30,7 +41,13 @@ router.post("/postToDatabase", async function (req, res) {
 /*Dynamically gets Posts in reverse order which effectively makes them most recent*/
 router.get("/posts", async function (req, res) {
   try {
-    const posts = await Post.find({}, "-comments").sort({ _id: -1 }); //excludes comments array
+    const limit = parseInt(req.query.limit) || 10; // Default to 10 if limit is not provided
+    const skip = parseInt(req.query.skip) || 0; // Default to 0 if skip is not provided
+
+    const posts = await Post.find({}, "-comments")
+      .sort({ _id: -1 }) // Excludes comments array and sorts in reverse order
+      .skip(skip)
+      .limit(limit);
     const totalPosts = await Post.countDocuments();
 
     res.send({ posts, totalPosts });
@@ -160,7 +177,7 @@ router.post("/commentOnPost", async function (req, res) {
       { new: true } // Ensure this is within the options object
     );
 
-    res.send("Comment Post Success");
+    res.status(200).send("Comment Post Success");
   } catch (error) {
     console.log(error);
     res.status(500).send("Error posting comment");
@@ -175,6 +192,23 @@ router.post("/getComments", async function (req, res) {
     res.status(200).send(comments);
   } catch (error) {
     res.status(500).json({ error: error.message });
+  }
+});
+
+router.post("/deletePost", async function (req, res) {
+  try {
+    const { postId } = req.body;
+
+    const deletedPost = await Post.findOneAndDelete({ postId: postId });
+
+    if (!deletedPost) {
+      return res.status(404).send("Post not found");
+    }
+
+    res.status(200).send("Post deleted successfully");
+  } catch (error) {
+    console.log(error);
+    res.status(500).send("Server error on delete");
   }
 });
 

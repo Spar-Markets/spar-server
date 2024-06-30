@@ -2,6 +2,8 @@ const express = require("express");
 const router = express.Router();
 const Player = require("../models/Player");
 const Match = require("../models/Match");
+const MatchSnapshots = require("../models/MatchSnapshots");
+
 const User = require("../models/User");
 const MatchHistory = require("../models/MatchHistory");
 const generateRandomString = require("../utility/generateRandomString");
@@ -329,29 +331,39 @@ async function createMatch() {
         if (skillDifference <= 10) {
           // Create a unique match ID (you might want to use a more sophisticated approach)
           const matchID = generateRandomString(45);
+          console.log("ID", matchID);
 
           // Insert the matched users into the "matches" collection
           const match = new Match({
-            matchID,
+            matchID: matchID,
             timeframe: players[i].matchLengthInt,
             endAt: Date.now() + players[i].matchLengthInt,
+            createdAt: Date.now(),
             matchType: players[i].matchType,
             wagerAmt: players[i].entryFeeInt,
             user1: {
               userID: players[i].userID,
               assets: [],
               trades: [],
-              portfolioSnapShots: [],
+
               buyingPower: 100000,
             },
             user2: {
               userID: players[j].userID,
               assets: [],
               trades: [],
-              portfolioSnapShots: [],
+              snapshots: [],
               buyingPower: 100000,
             },
           });
+
+          const matchSnapshots = new MatchSnapshots({
+            matchID: matchID,
+            user1Snapshots: [],
+            user2Snapshots: [],
+          });
+
+          await matchSnapshots.save();
           await match.save();
 
           console.log("Updating user:", players[i].userID);

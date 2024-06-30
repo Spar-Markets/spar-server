@@ -47,6 +47,15 @@ const postSchema = new mongoose.Schema({
     type: [Object],
     default: [],
   },
+  hasImage: {
+    type: Boolean,
+    required: true,
+    default: false,
+  },
+  posterId: {
+    type: String,
+    required: true,
+  },
 });
 
 module.exports = feedDB.model("Post", postSchema);
