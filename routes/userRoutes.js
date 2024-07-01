@@ -35,7 +35,7 @@ router.post("/createUser", async (req, res) => {
   }
 });
 
-router.post("/getActiveUser", async (req, res) => {
+router.post("/getUser", async (req, res) => {
   const { userID } = req.body;
   try {
     const user = await User.findOne({ userID: userID });
@@ -178,6 +178,154 @@ router.post("/isWatchedStock", async (req, res) => {
     res
       .status(500)
       .send("An error occurred while checking the user's watched stocks");
+  }
+});
+
+router.post("/getProfileList", async (req, res) => {
+  try {
+    const users = await User.find({}, "userID username"); // Fetch all users and select userID and username fields
+    const userProfiles = users.map((user) => ({
+      userID: user.userID,
+      username: user.username,
+    }));
+
+    res.status(200).json(userProfiles); // Directly send the userProfiles array
+  } catch (error) {
+    console.error("Error fetching user profiles:", error);
+    res
+      .status(500)
+      .json({ error: "An error occurred while fetching user profiles" });
+  }
+});
+
+router.post("/addFollowRequest", async (req, res) => {
+  const { userID, otherUserID } = req.body;
+
+  try {
+    const updatedOtherUser = await User.findOneAndUpdate(
+      { userID: otherUserID },
+      {
+        $push: {
+          followRequests: {
+            from: userID,
+            status: "pending",
+            createdAt: new Date(),
+          },
+          followers: userID,
+        },
+      },
+      { new: true, upsert: true } // new: true returns the updated document, upsert: true creates it if it doesn't exist
+    );
+
+    const updatedUser = await User.findOneAndUpdate(
+      { userID: userID },
+      {
+        $push: {
+          following: otherUserID,
+        },
+      },
+      { new: true, upsert: true } // new: true returns the updated document, upsert: true creates it if it doesn't exist
+    );
+
+    res.status(200).send(updatedUser);
+  } catch (error) {
+    console.error("Error adding follow request:", error);
+    res.status(500).send("An error occurred while adding the follow request");
+  }
+});
+
+router.post("/checkFollowStatus", async (req, res) => {
+  const { userID, otherUserID } = req.body;
+
+  try {
+    const user = await User.findOne({ userID: otherUserID });
+    if (!user) {
+      return res.status(404).send("User not found");
+    }
+    console.log(user.followRequests);
+    const followRequest = user.followRequests.find(
+      (request) => request.from === userID
+    );
+
+    console.log("Follow request found:", followRequest);
+    if (!followRequest) {
+      return res.status(200).json({ status: "none" });
+    }
+
+    res.status(200).json({ status: followRequest.status });
+  } catch (error) {
+    console.error("Error checking follow request status:", error);
+    res
+      .status(500)
+      .send("An error occurred while checking the follow request status");
+  }
+});
+
+router.post("/checkIncomingFriendRequests", async (req, res) => {
+  const { userID } = req.body;
+
+  try {
+    // Find the user by userID
+    const user = await User.findOne({ userID });
+    if (!user) {
+      return res.status(404).send("User not found");
+    }
+
+    // Get incoming friend requests
+    const incomingRequests = user.followRequests.filter(
+      (request) => request.status === "pending"
+    );
+
+    res.status(200).json({ incomingRequests });
+  } catch (error) {
+    console.error("Error checking incoming friend requests:", error);
+    res
+      .status(500)
+      .send("An error occurred while checking incoming friend requests");
+  }
+});
+
+router.post("/acceptFollowRequest", async (req, res) => {
+  const { userID, otherUserID } = req.body;
+
+  try {
+    // Find the target user and remove the follow request
+    const updatedOtherUser = await User.findOneAndUpdate(
+      { userID: userID },
+      {
+        $pull: { followRequests: { from: otherUserID } }, // Remove the follow request
+        $addToSet: { following: otherUserID }, // Add userID to followers
+      },
+      { new: true } // Return the updated document
+    );
+
+    if (!updatedOtherUser) {
+      return res.status(404).send("Target user not found");
+    }
+
+    // Find the user and add the otherUserID to the following array
+    const updatedUser = await User.findOneAndUpdate(
+      { userID: otherUserID },
+      {
+        $addToSet: { followers: userID }, // Add otherUserID to following
+      },
+      { new: true } // Return the updated document
+    );
+
+    if (!updatedUser) {
+      return res.status(404).send("User not found");
+    }
+
+    res.status(200).json({
+      message: "Follow request accepted successfully",
+      updatedUser,
+      updatedOtherUser,
+    });
+  } catch (error) {
+    console.error("Error accepting follow request:", error);
+    res
+      .status(500)
+      .send("An error occurred while accepting the follow request");
   }
 });
 
