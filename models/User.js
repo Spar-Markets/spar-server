@@ -49,6 +49,18 @@ const userSchema = new mongoose.Schema({
   watchedStocks: {
     type: [String],
   },
+  followers: {
+    type: [String],
+    default: [],
+  },
+  following: {
+    type: [String],
+    default: [],
+  },
+  followRequests: {
+    type: [Object],
+    default: [],
+  },
 });
 
 module.exports = sparDB.model("User", userSchema);

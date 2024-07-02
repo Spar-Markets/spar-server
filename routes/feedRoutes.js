@@ -32,7 +32,7 @@ router.post("/postToDatabase", async function (req, res) {
       hasImage: hasImage,
     });
     await newPost.save();
-    res.send(newPost);
+    res.status(200).send(newPost);
   } catch (error) {
     console.log(error);
   }

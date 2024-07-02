@@ -13,15 +13,15 @@ const uri =
 const client = new MongoClient(uri);
 
 stockEmitter.on("change", async (change) => {
-  console.log("Stock emitter received CHANGES");
+  console.log("STEP 5: Stock emitter received CHANGES");
 
   // get object id
   const objectID = change.documentKey._id;
-  console.log("ObjectID:", objectID);
+  console.log("STEP 6: ObjectID:", objectID);
 
   // find the match in mongo
-  const match = Match.findById(objectID);
-  console.log("Match:", match);
+  const match = await Match.findOne();
+  console.log("STEP 7: Match:", match);
 
   // get user1 assets and user2 assets in JSON format
   const updatedAssets = {
@@ -29,13 +29,18 @@ stockEmitter.on("change", async (change) => {
     user1Assets: match.user1.assets,
     user2Assets: match.user2.assets,
   };
-  console.log("Updated assets:", updatedAssets);
+  console.log("STEP 8: Updated assets about to send:", updatedAssets);
 
-  if (matchClientList[matchID]) {
-    for (socket of matchClientList[matchID]) {
+  if (matchClientList[match.matchID]) {
+    for (socket of matchClientList[match.matchID]) {
       socket.send(JSON.stringify(updatedAssets));
+      console.log("STEP 9: Just sent updated assets to client.");
     }
   }
+
+  console.log(
+    "STEP 10: Done sending assets to all connected clients for this match."
+  );
 });
 
 async function changeStream() {
@@ -60,15 +65,19 @@ async function changeStream() {
 
     changeStream.on("change", (change) => {
       // check whether event is from assets
+      console.log("STEP 1: Receive change from changestream.");
       const firstCheck = "user1.assets";
       const secondCheck = "user2.assets";
       const key = Object.keys(change.updateDescription.updatedFields)[0];
-      console.log("change,", change);
+      console.log("STEP 2: Here is change:", change);
       console.log("Key:", key);
       if (key.includes(firstCheck) || key.includes(secondCheck)) {
-        console.log("Received change:\n", JSON.stringify(change, null, 2));
-
-        stockEmitter.emit("change:", change);
+        console.log(
+          "STEP 3: Received change:\n",
+          JSON.stringify(change, null, 2)
+        );
+        stockEmitter.emit("change", change);
+        console.log("STEP 4: Just emitted stockEmitter change.");
       } else {
         console.log("this is not the change we really care about");
       }
