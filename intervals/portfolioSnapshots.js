@@ -83,7 +83,7 @@ async function updatePortfolioValues() {
           const result = await MatchSnapshots.findOneAndUpdate(
             { matchID: match[0].matchID },
             { $push: { [`${user}Snapshots`]: portfolioSnapshot } },
-            { upsert: true, returnDocument: "after" }
+            { new: true, upsert: true, returnDocument: "after" }
           );
         } catch (err) {
           console.error("Error updating match:", err);

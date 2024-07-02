@@ -12,6 +12,11 @@ const uri =
   "mongodb+srv://jjquaratiello:Cjwefuhijdsjdkhf2weeWu@cluster0.xcfppj4.mongodb.net";
 const client = new MongoClient(uri);
 
+function stringToArrayBuffer(str) {
+  const encoder = new TextEncoder();
+  return encoder.encode(str).buffer;
+}
+
 stockEmitter.on("change", async (change) => {
   console.log("STEP 5: Stock emitter received CHANGES");
 
@@ -30,10 +35,12 @@ stockEmitter.on("change", async (change) => {
     user2Assets: match.user2.assets,
   };
   console.log("STEP 8: Updated assets about to send:", updatedAssets);
+  const jsonString = JSON.stringify(updatedAssets);
+  const arrayBuffer = stringToArrayBuffer(jsonString);
 
   if (matchClientList[match.matchID]) {
     for (socket of matchClientList[match.matchID]) {
-      socket.send(JSON.stringify(updatedAssets));
+      socket.send(arrayBuffer);
       console.log("STEP 9: Just sent updated assets to client.");
     }
   }
