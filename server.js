@@ -20,6 +20,7 @@ const userRoutes = require("./routes/userRoutes");
 const stockDataDelayed = require("./routes/stockDataDelayed");
 const feedRoutes = require("./routes/feedRoutes");
 const snapshotRoutes = require("./routes/snapshot");
+const waitListRoutes = require("./routes/waitListRoutes");
 
 // initialize express app and ports
 const app = express();
@@ -38,6 +39,7 @@ app.use(userRoutes);
 app.use(feedRoutes);
 app.use(stockDataDelayed);
 app.use(snapshotRoutes);
+app.use(waitListRoutes);
 
 // intervals
 portfolioInterval.start();
