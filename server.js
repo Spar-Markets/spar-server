@@ -29,6 +29,7 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 // intervals
 portfolioInterval.start();
+const INDEX = "/index.html";
 
 // websockets
 // setupPolySocket();
