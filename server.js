@@ -46,7 +46,7 @@ portfolioInterval.start();
 
 // websockets
 setupPolySocket();
-setupWebSocket(app, WsPort);
+setupWebSocket(app);
 changeStream();
 
 // listen on port
