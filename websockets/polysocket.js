@@ -177,10 +177,10 @@ function subscribeToStocks(ws) {
   }
 }
 
-function setupWebSocket(app) {
-  const wss = new WebSocket.Server({ app });
+function setupWebSocket(server) {
+  const wss = new WebSocket.Server({ server });
 
-  wss.on("connection", (socket) => {
+  wss.on("connection", function connection(socket) {
     console.log("WebSocket client connected");
 
     socket.send("Websocket connected successfully");
