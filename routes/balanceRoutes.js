@@ -29,6 +29,7 @@ router.post("/updateUserBalanceWithdraw", async (req, res) => {
       );
     } catch (error) {
       console.log("user doesn't exist");
+      console.log("user doesn't existthis is logged twice as a test");
     }
   } catch (error) {
     console.error("Error in updating balance");
