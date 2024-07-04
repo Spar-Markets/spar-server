@@ -1,3 +1,5 @@
+"use strict";
+
 require("dotenv").config();
 
 const express = require("express");
@@ -23,9 +25,10 @@ const snapshotRoutes = require("./routes/snapshot");
 const waitListRoutes = require("./routes/waitListRoutes");
 
 // initialize express app and ports
-const app = express();
+// const app = express();
 const PORT = process.env.PORT || 3000;
 const WsPort = 3001;
+const { Server } = require("ws");
 
 app.use(bodyParser.json());
 
@@ -46,10 +49,21 @@ portfolioInterval.start();
 
 // websockets
 setupPolySocket();
-setupWebSocket(app);
+// setupWebSocket(app);
 changeStream();
 
-// listen on port
-app.listen(PORT, function listening() {
-  console.log("Server started on port", PORT);
+const app = express()
+  .use((req, res) => res.sendFile(INDEX, { root: __dirname }))
+  .listen(PORT, () => console.log(`Listening on ${PORT}`));
+
+const wss = new Server({ server });
+
+wss.on("connection", (ws) => {
+  console.log("Client connected");
+  ws.on("close", () => console.log("Client disconnected"));
 });
+
+// // listen on port
+// app.listen(PORT, function listening() {
+//   console.log("Server started on port", PORT);
+// });
