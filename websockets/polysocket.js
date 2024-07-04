@@ -3,6 +3,7 @@ const EventEmitter = require("events");
 const Match = require("../models/Match");
 const { polygonKey } = require("../config/constants");
 const stockEmitter = new EventEmitter();
+const { Server } = require("ws");
 
 let interestedStocksList = {};
 let matchClientList = {};
@@ -178,8 +179,6 @@ function subscribeToStocks(ws) {
 }
 
 function setupWebSocket(app) {
-  const { Server } = require("ws");
-
   const wss = new Server({ app });
 
   wss.on("connection", (socket) => {
