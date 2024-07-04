@@ -30,19 +30,19 @@ const PORT = process.env.PORT || 3000;
 const WsPort = 3001;
 const { Server } = require("ws");
 
-app.use(bodyParser.json());
+// app.use(bodyParser.json());
 
-// use routes
-app.use(balanceRoutes);
-app.use(matchMakingRoutes);
-app.use(plaidRoutes);
-app.use(stockRoutes);
-app.use(tradeRoutes);
-app.use(userRoutes);
-app.use(feedRoutes);
-app.use(stockDataDelayed);
-app.use(snapshotRoutes);
-app.use(waitListRoutes);
+// // use routes
+// app.use(balanceRoutes);
+// app.use(matchMakingRoutes);
+// app.use(plaidRoutes);
+// app.use(stockRoutes);
+// app.use(tradeRoutes);
+// app.use(userRoutes);
+// app.use(feedRoutes);
+// app.use(stockDataDelayed);
+// app.use(snapshotRoutes);
+// app.use(waitListRoutes);
 
 // intervals
 portfolioInterval.start();
@@ -52,7 +52,7 @@ setupPolySocket();
 // setupWebSocket(app);
 changeStream();
 
-const app = express()
+const server = express()
   .use((req, res) => res.sendFile(INDEX, { root: __dirname }))
   .listen(PORT, () => console.log(`Listening on ${PORT}`));
 
