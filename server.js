@@ -54,11 +54,5 @@ changeStream();
 const server = app.listen(PORT, function listening() {
   console.log("Server started on port", PORT);
 });
-const { Server } = require("ws");
 
-// setupWebSocket(server);
-const wss = new Server({ server });
-
-wss.on("connection", function connection(ws) {
-  console.log("connection ...");
-});
+setupWebSocket(server);
