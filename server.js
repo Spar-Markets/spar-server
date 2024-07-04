@@ -54,5 +54,5 @@ changeStream();
 const server = app.listen(PORT, function listening() {
   console.log("Server started on port", PORT);
 });
-
+// Pass the app with open port to websocket
 setupWebSocket(server);
