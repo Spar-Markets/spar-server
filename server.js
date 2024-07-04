@@ -27,41 +27,33 @@ const waitListRoutes = require("./routes/waitListRoutes");
 // initialize express app and ports
 // const app = express();
 const PORT = process.env.PORT || 3000;
-const WsPort = 3001;
-const { Server } = require("ws");
-
-// app.use(bodyParser.json());
-
-// // use routes
-// app.use(balanceRoutes);
-// app.use(matchMakingRoutes);
-// app.use(plaidRoutes);
-// app.use(stockRoutes);
-// app.use(tradeRoutes);
-// app.use(userRoutes);
-// app.use(feedRoutes);
-// app.use(stockDataDelayed);
-// app.use(snapshotRoutes);
-// app.use(waitListRoutes);
 
 // intervals
 portfolioInterval.start();
 
 // websockets
 setupPolySocket();
-// setupWebSocket(app);
 changeStream();
 
 const server = express()
   .use((req, res) => res.sendFile(INDEX, { root: __dirname }))
   .listen(PORT, () => console.log(`Listening on ${PORT}`));
 
-const wss = new Server({ server });
+server.use(bodyParser.json());
 
-wss.on("connection", (ws) => {
-  console.log("Client connected");
-  ws.on("close", () => console.log("Client disconnected"));
-});
+// use routes
+server.use(balanceRoutes);
+server.use(matchMakingRoutes);
+server.use(plaidRoutes);
+server.use(stockRoutes);
+server.use(tradeRoutes);
+server.use(userRoutes);
+server.use(feedRoutes);
+server.use(stockDataDelayed);
+server.use(snapshotRoutes);
+server.use(waitListRoutes);
+
+setupWebSocket(server);
 
 // // listen on port
 // app.listen(PORT, function listening() {
