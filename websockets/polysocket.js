@@ -3,8 +3,7 @@ const EventEmitter = require("events");
 const Match = require("../models/Match");
 const { polygonKey } = require("../config/constants");
 const stockEmitter = new EventEmitter();
-
-const http = require("http");
+const { Server } = require("ws");
 
 let interestedStocksList = {};
 let matchClientList = {};
@@ -184,9 +183,9 @@ function setupWebSocket(app) {
   //   console.log(`WebSocket server started on port ${WsPort}`);
   // });
 
-  const server = http.createServer(app);
+  const wss = new Server({ app });
 
-  const wss = new WebSocket.Server({ server });
+  // const wss = new WebSocket.Server({ server });
 
   wss.on("connection", (socket) => {
     console.log("WebSocket client connected");
