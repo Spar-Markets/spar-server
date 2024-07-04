@@ -27,7 +27,6 @@ const waitListRoutes = require("./routes/waitListRoutes");
 // initialize express app and ports
 const app = express();
 const PORT = process.env.PORT || 3000;
-const SneaklylinkPORT = 30001;
 // intervals
 portfolioInterval.start();
 
@@ -54,8 +53,3 @@ const server = express()
   .listen(PORT, () => console.log(`Listening on ${PORT}`));
 
 setupWebSocket(server);
-
-// listen on port
-app.listen(SneaklylinkPORT, function listening() {
-  console.log("Server started on port", SneaklylinkPORT);
-});
