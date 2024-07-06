@@ -196,6 +196,7 @@ router.post("/addToWatchList", async (req, res) => {
   }
 
   try {
+    console.log("IN THE TRY BLOCK OT ADD STOCK TO WATCHLIST");
     const updates = watchListNames.map((watchListName) => {
       return User.findOneAndUpdate(
         { userID, "watchlists.name": watchListName },
@@ -211,9 +212,9 @@ router.post("/addToWatchList", async (req, res) => {
       return res.status(404).json({ message: "Some watchlists not found" });
     }
 
-    res.status(200).json("Success");
+    return res.status(200).json("Success");
   } catch (error) {
-    res.status(500).json({ message: "An error occurred", error });
+    return res.status(500).json({ message: "An error occurred", error });
   }
 });
 
