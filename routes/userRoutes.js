@@ -161,6 +161,53 @@ router.post("/unwatchStock", async (req, res) => {
   }
 });
 
+router.post("/createWatchlist", async (req, res) => {
+  const { userID, watchListName, watchListIcon } = req.body;
+  try {
+    const updatedUser = await User.findOneAndUpdate(
+      { userID },
+      {
+        $addToSet: {
+          watchLists: { watchListName, watchListIcon, watchedStocks: [] },
+        },
+      },
+      { new: true } // return the updated document
+    );
+
+    if (!updatedUser) {
+      return res.status(404).send("User not found");
+    }
+
+    res.status(200).send(updatedUser); // Respond with the updated user document
+  } catch (error) {
+    console.error("Error creating watchlist:", error);
+    res
+      .status(500)
+      .send("An error occurred while updating the user's watchlists");
+  }
+});
+
+// Endpoint for adding stocks to a watchlist
+router.post("/createWatchlist", async (req, res) => {
+  const { userID, watchListName, stockTicker } = req.body;
+
+  try {
+    const updateUser = await User.findOneAndUpdate(
+      { userID, "watchlists.name": watchListName },
+      { $addToSet: { "watchlists.$.stocks": stockTicker } }, // Use $addToSet to avoid duplicates
+      { new: true } // Return the updated document
+    );
+
+    if (!updateUser) {
+      return res.status(404).json({ message: "User or watchlist not found" });
+    }
+
+    res.status(200).json("Success");
+  } catch (error) {
+    res.status(500).json({ message: "An error occurred", error });
+  }
+});
+
 // Endpoint to check if a ticker is in watchedStocks
 router.post("/isWatchedStock", async (req, res) => {
   const { userID, ticker } = req.body; // Use query parameters for GET requests

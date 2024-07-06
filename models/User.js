@@ -46,8 +46,9 @@ const userSchema = new mongoose.Schema({
   postsVotedOn: {
     type: [Object],
   },
-  watchedStocks: {
-    type: [String],
+  watchLists: {
+    type: [Object],
+    default: [],
   },
   followers: {
     type: [String],
