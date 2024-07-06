@@ -126,8 +126,9 @@ const portfolioInterval = cron.schedule("*/30 * * * * *", () => {
   // only runs if it is weekend and within market hours
   console.log(`SNAPSHOT STUFF --- Hours: ${hours}, Minutes: ${minutes}`);
   console.log("STEP 1: About to check if within market hours");
-  const condition1 =
-    now.getUTCDate() == getMostRecentMarketOpenDay(now).getUTCDate();
+  const marketDay = getMostRecentMarketOpenDay(now);
+  console.log("Step 1.1: Just got most recent market open day");
+  const condition1 = now.getUTCDate() == marketDay.getUTCDate();
   console.log("Just checked condition1, about to check condition2");
   const condition2 =
     (hours === 13 && minutes >= 45) ||
