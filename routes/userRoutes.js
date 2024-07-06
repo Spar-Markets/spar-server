@@ -187,19 +187,28 @@ router.post("/createWatchlist", async (req, res) => {
   }
 });
 
-// Endpoint for adding stocks to a watchlist
-router.post("/createWatchlist", async (req, res) => {
-  const { userID, watchListName, stockTicker } = req.body;
+// Endpoint for adding stocks to multiple watchlists
+router.post("/addToWatchList", async (req, res) => {
+  const { userID, watchListNames, stockTicker } = req.body;
+
+  if (!Array.isArray(watchListNames)) {
+    return res.status(400).json({ message: "watchListNames must be an array" });
+  }
 
   try {
-    const updateUser = await User.findOneAndUpdate(
-      { userID, "watchlists.name": watchListName },
-      { $addToSet: { "watchlists.$.stocks": stockTicker } }, // Use $addToSet to avoid duplicates
-      { new: true } // Return the updated document
-    );
+    const updates = watchListNames.map((watchListName) => {
+      return User.findOneAndUpdate(
+        { userID, "watchlists.name": watchListName },
+        { $addToSet: { "watchlists.$.watchedStocks": stockTicker } }, // Use $addToSet to avoid duplicates
+        { new: true } // Return the updated document
+      );
+    });
 
-    if (!updateUser) {
-      return res.status(404).json({ message: "User or watchlist not found" });
+    const updateUser = await Promise.all(updates);
+
+    const notFound = updateUser.filter((user) => !user);
+    if (notFound.length > 0) {
+      return res.status(404).json({ message: "Some watchlists not found" });
     }
 
     res.status(200).json("Success");
