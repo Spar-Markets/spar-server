@@ -132,10 +132,12 @@ const portfolioInterval = cron.schedule("*/30 * * * * *", () => {
       (hours > 13 && hours < 20))
   ) {
     console.log(
-      "Running the scheduled task, because we are in correct time range"
+      "Running portfolio snapshots, because we are in correct time range"
     );
     // Add your task here
     updatePortfolioValues();
+  } else {
+    console.log("NOT running portfolio snapshots. Outside market hours.");
   }
 });
 
