@@ -214,6 +214,7 @@ router.post("/addToWatchList", async (req, res) => {
 
     return res.status(200).json("Success");
   } catch (error) {
+    console.log("ERROR FROM ADD TO WATCHLIST", error);
     return res.status(500).json({ message: "An error occurred", error });
   }
 });
