@@ -199,7 +199,7 @@ router.post("/addToWatchList", async (req, res) => {
     console.log("IN THE TRY BLOCK OT ADD STOCK TO WATCHLIST");
     const updates = watchListNames.map((watchListName) => {
       return User.findOneAndUpdate(
-        { userID, "watchlists.name": watchListName },
+        { userID, "watchlists.watchListName": watchListName },
         { $addToSet: { "watchlists.$.watchedStocks": stockTicker } }, // Use $addToSet to avoid duplicates
         { new: true } // Return the updated document
       );
@@ -207,14 +207,9 @@ router.post("/addToWatchList", async (req, res) => {
 
     console.log("UPDATED USER WATCHLISTS WITH NEW STOCK");
 
-    const updateUser = await Promise.all(updates);
-
-    console.log("After goofy ahh Promise shit");
-
-    const notFound = updateUser.filter((user) => !user);
-    if (notFound.length > 0) {
-      console.log("Boutta send a 404 ong");
-      return res.status(404).json({ message: "Some watchlists not found" });
+    if (!updates) {
+      console.log("Boutta send a 404");
+      return res.status(404).send("User not found");
     }
 
     console.log("Boutta not send a 404 error ong");
