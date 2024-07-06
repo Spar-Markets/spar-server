@@ -199,8 +199,8 @@ router.post("/addToWatchList", async (req, res) => {
     console.log("IN THE TRY BLOCK OT ADD STOCK TO WATCHLIST");
     const updates = watchListNames.map((watchListName) => {
       return User.findOneAndUpdate(
-        { userID, "watchlists.watchListName": watchListName },
-        { $addToSet: { "watchlists.$.watchedStocks": stockTicker } }, // Use $addToSet to avoid duplicates
+        { userID, "watchLists.watchListName": watchListName },
+        { $addToSet: { "watchLists.$.watchedStocks": stockTicker } }, // Use $addToSet to avoid duplicates
         { new: true } // Return the updated document
       );
     });
