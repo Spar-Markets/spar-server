@@ -196,26 +196,31 @@ router.post("/addToWatchList", async (req, res) => {
   }
 
   try {
-    console.log("IN THE TRY BLOCK OT ADD STOCK TO WATCHLIST");
+    console.log("IN THE TRY BLOCK TO ADD STOCK TO WATCHLIST");
     const updates = watchListNames.map((watchListName) => {
       return User.findOneAndUpdate(
         { userID, "watchLists.watchListName": watchListName },
         { $addToSet: { "watchLists.$.watchedStocks": stockTicker } }, // Use $addToSet to avoid duplicates
         { new: true } // Return the updated document
-      );
+      ).exec(); // Ensure it returns a Promise
     });
 
+    const results = await Promise.all(updates);
     console.log("UPDATED USER WATCHLISTS WITH NEW STOCK");
 
-    if (!updates) {
-      console.log("Boutta send a 404");
-      return res.status(404).send("User not found");
+    // Check if any update was successful
+    const successfulUpdates = results.filter((result) => result !== null);
+    if (successfulUpdates.length === 0) {
+      return res
+        .status(404)
+        .json({ message: "No matching watchlists found for the user." });
     }
 
-    console.log("Boutta not send a 404 error ong");
-    return res.status(200).json("Success");
+    return res
+      .status(200)
+      .json({ message: "Success", updatedWatchLists: successfulUpdates });
   } catch (error) {
-    console.log("ERROR FROM ADD TO WATCHLIST", error);
+    console.error("ERROR FROM ADD TO WATCHLIST", error);
     return res.status(500).json({ message: "An error occurred", error });
   }
 });
