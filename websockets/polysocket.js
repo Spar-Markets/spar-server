@@ -177,14 +177,10 @@ function subscribeToStocks(ws) {
   }
 }
 
-function setupWebSocket(app, WsPort) {
-  const server = app.listen(WsPort, () => {
-    console.log(`WebSocket server started on port ${WsPort}`);
-  });
-
+function setupWebSocket(server) {
   const wss = new WebSocket.Server({ server });
 
-  wss.on("connection", (socket) => {
+  wss.on("connection", function connection(socket) {
     console.log("WebSocket client connected");
 
     socket.send("Websocket connected successfully");

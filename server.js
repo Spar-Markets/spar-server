@@ -1,3 +1,5 @@
+"use strict";
+
 require("dotenv").config();
 
 const express = require("express");
@@ -25,7 +27,7 @@ const waitListRoutes = require("./routes/waitListRoutes");
 // initialize express app and ports
 const app = express();
 const PORT = process.env.PORT || 3000;
-const WsPort = 3001;
+// const WsPort = 3001;
 
 app.use(bodyParser.json());
 
@@ -46,10 +48,11 @@ portfolioInterval.start();
 
 // websockets
 setupPolySocket();
-setupWebSocket(app, WsPort);
 changeStream();
 
 // listen on port
-app.listen(PORT, function listening() {
+const server = app.listen(PORT, function listening() {
   console.log("Server started on port", PORT);
 });
+// Pass the app with open port to websocket
+setupWebSocket(server);
