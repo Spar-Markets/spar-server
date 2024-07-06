@@ -115,7 +115,7 @@ const finishMatch = async (matchID) => {
     const updatedLoserUser = await loserUser.save();
   } catch (error) {
     console.error(
-      "sent that shit straight to the moon: error in finishMatch logic in saving winner and loser users to database",
+      "sent that stuff straight to the moon: error in finishMatch logic in saving winner and loser users to database",
       error
     );
   }

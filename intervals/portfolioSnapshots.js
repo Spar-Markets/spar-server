@@ -118,7 +118,7 @@ async function updatePortfolioValues() {
 const portfolioInterval = cron.schedule("*/30 * * * * *", () => {
   console.log("Running cron schedule");
   //this is the 15 min delay
-  const now = new Date(Date.now() - 900000);
+  const now = new Date(Date.now());
   // convert to EST
   const hours = now.getUTCHours();
   const minutes = now.getUTCMinutes();
@@ -126,10 +126,10 @@ const portfolioInterval = cron.schedule("*/30 * * * * *", () => {
   // only runs if it is weekend and within market hours
   console.log(`SNAPSHOT STUFF --- Hours: ${hours}, Minutes: ${minutes}`);
   if (
-    //now.getUTCDate() != getMostRecentMarketOpenDay(now).getUTCDate() ||
-    (hours === 13 && minutes >= 45) ||
-    (hours === 20 && minutes <= 15) ||
-    (hours > 13 && hours < 20)
+    now.getUTCDate() == getMostRecentMarketOpenDay(now).getUTCDate() &&
+    ((hours === 13 && minutes >= 45) ||
+      (hours === 20 && minutes <= 15) ||
+      (hours > 13 && hours < 20))
   ) {
     console.log(
       "Running the scheduled task, because we are in correct time range"
