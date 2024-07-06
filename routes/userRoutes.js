@@ -205,7 +205,11 @@ router.post("/addToWatchList", async (req, res) => {
       );
     });
 
+    console.log("UPDATED USER WATCHLISTS WITH NEW STOCK");
+
     const updateUser = await Promise.all(updates);
+
+    console.log("After goofy ahh Promise shit");
 
     const notFound = updateUser.filter((user) => !user);
     if (notFound.length > 0) {
