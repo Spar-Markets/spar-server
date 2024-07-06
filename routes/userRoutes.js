@@ -213,9 +213,11 @@ router.post("/addToWatchList", async (req, res) => {
 
     const notFound = updateUser.filter((user) => !user);
     if (notFound.length > 0) {
+      console.log("Boutta send a 404 ong");
       return res.status(404).json({ message: "Some watchlists not found" });
     }
 
+    console.log("Boutta not send a 404 error ong");
     return res.status(200).json("Success");
   } catch (error) {
     console.log("ERROR FROM ADD TO WATCHLIST", error);
