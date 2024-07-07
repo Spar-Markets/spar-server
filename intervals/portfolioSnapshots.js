@@ -128,15 +128,15 @@ const portfolioInterval = cron.schedule("*/30 * * * * *", () => {
   console.log(`SNAPSHOT STUFF --- Hours: ${hours}, Minutes: ${minutes}`);
   console.log("STEP 1: About to check if within market hours");
   const marketDay = getMostRecentMarketOpenDay(now);
-  console.log("Step 1.1: Just got most recent market open day");
+  console.log("Step 5: Just got most recent market open day");
   const condition1 = now.getUTCDate() == marketDay.getUTCDate();
-  console.log("Just checked condition1, about to check condition2");
+  console.log("STEP 6: Just checked condition1, about to check condition2");
   const condition2 =
     (hours === 13 && minutes >= 45) ||
     (hours === 20 && minutes <= 15) ||
     (hours > 13 && hours < 20);
   console.log(
-    "STEP 2: Just checked if within MarketHours:",
+    "STEP 7: Just checked if within MarketHours:",
     isWithinMarketHours
   );
   if (isWithinMarketHours) {
@@ -150,6 +150,7 @@ const portfolioInterval = cron.schedule("*/30 * * * * *", () => {
       "CASE 2: NOT running portfolio snapshots. Outside market hours."
     );
   }
+  console.log("STEP 9: Finished if else statement");
 });
 
 module.exports = { portfolioInterval };
