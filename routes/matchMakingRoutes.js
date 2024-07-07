@@ -407,7 +407,7 @@ async function createMatch() {
 setInterval(async () => {
   try {
     await createMatch();
-    //console.log("Matchmaking process completed successfully");
+    console.log("Matchmaking process completed successfully");
   } catch (error) {
     console.error("Error in matchmaking process:", error);
   }
