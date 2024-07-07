@@ -136,10 +136,8 @@ const portfolioInterval = cron.schedule("*/30 * * * * *", () => {
   //   (hours === 20 && minutes <= 15) ||
   //   (hours > 13 && hours < 20);
   const condition2 = true;
-  console.log(
-    "STEP 7: Just checked if within MarketHours:",
-    isWithinMarketHours
-  );
+  const isWithinMarketHours = condition1 && condition2;
+  console.log("STEP 7: Just checked if within MarketHours:", isWithinMarketHours);
   if (isWithinMarketHours) {
     console.log(
       "CASE 1: Running portfolio snapshots, because we are in correct time range"
