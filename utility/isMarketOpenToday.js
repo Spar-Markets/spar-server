@@ -59,14 +59,14 @@ function isMarketOpenToday(inputDate) {
   // If Independence Day falls on a Saturday, market closed on Friday (observed)
   if (
     date.getMonth() === 6 &&
-    (date.getDate() === 3 || date.getDate() === 5) &&
+    date.getDate() === 3 &&
     dayOfWeek === 5
   ) {
     console.log("Independence day rule 1 hit.")
     return false;
   }
   // If Independence Day falls on a Sunday, market closed on Monday (observed)
-  if (date.getMonth() === 6 && date.getDate() === 4 && dayOfWeek === 1) {
+  if (date.getMonth() === 6 && date.getDate() === 5 && dayOfWeek === 1) {
     console.log("Independence day rule 2 hit.")
     return false;
   }
