@@ -112,7 +112,7 @@ router.post("/getMostRecentOneDayPrices", async (req, res) => {
     // passing desired open date to retrieve the most recent open day from that time and prior
     const timeframeOpenDay = getMostRecentMarketOpenDay(desiredOpenDay);
 
-    const timeframeOpen = getMillisecondsForTime(firstTimeframeDay, 13, 30); //WHY IS THIS 9 ALL THE SUDDEN????
+    const timeframeOpen = getMillisecondsForTime(timeframeOpenDay, 13, 30); //WHY IS THIS 9 ALL THE SUDDEN????
 
     // add a check for if tickers is an array otherwise throw error
     if (!Array.isArray(tickers)) {
