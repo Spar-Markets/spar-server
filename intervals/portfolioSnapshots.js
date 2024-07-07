@@ -131,10 +131,11 @@ const portfolioInterval = cron.schedule("*/30 * * * * *", () => {
   console.log("Step 5: Just got most recent market open day");
   const condition1 = now.getUTCDate() == marketDay.getUTCDate();
   console.log("STEP 6: Just checked condition1, about to check condition2");
-  const condition2 =
-    (hours === 13 && minutes >= 45) ||
-    (hours === 20 && minutes <= 15) ||
-    (hours > 13 && hours < 20);
+  // const condition2 =
+  //   (hours === 13 && minutes >= 45) ||
+  //   (hours === 20 && minutes <= 15) ||
+  //   (hours > 13 && hours < 20);
+  const condition2 = true;
   console.log(
     "STEP 7: Just checked if within MarketHours:",
     isWithinMarketHours
