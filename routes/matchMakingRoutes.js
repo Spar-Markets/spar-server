@@ -336,8 +336,8 @@ async function createMatch() {
           const match = new Match({
             matchID: matchID,
             timeframe: players[i].matchLengthInt,
-            endAt: Date.now() + players[i].matchLengthInt,
-            createdAt: Date.now(),
+            endAt: new Date(Date.now() + players[i].matchLengthInt),
+            createdAt: new Date(Date.now()),
             matchType: players[i].matchType,
             wagerAmt: players[i].entryFeeInt,
             user1: {
