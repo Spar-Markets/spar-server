@@ -9,6 +9,7 @@ const secondsInOneDay = 86400;
 const secondsInOneHour = 3600;
 const secondsIn15min = 900;
 const { polygonKey } = require("../config/constants");
+const getMostRecentMarketOpenDay = require("../utility/getMostRecentMarketOpenDay");
 let counter;
 
 async function updatePortfolioValues() {
@@ -140,12 +141,14 @@ const portfolioInterval = cron.schedule("*/30 * * * * *", () => {
   );
   if (isWithinMarketHours) {
     console.log(
-      "Running portfolio snapshots, because we are in correct time range"
+      "CASE 1: Running portfolio snapshots, because we are in correct time range"
     );
     // Add your task here
     updatePortfolioValues();
   } else {
-    console.log("NOT running portfolio snapshots. Outside market hours.");
+    console.log(
+      "CASE 2: NOT running portfolio snapshots. Outside market hours."
+    );
   }
 });
 
