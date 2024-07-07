@@ -362,7 +362,11 @@ async function createMatch() {
           });
           console.log("here's the match", match);
           try {
-            await match.save();
+            const test = await match.save();
+            console.log(
+              "THIS IS THE TEST REPSONSE THAT MATCH WAS SAVED:",
+              test
+            );
             await matchSnapshots.save();
           } catch (error) {
             console.log("error creating match");
