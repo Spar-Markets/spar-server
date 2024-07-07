@@ -48,7 +48,7 @@ portfolioInterval.start();
 
 // websockets
 setupPolySocket();
-// changeStream();
+changeStream();
 
 // listen on port
 const server = app.listen(PORT, function listening() {
