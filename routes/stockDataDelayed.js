@@ -41,7 +41,7 @@ router.post("/getMostRecentOneDayPrices", async (req, res) => {
     "getMostRecentOneDayPrices",
     now.getUTCHours(),
     now.getMinutes(),
-    getMostRecentMarketOpenDay(delayedNow).getUTCDate()
+    getMostRecentMarketOpenDay(now).getUTCDate()
   );
   // most recent time where the market was open
   // if date is not today, OR it's not within market hours, put in 4pm for mostRecentMarketTime. otherwise give it right now.
@@ -56,8 +56,8 @@ router.post("/getMostRecentOneDayPrices", async (req, res) => {
   else {
     timeframeClose = getMillisecondsForTime(
       mostRecentMarketDay,
-      delayedNow.getUTCHours(),
-      delayedNow.getUTCMinutes()
+      now.getUTCHours(),
+      now.getUTCMinutes()
     );
   }
 
