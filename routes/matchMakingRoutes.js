@@ -360,6 +360,7 @@ async function createMatch() {
             user1Snapshots: [],
             user2Snapshots: [],
           });
+          console.log("here's the match", match);
           try {
             await match.save();
             await matchSnapshots.save();
@@ -388,15 +389,16 @@ async function createMatch() {
             _id: { $in: [players[i]._id, players[j]._id] },
           });
 
+          console.log(`Match found and created: ${matchID}`);
+
           // Function to schedule tasks
           const scheduleTasks = async () => {
             const endDate = new Date(match.endAt);
-            schedule.scheduleJob(endDate, () => finishMatch(match.matchID));
+            schedule.scheduleJob(endDate, () => finishMatch(matchID));
           };
+
           scheduleTasks();
         }
-
-        console.log(`Match found and created: ${matchID}`);
       }
     }
   } catch (error) {
