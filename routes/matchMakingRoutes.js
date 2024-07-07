@@ -357,8 +357,8 @@ async function createMatch() {
 
           const matchSnapshots = new MatchSnapshots({
             matchID: matchID,
-            user1Snapshots: [],
-            user2Snapshots: [],
+            user1Snapshots: [{ value: 100000, timeField: Date.now() }],
+            user2Snapshots: [{ value: 100000, timeField: Date.now() }],
           });
           console.log("here's the match", match);
           try {
