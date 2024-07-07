@@ -255,7 +255,6 @@ router.post("/userToMatchmaking", async (req, res) => {
       matchType,
     });
     console.log("Logging player creds in Usertomatchmaking " + newPlayer);
-    console.log("New Player email: " + newPlayer.email);
 
     await newPlayer.save();
     console.log("Saved player to DB");
@@ -345,7 +344,6 @@ async function createMatch() {
               userID: players[i].userID,
               assets: [],
               trades: [],
-
               buyingPower: 100000,
             },
             user2: {
@@ -369,19 +367,20 @@ async function createMatch() {
             console.log("error creating match");
           }
           console.log("Updating user:", players[i].userID);
-          console.log("Match ID:", matchID);
+          console.log("Match ID from var:", matchID);
+          console.log("matchid from match.matchId", match.matchID);
           // Create an object representing the match
-          console.log(players[i].userID, match.matchID);
+          console.log(players[i].userID, matchID);
           // Add the match to both players' activematches field
           await User.findOneAndUpdate(
             { userID: players[i].userID },
-            { $addToSet: { activematches: match.matchID } },
+            { $addToSet: { activematches: matchID } },
             { new: true } // Return the updated document
           );
 
           await User.findOneAndUpdate(
             { userID: players[j].userID },
-            { $addToSet: { activematches: match.matchID } },
+            { $addToSet: { activematches: matchID } },
             { new: true } // Return the updated document
           );
           // Remove matched players from the "matchmaking" collection
@@ -401,7 +400,7 @@ async function createMatch() {
       }
     }
   } catch (error) {
-    console.log("Eror in matchmaking", error);
+    console.log("Error in matchmaking", error);
   }
 }
 
