@@ -125,31 +125,25 @@ const portfolioInterval = cron.schedule("*/30 * * * * *", () => {
   const minutes = now.getUTCMinutes();
   // Ensure it's within the specific time range
   // only runs if it is weekend and within market hours
-  console.log(`SNAPSHOT STUFF --- Hours: ${hours}, Minutes: ${minutes}`);
-  console.log("STEP 1: About to check if within market hours");
+  console.log(`SNAPSHOT INTERVAL RUNNING. --- Hours: ${hours}, Minutes: ${minutes}`);
   const marketDay = getMostRecentMarketOpenDay(now);
-  console.log("Step 5: Just got most recent market open day");
   const condition1 = now.getUTCDate() == marketDay.getUTCDate();
-  console.log("STEP 6: Just checked condition1, about to check condition2");
-  // const condition2 =
-  //   (hours === 13 && minutes >= 45) ||
-  //   (hours === 20 && minutes <= 15) ||
-  //   (hours > 13 && hours < 20);
-  const condition2 = true;
+  const condition2 =
+    (hours === 13 && minutes >= 45) ||
+    (hours === 20 && minutes <= 15) ||
+    (hours > 13 && hours < 20);
   const isWithinMarketHours = condition1 && condition2;
-  console.log("STEP 7: Just checked if within MarketHours:", isWithinMarketHours);
   if (isWithinMarketHours) {
     console.log(
-      "CASE 1: Running portfolio snapshots, because we are in correct time range"
+      `CASE 1: Running portfolio snapshots, because we are in correct time range. --- Hours: ${hours}, Minutes: ${minutes}`
     );
     // Add your task here
     updatePortfolioValues();
   } else {
     console.log(
-      "CASE 2: NOT running portfolio snapshots. Outside market hours."
+      `CASE 2: NOT running portfolio snapshots. Outside market hours. --- Hours: ${hours}, Minutes: ${minutes}`
     );
   }
-  console.log("STEP 9: Finished if else statement");
 });
 
 module.exports = { portfolioInterval };
