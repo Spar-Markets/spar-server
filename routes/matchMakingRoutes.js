@@ -355,6 +355,7 @@ async function createMatch() {
               snapshots: [],
               buyingPower: 100000,
             },
+            matchId: 0,
           });
 
           const matchSnapshots = new MatchSnapshots({
