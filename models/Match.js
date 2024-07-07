@@ -38,4 +38,4 @@ const matchSchema = new mongoose.Schema({
   // You can add more fields as needed for your specific application
 });
 
-module.exports = sparDB.model("Match", matchSchema);
+module.exports = sparDB.model("matche", matchSchema);
