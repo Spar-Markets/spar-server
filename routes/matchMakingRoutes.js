@@ -362,10 +362,12 @@ async function createMatch() {
             user1Snapshots: [],
             user2Snapshots: [],
           });
-
-          await matchSnapshots.save();
-          await match.save();
-
+          try {
+            await match.save();
+            await matchSnapshots.save();
+          } catch (error) {
+            console.log("error creating match");
+          }
           console.log("Updating user:", players[i].userID);
           console.log("Match ID:", matchID);
           // Create an object representing the match
