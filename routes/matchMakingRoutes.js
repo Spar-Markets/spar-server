@@ -400,9 +400,8 @@ async function createMatch() {
             schedule.scheduleJob(endDate, () => finishMatch(match.matchID));
           };
           scheduleTasks();
+          console.log(`Match found and created: ${matchID}`);
         }
-
-        console.log(`Match found and created: ${matchID}`);
       }
     }
   } catch (error) {
