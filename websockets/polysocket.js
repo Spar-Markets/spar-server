@@ -6,7 +6,6 @@ const stockEmitter = new EventEmitter();
 
 let interestedStocksList = {};
 let matchClientList = {};
-
 let userMatchmakingList = {};
 
 const { MongoClient } = require("mongodb");
@@ -192,7 +191,9 @@ function setupWebSocket(server) {
 
     socket.on("message", async function message(data) {
       const object = JSON.parse(data);
+
       // If type match, get their UserID so we can push updates to them when their match object changes
+
       if (object.matchID) {
         // if matchClient list already exists, push socket connection to it
         if (matchClientList[object.matchID]) {

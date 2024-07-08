@@ -27,6 +27,7 @@ const finishMatch = async (matchID) => {
   // 1. grab match
   matchToFinish = await Match.findOne({ matchID: matchID });
   console.log("finishing match", matchID);
+
   // 2. determine winner
   // calculate portfolio value of each user
   async function calculatePortfolioValue(user) {
@@ -143,8 +144,23 @@ const finishMatch = async (matchID) => {
     );
   }
 
-  // 5. put match in each users match history
+  // 5. delete match from both user's active matches
 
+  // grab both user documents from db
+
+  // iterate over activematches field for each user until you find the match in question
+  // delete that match
+
+  await User.updateOne(
+    { _id: winnerUserID },
+    { $pull: { activeMatches: matchID } }
+  );
+  await User.updateOne(
+    { _id: loserUserID },
+    { $pull: { activeMatches: matchID } }
+  );
+
+  // 6. put match in each users match history
   // TODO: make custom match object to store in history.
   //       since each object is pegged to each user, we can clarify which is "you" and which is "opponent"
   //       we can also have a field for whether they won or lost
@@ -164,7 +180,7 @@ const finishMatch = async (matchID) => {
     );
   }
 
-  // 6. delete match from 'matches' collection
+  // 7. delete match from 'matches' collection
 
   try {
     // delete match

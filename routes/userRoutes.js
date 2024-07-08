@@ -37,6 +37,7 @@ router.post("/createUser", async (req, res) => {
 
 router.post("/getUser", async (req, res) => {
   const { userID } = req.body;
+  console.log("THIS IS THE USER ID BEING PASSED!!!!!!", userID);
   try {
     const user = await User.findOne({ userID: userID });
     if (user) {

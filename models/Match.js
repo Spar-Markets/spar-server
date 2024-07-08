@@ -12,7 +12,7 @@ const matchSchema = new mongoose.Schema({
     required: true,
   },
   user1: {
-    type: Object, // Array of usernames participating in the match
+    type: Object,
     required: true,
   },
   user2: {
