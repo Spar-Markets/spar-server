@@ -19,13 +19,14 @@ const rankingAlgo = require("../utility/rankingAlgo");
  * 2. determine winner
  * 3. update rank
  * 4. distribute winnings
- * 5. put in each user's match history
- * 6. delete match from 'matches' collection
+ * 5. delete match from both user's active matches (WE NEED TO DO THIS)
+ * 6. put in each user's match history
+ * 7. delete match from 'matches' collection
  */
 const finishMatch = async (matchID) => {
   // 1. grab match
   matchToFinish = await Match.findOne({ matchID: matchID });
-
+  console.log("finishing match", matchID);
   // 2. determine winner
   // calculate portfolio value of each user
   async function calculatePortfolioValue(user) {
@@ -372,20 +373,19 @@ async function createMatch() {
             console.log("error creating match");
           }
           console.log("Updating user:", players[i].userID);
-          console.log("Match ID from var:", matchID);
-          console.log("matchid from match.matchId", match.matchID);
+
           // Create an object representing the match
-          console.log(players[i].userID, matchID);
+          console.log(players[i].userID, match.matchID);
           // Add the match to both players' activematches field
           await User.findOneAndUpdate(
             { userID: players[i].userID },
-            { $addToSet: { activematches: matchID } },
+            { $addToSet: { activematches: match.matchID } },
             { new: true } // Return the updated document
           );
 
           await User.findOneAndUpdate(
             { userID: players[j].userID },
-            { $addToSet: { activematches: matchID } },
+            { $addToSet: { activematches: match.matchID } },
             { new: true } // Return the updated document
           );
           // Remove matched players from the "matchmaking" collection
@@ -393,16 +393,16 @@ async function createMatch() {
             _id: { $in: [players[i]._id, players[j]._id] },
           });
 
-          console.log(`Match found and created: ${matchID}`);
-
           // Function to schedule tasks
           const scheduleTasks = async () => {
+            console.log("scheduling match end");
             const endDate = new Date(match.endAt);
-            schedule.scheduleJob(endDate, () => finishMatch(matchID));
+            schedule.scheduleJob(endDate, () => finishMatch(match.matchID));
           };
-
           scheduleTasks();
         }
+
+        console.log(`Match found and created: ${matchID}`);
       }
     }
   } catch (error) {

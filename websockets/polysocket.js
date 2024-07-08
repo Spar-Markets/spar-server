@@ -7,6 +7,8 @@ const stockEmitter = new EventEmitter();
 let interestedStocksList = {};
 let matchClientList = {};
 
+let userMatchmakingList = {};
+
 const { MongoClient } = require("mongodb");
 const uri =
   "mongodb+srv://jjquaratiello:Cjwefuhijdsjdkhf2weeWu@cluster0.xcfppj4.mongodb.net";
@@ -17,10 +19,13 @@ function stringToArrayBuffer(str) {
   return encoder.encode(str).buffer;
 }
 
+// This is where changes are sent and this is where we distribute them to websockets
 stockEmitter.on("change", async (change) => {
   console.log("STEP 5: Stock emitter received CHANGES");
 
-  // get object id
+  // conditional for whether it is a new match or a change in assets
+
+  // Get object id
   const objectID = change.documentKey._id;
   console.log("STEP 6: ObjectID:", objectID);
 
@@ -68,13 +73,23 @@ async function changeStream() {
         },
       }
     );
-    console.log("aight just ran the change streams w the pipeline");
+    console.log("Ran the change streams w the pipeline");
 
     changeStream.on("change", (change) => {
       // check whether event is from assets
       console.log("STEP 1: Receive change from changestream.");
+
+      console.log(
+        "polysocket.js change stream change listener got a change here it is: ",
+        change
+      );
+
+      // A conditional that tells whether the match was added or if it's for a change in assets,
+      // Yes even though we have a pipeline for only assets it still detects if a match is created
+
       const firstCheck = "user1.assets";
       const secondCheck = "user2.assets";
+
       const key = Object.keys(change.updateDescription.updatedFields)[0];
       console.log("STEP 2: Here is change:", change);
       console.log("Key:", key);
@@ -120,16 +135,6 @@ function setupPolySocket() {
 
   //let clients = [];
   ws.on("message", function incoming(data) {
-    //console.log(`Received data: ${data}`);
-
-    // commented this out, because why are we sending this data to every client?
-    // clients.forEach((client) => {
-    //  client.send(data);
-    //});
-    //console.log("Jackson interested data:", data);
-
-    //console.log(interestedStocksList);
-
     const parsedData = JSON.parse(data);
     //console.log(parsedData[0].sym);
     // console.log("Jackson interestedParsedData", parsedData);
