@@ -330,5 +330,4 @@ module.exports = {
   setupPolySocket,
   setupWebSocket,
   changeStream,
-  setupMatchmakingSocket,
 };
