@@ -259,7 +259,7 @@ function setupWebSocket(server) {
         // CASE 3: Subscribing to heartbeat to keep socket open
       } else if (object.type === "heartbeat") {
         // do nothing
-        console.log("Heartbeat received");
+        console.log("Heartbeat received.");
       } else {
         const ticker = object.ticker;
         if (!interestedStocksList[ticker]) {
