@@ -233,6 +233,7 @@ function setupWebSocket(server) {
 
     socket.on("message", async function message(data) {
       const object = JSON.parse(data);
+      console.log("Socket message received:", object);
 
       // If type match, get their UserID so we can push updates to them when their match object changes
 
