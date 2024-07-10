@@ -260,6 +260,8 @@ function setupWebSocket(server) {
       } else if (object.type === "heartbeat") {
         // do nothing
         console.log("Heartbeat received.");
+      } else if (object.type == "GameScreenConnection") {
+        console.log("GameScreenConnection");
       } else {
         const ticker = object.ticker;
         if (!interestedStocksList[ticker]) {
