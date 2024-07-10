@@ -120,4 +120,18 @@ router.post("/getGainers", async (req, res) => {
   }
 });
 
+router.post("/getNews", async (req, res) => {
+  try {
+    const response = await axios.get(
+      `https://api.polygon.io/v2/reference/news?limit=20&apiKey=${polygonKey}`
+    );
+
+    if (response.data) {
+      res.status(200).send(response.data);
+    }
+  } catch (error) {
+    res.status(500).send({ message: "Error getting News", error });
+  }
+});
+
 module.exports = router;
