@@ -23,20 +23,31 @@ async function updatePortfolioValues() {
 
   // always add to 15 min
   let matches = [];
-  matches.push(await Match.find({ timeframe: secondsIn15min }));
+  const fifteenMinMatches = await Match.find({ timeframe: secondsIn15min });
+  matches.push(...fifteenMinMatches); // Destructure the results before pushing
+
   if (counter % 2 == 0) {
-    matches.push(await Match.find({ timeframe: secondsInOneHour }));
+    const oneHourMatches = await Match.find({ timeframe: secondsInOneHour });
+    matches.push(...oneHourMatches); // Destructure the results before pushing
   }
+
   if (counter % 10 == 0) {
-    matches.push(await Match.find({ timeframe: secondsInOneDay }));
+    const oneDayMatches = await Match.find({ timeframe: secondsInOneDay });
+    matches.push(...oneDayMatches); // Destructure the results before pushing
   }
+  console.log("MATCHES ARRAY", matches);
+
+  console.log(
+    "JUNE 10TH 2024: JOSEPH JAMES QUARATIELLO. LOOK AT THIS!!! These are the matches that the interval is taking portfolio snapshots for:"
+  );
+  console.log(matches);
 
   // for each match:
   // for each user in match:
   matches.forEach((match) => {
     function updateUserPortfolio(user) {
       //for some reason the actual match data is the first element an array
-      const assets = match[0][user].assets;
+      const assets = match[user].assets;
 
       // calculate gain/loss on each stock
       let sharesValue = 0;
@@ -61,7 +72,7 @@ async function updatePortfolioValues() {
       });
 
       // user's portfolio value
-      const userPortfolioValue = match[0][user].buyingPower + sharesValue;
+      const userPortfolioValue = match[user].buyingPower + sharesValue;
 
       const timeToNearest30s = formatTime(Date.now());
       const realTime = Date.now();
@@ -82,7 +93,7 @@ async function updatePortfolioValues() {
 
           // Step 2: Push the new snapshot to the snapshots array
           const result = await MatchSnapshots.findOneAndUpdate(
-            { matchID: match[0].matchID },
+            { matchID: match.matchID },
             { $push: { [`${user}Snapshots`]: portfolioSnapshot } },
             { new: true, upsert: true, returnDocument: "after" }
           );
@@ -125,7 +136,9 @@ const portfolioInterval = cron.schedule("*/30 * * * * *", () => {
   const minutes = now.getUTCMinutes();
   // Ensure it's within the specific time range
   // only runs if it is weekend and within market hours
-  console.log(`SNAPSHOT INTERVAL RUNNING. --- Hours: ${hours}, Minutes: ${minutes}`);
+  console.log(
+    `SNAPSHOT INTERVAL RUNNING. --- Hours: ${hours}, Minutes: ${minutes}`
+  );
   const marketDay = getMostRecentMarketOpenDay(now);
   const condition1 = now.getUTCDate() == marketDay.getUTCDate();
   const condition2 =

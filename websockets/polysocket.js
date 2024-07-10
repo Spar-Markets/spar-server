@@ -6,6 +6,7 @@ const stockEmitter = new EventEmitter();
 
 let interestedStocksList = {};
 let matchClientList = {};
+// maps userIDs to socket connection
 let userMatchmakingList = {};
 
 const { MongoClient } = require("mongodb");
@@ -18,7 +19,9 @@ function stringToArrayBuffer(str) {
   return encoder.encode(str).buffer;
 }
 
-// This is where changes are sent and this is where we distribute them to websockets
+/**
+ * This is where changes are sent and this is where we distribute them to websockets
+ */
 stockEmitter.on("change", async (change) => {
   console.log("STEP 5: Stock emitter received CHANGES");
 
@@ -48,6 +51,37 @@ stockEmitter.on("change", async (change) => {
       console.log("STEP 9: Just sent updated assets to client.");
     }
   }
+
+  /**
+   * Handle new match event
+   */
+  stockEmitter.on("newMatch", async (change) => {
+    // 1. grab the userIDs from the newly created match
+    const userIDs = [
+      change.fullDocument.user1.userID,
+      change.fullDocument.user2.userID,
+    ];
+
+    // 2. lookup the corresponding socket connections in userMatchmakingList
+    for (let userID of userIDs) {
+      const activeMatchmakingSocket = userMatchmakingList[userID];
+      // 3. IF any active connections: send the newly created match to them
+      if (activeMatchmakingSocket) {
+        // send them the match
+        socket.send({
+          type: "matchCreated",
+          match: change.fullDocument,
+        });
+        // remove socket from userMatchmakingList
+        userMatchmakingList[userID].splice(index, 1);
+
+        // if no clients are currently interested in match, delete it
+        if (userMatchmakingList[userID].length == 0) {
+          delete userMatchmakingList[userID];
+        }
+      }
+    }
+  });
 
   console.log(
     "STEP 10: Done sending assets to all connected clients for this match."
@@ -86,21 +120,29 @@ async function changeStream() {
       // A conditional that tells whether the match was added or if it's for a change in assets,
       // Yes even though we have a pipeline for only assets it still detects if a match is created
 
-      const firstCheck = "user1.assets";
-      const secondCheck = "user2.assets";
-
-      const key = Object.keys(change.updateDescription.updatedFields)[0];
-      console.log("STEP 2: Here is change:", change);
-      console.log("Key:", key);
-      if (key.includes(firstCheck) || key.includes(secondCheck)) {
-        console.log(
-          "STEP 3: Received change:\n",
-          JSON.stringify(change, null, 2)
-        );
-        stockEmitter.emit("change", change);
-        console.log("STEP 4: Just emitted stockEmitter change.");
+      // check operation type
+      if (change.operationType == "insert") {
+        // this means new match was created
+        // emit event that new match was created
+        stockEmitter.emit("newMatch", change.fullDocument);
       } else {
-        console.log("this is not the change we really care about");
+        const key = Object.keys(change.updateDescription.updatedFields)[0];
+        console.log("STEP 2: Here is change:", change);
+        console.log("Key:", key);
+
+        // CHECK 1: check for change in assets
+        const firstCheck = "user1.assets";
+        const secondCheck = "user2.assets";
+        if (key.includes(firstCheck) || key.includes(secondCheck)) {
+          console.log(
+            "STEP 3: Received change:\n",
+            JSON.stringify(change, null, 2)
+          );
+          stockEmitter.emit("change", change);
+          console.log("STEP 4: Just emitted stockEmitter change.");
+        } else {
+          console.log("this is not the change we really care about");
+        }
       }
     });
 
@@ -194,7 +236,18 @@ function setupWebSocket(server) {
 
       // If type match, get their UserID so we can push updates to them when their match object changes
 
-      if (object.matchID) {
+      // CASE 1: Matchmaking
+      if (object.type == "matchmaking") {
+        // if userMatchMaking List already exists, push socket connection to it
+        if (userMatchmakingList[object.userID]) {
+          userMatchmakingList[object.userID].push(socket);
+        } else {
+          // otherwise, create it
+          userMatchmakingList[object.userID] = [socket];
+        }
+
+        // CASE 2: Interested in stocks
+      } else if (object.matchID) {
         // if matchClient list already exists, push socket connection to it
         if (matchClientList[object.matchID]) {
           matchClientList[object.matchID].push(socket);
@@ -202,6 +255,11 @@ function setupWebSocket(server) {
           // otherwise, create it
           matchClientList[object.matchID] = [socket];
         }
+
+        // CASE 3: Subscribing to heartbeat to keep socket open
+      } else if (object.type === "heartbeat") {
+        // do nothing
+        console.log("Heartbeat received");
       } else {
         const ticker = object.ticker;
         if (!interestedStocksList[ticker]) {
@@ -243,8 +301,34 @@ function setupWebSocket(server) {
           break;
         }
       }
+
+      // Delete the user from userMatchmakingList
+      // userID is the key, with an array of sockets as the value,
+      // find the index of the socket and remove it on close from the user's values
+      for (let userID in userMatchmakingList) {
+        // grab index if socket within current socket array, if it's in there
+        let index = userMatchmakingList[userID].indexOf(socket);
+        // checks whether socket is present in array
+        if (index !== -1) {
+          // remove client if found
+          userMatchmakingList[userID].splice(index, 1);
+
+          // if no clients are currently interested in match, delete it
+          if (userMatchmakingList[userID].length == 0) {
+            delete userMatchmakingList[userID];
+          }
+
+          // break out of the loop if a socket has been found
+          break;
+        }
+      }
     });
   });
 }
 
-module.exports = { setupPolySocket, setupWebSocket, changeStream };
+module.exports = {
+  setupPolySocket,
+  setupWebSocket,
+  changeStream,
+  setupMatchmakingSocket,
+};
