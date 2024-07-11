@@ -3,6 +3,7 @@ const EventEmitter = require("events");
 const Match = require("../models/Match");
 const { polygonKey } = require("../config/constants");
 const stockEmitter = new EventEmitter();
+const finishMatch = require("../utility/finishMatch");
 
 let interestedStocksList = {};
 let matchClientList = {};
@@ -125,6 +126,8 @@ async function changeStream() {
         // this means new match was created
         // emit event that new match was created
         stockEmitter.emit("newMatch", change.fullDocument);
+      } else if (change.operationType == "delete") {
+        finishMatch(change.fullDocumentBeforeChange);
       } else {
         const key = Object.keys(change.updateDescription.updatedFields)[0];
         console.log("STEP 2: Here is change:", change);
