@@ -230,12 +230,12 @@ async function createMatch() {
           });
 
           // Function to schedule tasks
-          const scheduleTasks = async () => {
-            console.log("scheduling match end");
-            const endDate = new Date(match.endAt);
-            schedule.scheduleJob(endDate, () => finishMatch(match.matchID));
-          };
-          scheduleTasks();
+          // const scheduleTasks = async () => {
+          //   console.log("scheduling match end");
+          //   const endDate = new Date(match.endAt);
+          //   schedule.scheduleJob(endDate, () => finishMatch(match.matchID));
+          // };
+          // scheduleTasks();
           console.log(`Match found and created: ${matchID}`);
         }
       }

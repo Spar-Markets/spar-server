@@ -99,14 +99,9 @@ async function changeStream() {
     const matches = database.collection("matches");
 
     console.log("boutta run change streams with the pipeline");
-    const changeStream = matches.watch(
-      // Create a change stream on the collection
-      {
-        $match: {
-          "fullDocument.user1.buyingpower": { $exists: true },
-        },
-      }
-    );
+    const changeStream = matches.watch([], {
+      fullDocumentBeforeChange: "required",
+    });
     console.log("Ran the change streams w the pipeline");
 
     changeStream.on("change", (change) => {
