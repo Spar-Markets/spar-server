@@ -154,7 +154,7 @@ const finishMatch = async (matchToFinish) => {
   console.log("We boutta delete it from this user:", winnerUserID);
   const winnerWithRemovedMatchID = await User.updateOne(
     { userID: winnerUserID },
-    { $pull: { activeMatches: matchID } }
+    { $pull: { activematches: matchID } }
   );
   const loserWithRemovedMatchID = await User.updateOne(
     { userID: loserUserID },

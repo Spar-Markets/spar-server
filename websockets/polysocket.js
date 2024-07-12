@@ -123,6 +123,10 @@ async function changeStream() {
         stockEmitter.emit("newMatch", change.fullDocument);
       } else if (change.operationType == "delete") {
         finishMatch(change.fullDocumentBeforeChange);
+        // here
+        // grab userIDs of match
+        // check for socket connections
+        // push update to them
       } else {
         const key = Object.keys(change.updateDescription.updatedFields)[0];
         console.log("STEP 2: Here is change:", change);
