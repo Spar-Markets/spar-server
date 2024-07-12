@@ -149,6 +149,9 @@ const finishMatch = async (matchToFinish) => {
   // iterate over activematches field for each user until you find the match in question
   // delete that match
 
+  console.log("STEP 5: DELETE MATCH FROM ACTIVE MATCHES. STARTING NOW.");
+  console.log("We boutta delete matchID from user active matches:", matchID);
+  console.log("We boutta delete it from this user:", winnerUserID);
   await User.updateOne(
     { userID: winnerUserID },
     { $pull: { activeMatches: matchID } }
@@ -165,11 +168,13 @@ const finishMatch = async (matchToFinish) => {
   try {
     const resultWinner = await MatchHistory.updateOne(
       { userID: winnerUserID },
-      { $push: { pastMatches: matchToFinish } }
+      { $push: { pastMatches: matchToFinish } },
+      { upsert: true }
     );
     const resultLoser = await MatchHistory.updateOne(
       { userID: loserUserID },
-      { $push: { pastMatches: matchToFinish } }
+      { $push: { pastMatches: matchToFinish } },
+      { upsert: true }
     );
   } catch (error) {
     console.error(
