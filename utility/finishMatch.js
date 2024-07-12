@@ -97,8 +97,8 @@ const finishMatch = async (matchToFinish) => {
   );
 
   // get new rank from rankingAlgo
-  const newSkillRatingWinner = rankingAlgoResults.newSkillRatingA;
-  const newSkillRatingLoser = rankingAlgoResults.newSkillRatingB;
+  const newSkillRatingWinner = rankingAlgoResults.newEloA;
+  const newSkillRatingLoser = rankingAlgoResults.newEloB;
 
   console.log("STEP 3: newSkillRatingWinner", newSkillRatingWinner);
   console.log("STEP 3: newSkillRatingLoser", newSkillRatingLoser);
