@@ -158,7 +158,7 @@ const finishMatch = async (matchToFinish) => {
   );
   const loserWithRemovedMatchID = await User.updateOne(
     { userID: loserUserID },
-    { $pull: { activeMatches: matchID } }
+    { $pull: { activematches: matchID } }
   );
   console.log(
     "winnerWithRemovedMatchID",
