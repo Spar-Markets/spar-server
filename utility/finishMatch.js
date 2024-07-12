@@ -54,9 +54,18 @@ const finishMatch = async (matchToFinish) => {
     loser = "user2";
   }
 
+  console.log("winner:", winner);
+  console.log("loser:", loser);
+
   // get user IDs for winner and loser
   const winnerUserID = matchToFinish[winner].userID;
   const loserUserID = matchToFinish[loser].userID;
+
+  console.log("matchToFinish[winner]:", matchToFinish[winner]);
+  console.log("matchToFinish[loser]", matchToFinish[loser]);
+
+  console.log("Winner User ID:", winnerUserID);
+  console.log("Loser User ID", loserUserID);
 
   // get actual user in DB for winner and loser
   let winnerUser;
@@ -69,6 +78,8 @@ const finishMatch = async (matchToFinish) => {
       "got a loan from the white house boom: Error finding the winner or the loser inside the database by ID in finishMatch logic.",
       error
     );
+
+    return;
   }
 
   // winner is now determined
