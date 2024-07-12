@@ -1,3 +1,8 @@
+const User = require("../models/User");
+const Match = require("../models/Match");
+const MatchHistory = require("../models/MatchHistory");
+const axios = require("axios");
+
 /**
  * Logic to finish match
  * 1. grab match from matchID
@@ -54,18 +59,9 @@ const finishMatch = async (matchToFinish) => {
     loser = "user2";
   }
 
-  console.log("winner:", winner);
-  console.log("loser:", loser);
-
   // get user IDs for winner and loser
   const winnerUserID = matchToFinish[winner].userID;
   const loserUserID = matchToFinish[loser].userID;
-
-  console.log("matchToFinish[winner]:", matchToFinish[winner]);
-  console.log("matchToFinish[loser]", matchToFinish[loser]);
-
-  console.log("Winner User ID:", winnerUserID);
-  console.log("Loser User ID", loserUserID);
 
   // get actual user in DB for winner and loser
   let winnerUser;
@@ -103,6 +99,9 @@ const finishMatch = async (matchToFinish) => {
   const newSkillRatingWinner = rankingAlgoResults.newSkillRatingA;
   const newSkillRatingLoser = rankingAlgoResults.newSkillRatingB;
 
+  console.log("STEP 3: newSkillRatingWinner", newSkillRatingWinner);
+  console.log("STEP 3: newSkillRatingLoser", newSkillRatingLoser);
+
   // update rank for each player
   winnerUser.skillRating = newSkillRatingWinner;
   loserUser.skillRating = newSkillRatingLoser;
@@ -113,7 +112,7 @@ const finishMatch = async (matchToFinish) => {
     const updatedLoserUser = await loserUser.save();
   } catch (error) {
     console.error(
-      "sent that stuff straight to the moon: error in finishMatch logic in saving winner and loser users to database",
+      "sent that shit straight to the moon: error in finishMatch logic in saving winner and loser users to database",
       error
     );
   }
@@ -132,6 +131,8 @@ const finishMatch = async (matchToFinish) => {
       loserUser.balance = loserUser.balance + initialWager;
       const updatedWinnerUser = await winnerUser.save();
       const updatedLoserUser = await loserUser.save();
+      console.log("updatedWinnerUser", updatedWinnerUser);
+      console.log("updatedLoserUser", updatedLoserUser);
     }
   } catch (error) {
     console.error(
@@ -172,18 +173,6 @@ const finishMatch = async (matchToFinish) => {
   } catch (error) {
     console.error(
       "your platform only launches depression: error in finishMatch logic in putting match in matchhistory for each user",
-      error
-    );
-  }
-
-  // 7. delete match from 'matches' collection
-
-  try {
-    // delete match
-    const deletedMatch = await Match.deleteOne({ matchID: matchID });
-  } catch (error) {
-    console.error(
-      "who put the elf with no friends in charge of human connection: error in finishMatch logic in deleting match from matches collection",
       error
     );
   }
