@@ -150,11 +150,11 @@ const finishMatch = async (matchToFinish) => {
   // delete that match
 
   await User.updateOne(
-    { _id: winnerUserID },
+    { userID: winnerUserID },
     { $pull: { activeMatches: matchID } }
   );
   await User.updateOne(
-    { _id: loserUserID },
+    { userID: loserUserID },
     { $pull: { activeMatches: matchID } }
   );
 
