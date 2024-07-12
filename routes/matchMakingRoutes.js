@@ -9,7 +9,6 @@ const MatchHistory = require("../models/MatchHistory");
 const generateRandomString = require("../utility/generateRandomString");
 const schedule = require("node-schedule");
 const { polygonKey } = require("../config/constants");
-const rankingAlgo = require("../utility/rankingAlgo");
 
 // Define routes here
 
