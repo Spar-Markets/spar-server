@@ -152,14 +152,19 @@ const finishMatch = async (matchToFinish) => {
   console.log("STEP 5: DELETE MATCH FROM ACTIVE MATCHES. STARTING NOW.");
   console.log("We boutta delete matchID from user active matches:", matchID);
   console.log("We boutta delete it from this user:", winnerUserID);
-  await User.updateOne(
+  const winnerWithRemovedMatchID = await User.updateOne(
     { userID: winnerUserID },
     { $pull: { activeMatches: matchID } }
   );
-  await User.updateOne(
+  const loserWithRemovedMatchID = await User.updateOne(
     { userID: loserUserID },
     { $pull: { activeMatches: matchID } }
   );
+  console.log(
+    "winnerWithRemovedMatchID",
+    winnerWithRemovedMatchID.activeMatches
+  );
+  console.log("loserWithRemovedMatchID", loserWithRemovedMatchID.activeMatches);
 
   // 6. put match in each users match history
   // TODO: make custom match object to store in history.
