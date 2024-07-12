@@ -71,7 +71,7 @@ stockEmitter.on("change", async (change) => {
         // send them the match
         socket.send({
           type: "matchCreated",
-          match: change.fullDocument,
+          newMatch: change.fullDocument,
         });
         // remove socket from userMatchmakingList
         userMatchmakingList[userID].splice(index, 1);
