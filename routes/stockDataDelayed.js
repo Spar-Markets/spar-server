@@ -6,6 +6,7 @@ const { polygonKey } = require("../config/constants");
 
 const getMostRecentMarketOpenDay = require("../utility/getMostRecentMarketOpenDay");
 const getPreviousDay = require("../utility/getPreviousDay");
+const { json } = require("body-parser");
 
 /**
  * STOCK DATA
@@ -21,6 +22,43 @@ function getMillisecondsForTime(dateString, hour, minute) {
   return date.getTime();
 }
 
+router.post("closeEndpoint", async (req, res) => {
+  const { ticker } = req;
+  const prices = {};
+
+  const now = new Date(Date.now());
+  now = now - 86400000;
+  twoClosesAgo = getMostRecentMarketOpenDay(now);
+
+  // Case 1. if it's before market hours, if it's past 4pm, or if recent market day is another day, set most recent market time to 4pm
+  if (
+    isBeforeMarketHours ||
+    now.getUTCHours() > 20 ||
+    now.getUTCDate() != twoClosesAgo.getUTCDate()
+  ) {
+    console.log("MOST RECENT MARKET DAY", mostRecentMarketDay);
+    timeframeClose = getMillisecondsForTime(twoClosesAgo, 20, 0);
+  }
+
+  // Case 2. if it's within market hours on the same market day, set most recent market time to right now
+  else {
+    timeframeClose = getMillisecondsForTime(
+      twoClosesAgo,
+      now.getUTCHours(),
+      now.getUTCMinutes()
+    );
+  }
+
+  const timeframeOpen = getMillisecondsForTime(twoClosesAgo, 13, 30); //WHY IS THIS 9 ALL THE SUDDEN????
+
+  const url = `https://api.polygon.io/v2/aggs/ticker/${ticker}/range/${range}/${timeframeOpen}/${timeframeClose}?adjusted=true&sort=asc&limit=49999&apiKey=${polygonKey}`;
+  console.log("Polygon URL request: " + url);
+  const response = await axios.get(url);
+  prices[response.data.ticker] = [];
+
+  res.sendStatus(response);
+});
+
 // Eendpoint to get one day stock prices for most recent day where market is open
 router.post("/getMostRecentOneDayPrices", async (req, res) => {
   //timeframe is optional
@@ -29,8 +67,12 @@ router.post("/getMostRecentOneDayPrices", async (req, res) => {
   const now = new Date(Date.now());
   let mostRecentMarketDay = getMostRecentMarketOpenDay(now);
   // edge case. if most recent market day is today, AND it is before 9:45am, go for the previous day before that
-  const isSameDay = now.getFullYear() === mostRecentMarketDay.getFullYear() && now.getMonth() === mostRecentMarketDay.getMonth() && now.getDate() === mostRecentMarketDay.getDate();
-  const isBeforeMarketHours = now.getUTCHours() < 13 || (now.getUTCHours() == 9 && now.getMinutes() < 45);
+  const isSameDay =
+    now.getFullYear() === mostRecentMarketDay.getFullYear() &&
+    now.getMonth() === mostRecentMarketDay.getMonth() &&
+    now.getDate() === mostRecentMarketDay.getDate();
+  const isBeforeMarketHours =
+    now.getUTCHours() < 13 || (now.getUTCHours() == 9 && now.getMinutes() < 45);
   if (isSameDay && isBeforeMarketHours) {
     mostRecentMarketDay = getPreviousDay(mostRecentMarketDay);
     mostRecentMarketDay = getMostRecentMarketOpenDay(mostRecentMarketDay);
@@ -47,7 +89,11 @@ router.post("/getMostRecentOneDayPrices", async (req, res) => {
   // if date is not today, OR it's not within market hours, put in 4pm for mostRecentMarketTime. otherwise give it right now.
 
   // Case 1. if it's before market hours, if it's past 4pm, or if recent market day is another day, set most recent market time to 4pm
-  if (isBeforeMarketHours || now.getUTCHours() > 20 || now.getUTCDate() != mostRecentMarketDay.getUTCDate()) {
+  if (
+    isBeforeMarketHours ||
+    now.getUTCHours() > 20 ||
+    now.getUTCDate() != mostRecentMarketDay.getUTCDate()
+  ) {
     console.log("MOST RECENT MARKET DAY", mostRecentMarketDay);
     timeframeClose = getMillisecondsForTime(mostRecentMarketDay, 20, 0);
   }
