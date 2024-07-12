@@ -22,7 +22,7 @@ function getMillisecondsForTime(dateString, hour, minute) {
   return date.getTime();
 }
 
-router.post("closeEndpoint", async (req, res) => {
+router.post("/closeEndpoint", async (req, res) => {
   console.log("dfsghfdsghgdfh");
   const { ticker } = req;
   const prices = {};
