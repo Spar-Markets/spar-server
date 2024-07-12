@@ -31,24 +31,7 @@ router.post("/closeEndpoint", async (req, res) => {
   now = now - 86400000;
   twoClosesAgo = getMostRecentMarketOpenDay(now);
 
-  // Case 1. if it's before market hours, if it's past 4pm, or if recent market day is another day, set most recent market time to 4pm
-  if (
-    isBeforeMarketHours ||
-    now.getUTCHours() > 20 ||
-    now.getUTCDate() != twoClosesAgo.getUTCDate()
-  ) {
-    console.log("MOST RECENT MARKET DAY", mostRecentMarketDay);
-    timeframeClose = getMillisecondsForTime(twoClosesAgo, 20, 0);
-  }
-
-  // Case 2. if it's within market hours on the same market day, set most recent market time to right now
-  else {
-    timeframeClose = getMillisecondsForTime(
-      twoClosesAgo,
-      now.getUTCHours(),
-      now.getUTCMinutes()
-    );
-  }
+  const timeframeClose = getMillisecondsForTime(twoClosesAgo, 20, 0);
 
   const timeframeOpen = getMillisecondsForTime(twoClosesAgo, 13, 30); //WHY IS THIS 9 ALL THE SUDDEN????
 
