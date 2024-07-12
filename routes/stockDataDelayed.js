@@ -27,7 +27,7 @@ router.post("/closeEndpoint", async (req, res) => {
   const { ticker } = req;
   const prices = {};
 
-  const now = new Date(Date.now());
+  now = new Date(Date.now());
   now = now - 86400000;
   twoClosesAgo = getMostRecentMarketOpenDay(now);
 
