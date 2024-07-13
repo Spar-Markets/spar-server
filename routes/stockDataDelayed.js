@@ -52,7 +52,6 @@ router.post("/closeEndpoint", async (req, res) => {
     console.log("Polygon URL request in close: " + url);
 
     const response = await axios.get(url);
-    console.log("Close response", response);
     const results = response.data.results || [];
 
     if (results.length === 0) {
