@@ -66,18 +66,13 @@ router.post("/closeEndpoint", async (req, res) => {
 
     // Get the last price from the results
     const closePrice = results[0].close; // 'c' represents the closing price
-    const closeDate = results[0].from; // 'c' represents the closing price
 
     res.status(200).json({
       ticker: response.data.ticker,
-      closeDate: closeDate,
       lastPrice: closePrice,
     });
-  } catch (error) {
-    console.error(error);
-    res
-      .status(500)
-      .json({ error: "An error occurred while processing the request." });
+  } catch {
+    console.log("THERE is an ERROR in closeEndpoint");
   }
 });
 
