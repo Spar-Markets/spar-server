@@ -68,22 +68,20 @@ stockEmitter.on("newMatch", async (newMatch) => {
 
   // 2. lookup the corresponding socket connections in userMatchmakingList
   for (let userID of userIDs) {
-    const activeMatchmakingSocket = userMatchmakingList[userID];
+    const activeMatchmakingSockets = userMatchmakingList[userID];
     // 3. IF any active connections: send the newly created match to them
-    if (activeMatchmakingSocket) {
+    if (activeMatchmakingSockets) {
       // send them the match
       console.log("MATCH CREATION - INSIDE AREA TO SEND TO CLIENT");
-      socket.send({
-        type: "matchCreated",
-        newMatch: newMatch,
-      });
-      // remove socket from userMatchmakingList
-      userMatchmakingList[userID].splice(index, 1);
-
-      // if no clients are currently interested in match, delete it
-      if (userMatchmakingList[userID].length == 0) {
-        delete userMatchmakingList[userID];
+      for (const socket of activeMatchmakingSockets) {
+        socket.send({
+          type: "matchCreated",
+          newMatch: newMatch,
+        });
       }
+
+      // delete it ong
+      delete userMatchmakingList[userID];
     }
   }
 });
