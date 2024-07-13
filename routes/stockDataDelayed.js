@@ -24,7 +24,6 @@ function getMillisecondsForTime(dateString, hour, minute) {
 
 router.post("/closeEndpoint", async (req, res) => {
   console.log("dfsghfdsghgdfh");
-  console.log(req);
   const { ticker } = req.body;
   const prices = {};
 
@@ -37,7 +36,7 @@ router.post("/closeEndpoint", async (req, res) => {
   const timeframeOpen = getMillisecondsForTime(twoClosesAgo, 13, 30); //WHY IS THIS 9 ALL THE SUDDEN????
   const range = "1/hour";
   const url = `https://api.polygon.io/v2/aggs/ticker/${ticker}/range/${range}/${timeframeOpen}/${timeframeClose}?adjusted=true&sort=asc&limit=49999&apiKey=${polygonKey}`;
-  console.log("Polygon URL request: " + url);
+  console.log("Polygon URL request in close: " + url);
   const response = await axios.get(url);
   prices[response.data.ticker] = [];
 
