@@ -25,7 +25,7 @@ function getMillisecondsForTime(dateString, hour, minute) {
 router.post("/closeEndpoint", async (req, res) => {
   console.log("dfsghfdsghgdfh");
   console.log(req);
-  const ticker = req.ticker;
+  const { ticker } = req.body;
   const prices = {};
 
   now = new Date(Date.now());
