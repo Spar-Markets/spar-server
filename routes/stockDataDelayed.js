@@ -35,7 +35,7 @@ router.post("/closeEndpoint", async (req, res) => {
   const timeframeClose = getMillisecondsForTime(twoClosesAgo, 20, 0);
 
   const timeframeOpen = getMillisecondsForTime(twoClosesAgo, 13, 30); //WHY IS THIS 9 ALL THE SUDDEN????
-
+  const range = "1/hour";
   const url = `https://api.polygon.io/v2/aggs/ticker/${ticker}/range/${range}/${timeframeOpen}/${timeframeClose}?adjusted=true&sort=asc&limit=49999&apiKey=${polygonKey}`;
   console.log("Polygon URL request: " + url);
   const response = await axios.get(url);
