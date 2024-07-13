@@ -31,7 +31,6 @@ function closeformatDate(date) {
 }
 
 // Assuming polygonKey and other required variables are defined somewhere in your code
-
 router.post("/closeEndpoint", async (req, res) => {
   try {
     console.log("Close Endpoint called");
@@ -54,17 +53,12 @@ router.post("/closeEndpoint", async (req, res) => {
     console.log("Polygon URL request in close: " + url);
 
     const response = await axios.get(url);
-    const results = response.data.results || [];
 
-    if (results.length === 0) {
-      throw new Error("No results returned from the API");
-    }
-
-    // Get the last price from the results
-    const closePrice = results[0].close;
+    // Get the last price from the response data
+    const closePrice = response.data.close;
 
     res.status(200).json({
-      ticker: response.data.ticker,
+      ticker: response.data.symbol,
       lastPrice: closePrice,
     });
   } catch (error) {
