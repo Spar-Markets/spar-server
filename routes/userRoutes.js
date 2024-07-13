@@ -394,4 +394,37 @@ router.post("/acceptFollowRequest", async (req, res) => {
   }
 });
 
+router.post("/updateUserProfile", async (req, res) => {
+  const { userID, newUsername, newBio } = req.body;
+
+  try {
+    const updatedUser = await User.findOneAndUpdate(
+      { userID: userID },
+      {
+        $set: {
+          username: newUsername,
+          bio: newBio,
+        },
+      }
+    );
+
+    if (!updatedUser) {
+      return res.status(404).send("User to update was not found");
+    }
+
+    res.status(200).json({
+      message: "User profile successfully updated.",
+    });
+  } catch (error) {
+    // check if username is NOT unique, since that would throw error 11000
+    if (err.code === 11000 && err.keyPattern && err.keyPattern.username) {
+      return res.status(409).json({ message: "Username is already taken." });
+    }
+    // handle other errors
+    return res
+      .status(500)
+      .json({ message: "Server error when trying to update username/bio." });
+  }
+});
+
 module.exports = router;

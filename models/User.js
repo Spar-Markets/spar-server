@@ -17,6 +17,10 @@ const userSchema = new mongoose.Schema({
     required: true,
     unique: false,
   },
+  bio: {
+    type: String,
+    default: "",
+  },
   balance: {
     type: Number,
     default: 0.0,
