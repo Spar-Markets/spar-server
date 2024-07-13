@@ -241,13 +241,16 @@ function setupWebSocket(server) {
 
       // CASE 1: Matchmaking
       if (object.type == "matchmaking") {
+        console.log("Matchmaking socket pinged.");
         // if userMatchMaking List already exists, push socket connection to it
+        console.log("Current userMatchmakingList before:", userMatchmakingList);
         if (userMatchmakingList[object.userID]) {
           userMatchmakingList[object.userID].push(socket);
         } else {
           // otherwise, create it
           userMatchmakingList[object.userID] = [socket];
         }
+        console.log("After userMatchmakingList:", userMatchmakingList);
 
         // CASE 2: Interested in stocks
       } else if (object.matchID) {
