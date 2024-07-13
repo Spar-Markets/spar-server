@@ -59,7 +59,7 @@ stockEmitter.on("change", async (change) => {
 });
 
 /**
- * Handle new match event
+ * Handle new match event.
  */
 stockEmitter.on("newMatch", async (change) => {
   console.log("Stock emitter NEW MATCH was hit.");
