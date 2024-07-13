@@ -100,9 +100,6 @@ const finishMatch = async (matchToFinish) => {
   const newSkillRatingWinner = rankingAlgoResults.newEloA;
   const newSkillRatingLoser = rankingAlgoResults.newEloB;
 
-  console.log("STEP 3: newSkillRatingWinner", newSkillRatingWinner);
-  console.log("STEP 3: newSkillRatingLoser", newSkillRatingLoser);
-
   // update rank for each player
   winnerUser.skillRating = newSkillRatingWinner;
   loserUser.skillRating = newSkillRatingLoser;
@@ -149,9 +146,6 @@ const finishMatch = async (matchToFinish) => {
   // iterate over activematches field for each user until you find the match in question
   // delete that match
 
-  console.log("STEP 5: DELETE MATCH FROM ACTIVE MATCHES. STARTING NOW.");
-  console.log("We boutta delete matchID from user active matches:", matchID);
-  console.log("We boutta delete it from this user:", winnerUserID);
   const winnerWithRemovedMatchID = await User.updateOne(
     { userID: winnerUserID },
     { $pull: { activematches: matchID } }
@@ -160,11 +154,6 @@ const finishMatch = async (matchToFinish) => {
     { userID: loserUserID },
     { $pull: { activematches: matchID } }
   );
-  console.log(
-    "winnerWithRemovedMatchID",
-    winnerWithRemovedMatchID.activeMatches
-  );
-  console.log("loserWithRemovedMatchID", loserWithRemovedMatchID.activeMatches);
 
   // 6. put match in each users match history
   // TODO: make custom match object to store in history.

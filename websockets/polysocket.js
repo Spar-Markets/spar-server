@@ -57,6 +57,7 @@ stockEmitter.on("change", async (change) => {
    * Handle new match event
    */
   stockEmitter.on("newMatch", async (change) => {
+    console.log("Stock emitter NEW MATCH was hit.");
     // 1. grab the userIDs from the newly created match
     const userIDs = [
       change.fullDocument.user1.userID,
@@ -69,6 +70,7 @@ stockEmitter.on("change", async (change) => {
       // 3. IF any active connections: send the newly created match to them
       if (activeMatchmakingSocket) {
         // send them the match
+        console.log("MATCH CREATION - INSIDE AREA TO SEND TO CLIENT");
         socket.send({
           type: "matchCreated",
           newMatch: change.fullDocument,
@@ -120,6 +122,7 @@ async function changeStream() {
       if (change.operationType == "insert") {
         // this means new match was created
         // emit event that new match was created
+        console.log("RECOGNIZED CHANGE OPERATION TYPE AS INSERT");
         stockEmitter.emit("newMatch", change.fullDocument);
       } else if (change.operationType == "delete") {
         finishMatch(change.fullDocumentBeforeChange);
