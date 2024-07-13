@@ -62,7 +62,7 @@ router.post("/closeEndpoint", async (req, res) => {
     }
 
     // Get the last price from the results
-    const lastPrice = results[results.length - 1].c; // 'c' represents the closing price
+    const lastPrice = results[results.length - 1].o; // 'c' represents the closing price
 
     res
       .status(200)
