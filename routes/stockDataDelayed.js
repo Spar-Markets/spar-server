@@ -28,18 +28,32 @@ router.post("/closeEndpoint", async (req, res) => {
     const { ticker } = req.body;
 
     let now = new Date(Date.now());
+
+    // const isSameDay =
+    //   now.getFullYear() === mostRecentMarketDay.getFullYear() &&
+    //   now.getMonth() === mostRecentMarketDay.getMonth() &&
+    //   now.getDate() === mostRecentMarketDay.getDate();
+    // const isBeforeMarketHours =
+    //   now.getUTCHours() < 13 || (now.getUTCHours() == 9 && now.getMinutes() < 45);
+    // if (isSameDay && isBeforeMarketHours) {
+    //   mostRecentMarketDay = getPreviousDay(mostRecentMarketDay);
+    //   mostRecentMarketDay = getMostRecentMarketOpenDay(mostRecentMarketDay);
+    // }
+
     now.setDate(now.getDate() - 2); // Subtract one day
-
+    console.log("should be two days ago", now);
     const twoClosesAgo = getMostRecentMarketOpenDay(now);
-    const timeframeClose = getMillisecondsForTime(twoClosesAgo, 20, 0); // 4:00 PM
-    const timeframeOpen = getMillisecondsForTime(twoClosesAgo, 9, 30); // 9:30 AM
 
-    const range = "1/hour";
+    const timeframeClose = getMillisecondsForTime(twoClosesAgo, 20, 0); // 4:00 PM
+    const timeframeOpen = getMillisecondsForTime(twoClosesAgo, 19, 30); // 9:30 AM
+
+    const range = "5/minute";
     const url = `https://api.polygon.io/v2/aggs/ticker/${ticker}/range/${range}/${timeframeOpen}/${timeframeClose}?adjusted=true&sort=asc&limit=49999&apiKey=${polygonKey}`;
+    const url1 = `https://api.polygon.io/v1/open-close/AAPL/2024-07-11?adjusted=true&apiKey=${polygonKey}`;
+
     console.log("Polygon URL request in close: " + url);
 
     const response = await axios.get(url);
-    console.log("Close response", response);
     const results = response.data.results || [];
 
     if (results.length === 0) {
@@ -49,7 +63,7 @@ router.post("/closeEndpoint", async (req, res) => {
     }
 
     // Get the last price from the results
-    const lastPrice = results[results.length - 1].c; // 'c' represents the closing price
+    const lastPrice = results[results.length - 1].o; // 'c' represents the closing price
 
     res
       .status(200)
