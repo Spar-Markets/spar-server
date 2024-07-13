@@ -74,10 +74,12 @@ stockEmitter.on("newMatch", async (newMatch) => {
       // send them the match
       console.log("MATCH CREATION - INSIDE AREA TO SEND TO CLIENT");
       for (const socket of activeMatchmakingSockets) {
-        socket.send({
-          type: "matchCreated",
-          newMatch: newMatch,
-        });
+        socket.send(
+          JSON.stringify({
+            type: "matchCreated",
+            newMatch: newMatch,
+          })
+        );
       }
 
       // delete it ong
