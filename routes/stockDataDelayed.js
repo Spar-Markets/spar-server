@@ -28,9 +28,22 @@ router.post("/closeEndpoint", async (req, res) => {
     const { ticker } = req.body;
 
     let now = new Date(Date.now());
-    now.setDate(now.getDate() - 2); // Subtract one day
 
+    // const isSameDay =
+    //   now.getFullYear() === mostRecentMarketDay.getFullYear() &&
+    //   now.getMonth() === mostRecentMarketDay.getMonth() &&
+    //   now.getDate() === mostRecentMarketDay.getDate();
+    // const isBeforeMarketHours =
+    //   now.getUTCHours() < 13 || (now.getUTCHours() == 9 && now.getMinutes() < 45);
+    // if (isSameDay && isBeforeMarketHours) {
+    //   mostRecentMarketDay = getPreviousDay(mostRecentMarketDay);
+    //   mostRecentMarketDay = getMostRecentMarketOpenDay(mostRecentMarketDay);
+    // }
+
+    now.setDate(now.getDate() - 2); // Subtract one day
+    console.log("should be two days ago", now);
     const twoClosesAgo = getMostRecentMarketOpenDay(now);
+
     const timeframeClose = getMillisecondsForTime(twoClosesAgo, 20, 0); // 4:00 PM
     const timeframeOpen = getMillisecondsForTime(twoClosesAgo, 9, 30); // 9:30 AM
 
