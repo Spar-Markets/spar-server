@@ -40,7 +40,7 @@ router.post("/closeEndpoint", async (req, res) => {
   const response = await axios.get(url);
   prices[response.data.ticker] = [];
 
-  res.sendStatus(response);
+  res.send(response);
 });
 
 // Eendpoint to get one day stock prices for most recent day where market is open
