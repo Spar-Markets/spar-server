@@ -61,13 +61,10 @@ stockEmitter.on("change", async (change) => {
 /**
  * Handle new match event.
  */
-stockEmitter.on("newMatch", async (change) => {
+stockEmitter.on("newMatch", async (newMatch) => {
   console.log("Stock emitter NEW MATCH was hit.");
   // 1. grab the userIDs from the newly created match
-  const userIDs = [
-    change.fullDocument.user1.userID,
-    change.fullDocument.user2.userID,
-  ];
+  const userIDs = [newMatch.user1.userID, newMatch.user2.userID];
 
   // 2. lookup the corresponding socket connections in userMatchmakingList
   for (let userID of userIDs) {
@@ -78,7 +75,7 @@ stockEmitter.on("newMatch", async (change) => {
       console.log("MATCH CREATION - INSIDE AREA TO SEND TO CLIENT");
       socket.send({
         type: "matchCreated",
-        newMatch: change.fullDocument,
+        newMatch: newMatch,
       });
       // remove socket from userMatchmakingList
       userMatchmakingList[userID].splice(index, 1);
