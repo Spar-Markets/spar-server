@@ -105,10 +105,8 @@ async function changeStream() {
 
     changeStream.on("change", (change) => {
       // check whether event is from assets
-      console.log("STEP 1: Receive change from changestream.");
-
       console.log(
-        "polysocket.js change stream change listener got a change here it is: ",
+        "polysocket.js change stream listener got a change here it is: ",
         change
       );
 

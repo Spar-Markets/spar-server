@@ -138,7 +138,12 @@ router.post("/cancelMatchmaking", async (req, res) => {
 
     if (!player) {
       // Player not found, send an error response
-      return res.status(400).json({ message: "Cancel matchmaking failed, because player is not in matchmaking." });
+      return res
+        .status(400)
+        .json({
+          message:
+            "Cancel matchmaking failed, because player is not in matchmaking.",
+        });
     }
 
     // Delete the player from the matchmaking collection
@@ -248,7 +253,6 @@ async function createMatch() {
 setInterval(async () => {
   try {
     await createMatch();
-    console.log("Matchmaking process completed successfully");
   } catch (error) {
     console.error("Error in matchmaking process:", error);
   }
