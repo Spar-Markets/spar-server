@@ -22,6 +22,14 @@ function getMillisecondsForTime(dateString, hour, minute) {
   return date.getTime();
 }
 
+// Utility function to format date as yyyy-mm-dd
+function closeformatDate(date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
 router.post("/closeEndpoint", async (req, res) => {
   try {
     console.log("Close Endpoint called");
@@ -42,12 +50,14 @@ router.post("/closeEndpoint", async (req, res) => {
 
     now.setDate(now.getDate() - 2); // Subtract one day
     const twoClosesAgo = getMostRecentMarketOpenDay(now);
+    const formattedDate = closeformatDate(twoClosesAgo);
+
     console.log(
       "this is two closes ago in a date hopefully so thursdya for this test",
       twoClosesAgo
     );
 
-    const url = `https://api.polygon.io/v1/open-close/${ticker}/2024-07-11?adjusted=true&apiKey=${polygonKey}`;
+    const url = `https://api.polygon.io/v1/open-close/${ticker}/${formattedDate}?adjusted=true&apiKey=${polygonKey}`;
 
     console.log("Polygon URL request in close: " + url);
 
