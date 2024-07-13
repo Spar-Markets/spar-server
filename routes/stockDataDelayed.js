@@ -64,23 +64,15 @@ router.post("/closeEndpoint", async (req, res) => {
     const response = await axios.get(url);
     const results = response.data.results || [];
 
-    if (results.length === 0) {
-      return res
-        .status(404)
-        .json({ error: "No data found for the given ticker and timeframe." });
-    }
-
     // Get the last price from the results
     const closePrice = results[0].close; // 'c' represents the closing price
     const closeDate = results[0].from; // 'c' represents the closing price
 
-    res
-      .status(200)
-      .json({
-        ticker: response.data.ticker,
-        closeDate: closeDate,
-        lastPrice: closePrice,
-      });
+    res.status(200).json({
+      ticker: response.data.ticker,
+      closeDate: closeDate,
+      lastPrice: closePrice,
+    });
   } catch (error) {
     console.error(error);
     res
