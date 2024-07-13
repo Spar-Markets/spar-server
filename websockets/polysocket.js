@@ -53,42 +53,42 @@ stockEmitter.on("change", async (change) => {
     }
   }
 
-  /**
-   * Handle new match event
-   */
-  stockEmitter.on("newMatch", async (change) => {
-    console.log("Stock emitter NEW MATCH was hit.");
-    // 1. grab the userIDs from the newly created match
-    const userIDs = [
-      change.fullDocument.user1.userID,
-      change.fullDocument.user2.userID,
-    ];
-
-    // 2. lookup the corresponding socket connections in userMatchmakingList
-    for (let userID of userIDs) {
-      const activeMatchmakingSocket = userMatchmakingList[userID];
-      // 3. IF any active connections: send the newly created match to them
-      if (activeMatchmakingSocket) {
-        // send them the match
-        console.log("MATCH CREATION - INSIDE AREA TO SEND TO CLIENT");
-        socket.send({
-          type: "matchCreated",
-          newMatch: change.fullDocument,
-        });
-        // remove socket from userMatchmakingList
-        userMatchmakingList[userID].splice(index, 1);
-
-        // if no clients are currently interested in match, delete it
-        if (userMatchmakingList[userID].length == 0) {
-          delete userMatchmakingList[userID];
-        }
-      }
-    }
-  });
-
   console.log(
     "STEP 10: Done sending assets to all connected clients for this match."
   );
+});
+
+/**
+ * Handle new match event
+ */
+stockEmitter.on("newMatch", async (change) => {
+  console.log("Stock emitter NEW MATCH was hit.");
+  // 1. grab the userIDs from the newly created match
+  const userIDs = [
+    change.fullDocument.user1.userID,
+    change.fullDocument.user2.userID,
+  ];
+
+  // 2. lookup the corresponding socket connections in userMatchmakingList
+  for (let userID of userIDs) {
+    const activeMatchmakingSocket = userMatchmakingList[userID];
+    // 3. IF any active connections: send the newly created match to them
+    if (activeMatchmakingSocket) {
+      // send them the match
+      console.log("MATCH CREATION - INSIDE AREA TO SEND TO CLIENT");
+      socket.send({
+        type: "matchCreated",
+        newMatch: change.fullDocument,
+      });
+      // remove socket from userMatchmakingList
+      userMatchmakingList[userID].splice(index, 1);
+
+      // if no clients are currently interested in match, delete it
+      if (userMatchmakingList[userID].length == 0) {
+        delete userMatchmakingList[userID];
+      }
+    }
+  }
 });
 
 async function changeStream() {
