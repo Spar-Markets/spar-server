@@ -28,10 +28,10 @@ router.post("/closeEndpoint", async (req, res) => {
     const { ticker } = req.body;
 
     let now = new Date(Date.now());
-    now.setDate(now.getDate() - 1); // Subtract one day
+    now.setDate(now.getDate() - 2); // Subtract one day
 
     const twoClosesAgo = getMostRecentMarketOpenDay(now);
-    const timeframeClose = getMillisecondsForTime(twoClosesAgo, 16, 0); // 4:00 PM
+    const timeframeClose = getMillisecondsForTime(twoClosesAgo, 20, 0); // 4:00 PM
     const timeframeOpen = getMillisecondsForTime(twoClosesAgo, 9, 30); // 9:30 AM
 
     const range = "1/hour";
