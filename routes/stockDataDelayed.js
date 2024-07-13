@@ -43,10 +43,11 @@ router.post("/closeEndpoint", async (req, res) => {
     now.setDate(now.getDate() - 2); // Subtract one day
     const twoClosesAgo = getMostRecentMarketOpenDay(now);
     console.log(
-      "this is two closes ago in a date hopefully so thursdya for this test"
+      "this is two closes ago in a date hopefully so thursdya for this test",
+      twoClosesAgo
     );
 
-    const url1 = `https://api.polygon.io/v1/open-close/${ticker}/2024-07-11?adjusted=true&apiKey=${polygonKey}`;
+    const url = `https://api.polygon.io/v1/open-close/${ticker}/2024-07-11?adjusted=true&apiKey=${polygonKey}`;
 
     console.log("Polygon URL request in close: " + url);
 
