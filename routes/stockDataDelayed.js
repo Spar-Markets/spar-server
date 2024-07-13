@@ -71,11 +71,16 @@ router.post("/closeEndpoint", async (req, res) => {
     }
 
     // Get the last price from the results
-    const lastPrice = results[results.length - 1].close; // 'c' represents the closing price
+    const closePrice = results[0].close; // 'c' represents the closing price
+    const closeDate = results[0].from; // 'c' represents the closing price
 
     res
       .status(200)
-      .json({ ticker: response.data.ticker, lastPrice: lastPrice });
+      .json({
+        ticker: response.data.ticker,
+        closeDate: closeDate,
+        lastPrice: closePrice,
+      });
   } catch (error) {
     console.error(error);
     res
