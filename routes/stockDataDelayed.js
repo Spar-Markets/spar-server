@@ -41,15 +41,12 @@ router.post("/closeEndpoint", async (req, res) => {
     // }
 
     now.setDate(now.getDate() - 2); // Subtract one day
-    console.log("should be two days ago", now);
     const twoClosesAgo = getMostRecentMarketOpenDay(now);
+    console.log(
+      "this is two closes ago in a date hopefully so thursdya for this test"
+    );
 
-    const timeframeClose = getMillisecondsForTime(twoClosesAgo, 20, 0); // 4:00 PM
-    const timeframeOpen = getMillisecondsForTime(twoClosesAgo, 19, 30); // 9:30 AM
-
-    const range = "5/minute";
-    const url = `https://api.polygon.io/v2/aggs/ticker/${ticker}/range/${range}/${timeframeOpen}/${timeframeClose}?adjusted=true&sort=asc&limit=49999&apiKey=${polygonKey}`;
-    const url1 = `https://api.polygon.io/v1/open-close/AAPL/2024-07-11?adjusted=true&apiKey=${polygonKey}`;
+    const url1 = `https://api.polygon.io/v1/open-close/${ticker}/2024-07-11?adjusted=true&apiKey=${polygonKey}`;
 
     console.log("Polygon URL request in close: " + url);
 
