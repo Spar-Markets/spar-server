@@ -26,23 +26,33 @@ router.post("/closeEndpoint", async (req, res) => {
   try {
     console.log("dfsghfdsghgdfh");
     const { ticker } = req.body;
-    const prices = {};
 
     let now = new Date(Date.now());
     now.setDate(now.getDate() - 1); // Subtract one day
 
     const twoClosesAgo = getMostRecentMarketOpenDay(now);
-    const timeframeClose = getMillisecondsForTime(twoClosesAgo, 20, 0);
-    const timeframeOpen = getMillisecondsForTime(twoClosesAgo, 13, 30);
+    const timeframeClose = getMillisecondsForTime(twoClosesAgo, 16, 0); // 4:00 PM
+    const timeframeOpen = getMillisecondsForTime(twoClosesAgo, 9, 30); // 9:30 AM
 
     const range = "1/hour";
     const url = `https://api.polygon.io/v2/aggs/ticker/${ticker}/range/${range}/${timeframeOpen}/${timeframeClose}?adjusted=true&sort=asc&limit=49999&apiKey=${polygonKey}`;
     console.log("Polygon URL request in close: " + url);
 
     const response = await axios.get(url);
-    prices[response.data.ticker] = response.data.results || [];
+    const results = response.data.results || [];
 
-    res.status(200).json(prices);
+    if (results.length === 0) {
+      return res
+        .status(404)
+        .json({ error: "No data found for the given ticker and timeframe." });
+    }
+
+    // Get the last price from the results
+    const lastPrice = results[results.length - 1].c; // 'c' represents the closing price
+
+    res
+      .status(200)
+      .json({ ticker: response.data.ticker, lastPrice: lastPrice });
   } catch (error) {
     console.error(error);
     res
