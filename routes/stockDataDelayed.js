@@ -30,6 +30,8 @@ function closeformatDate(date) {
   return `${year}-${month}-${day}`;
 }
 
+// Assuming polygonKey and other required variables are defined somewhere in your code
+
 router.post("/closeEndpoint", async (req, res) => {
   try {
     console.log("Close Endpoint called");
@@ -37,23 +39,13 @@ router.post("/closeEndpoint", async (req, res) => {
 
     let now = new Date(Date.now());
 
-    // const isSameDay =
-    //   now.getFullYear() === mostRecentMarketDay.getFullYear() &&
-    //   now.getMonth() === mostRecentMarketDay.getMonth() &&
-    //   now.getDate() === mostRecentMarketDay.getDate();
-    // const isBeforeMarketHours =
-    //   now.getUTCHours() < 13 || (now.getUTCHours() == 9 && now.getMinutes() < 45);
-    // if (isSameDay && isBeforeMarketHours) {
-    //   mostRecentMarketDay = getPreviousDay(mostRecentMarketDay);
-    //   mostRecentMarketDay = getMostRecentMarketOpenDay(mostRecentMarketDay);
-    // }
-
-    now.setDate(now.getDate() - 2); // Subtract one day
+    // Subtract two days (if necessary, adjust based on your market day calculation logic)
+    now.setDate(now.getDate() - 2);
     const twoClosesAgo = getMostRecentMarketOpenDay(now);
     const formattedDate = closeformatDate(twoClosesAgo);
 
     console.log(
-      "this is two closes ago in a date hopefully so thursdya for this test",
+      "This is two closes ago in a date, hopefully Thursday for this test:",
       twoClosesAgo
     );
 
@@ -64,15 +56,21 @@ router.post("/closeEndpoint", async (req, res) => {
     const response = await axios.get(url);
     const results = response.data.results || [];
 
+    if (results.length === 0) {
+      throw new Error("No results returned from the API");
+    }
+
     // Get the last price from the results
-    const closePrice = results[0].close; // 'c' represents the closing price
+    const closePrice = results[0].close;
 
     res.status(200).json({
       ticker: response.data.ticker,
       lastPrice: closePrice,
     });
-  } catch {
-    console.log("THERE is an ERROR in closeEndpoint");
+  } catch (error) {
+    console.error("There is an error in closeEndpoint:", error.message);
+    console.error(error.stack);
+    res.status(500).json({ error: error.message });
   }
 });
 
