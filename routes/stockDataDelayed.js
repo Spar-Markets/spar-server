@@ -23,24 +23,32 @@ function getMillisecondsForTime(dateString, hour, minute) {
 }
 
 router.post("/closeEndpoint", async (req, res) => {
-  console.log("dfsghfdsghgdfh");
-  const { ticker } = req.body;
-  const prices = {};
+  try {
+    console.log("dfsghfdsghgdfh");
+    const { ticker } = req.body;
+    const prices = {};
 
-  now = new Date(Date.now());
-  now = now - 86400000;
-  twoClosesAgo = getMostRecentMarketOpenDay(now);
+    let now = new Date(Date.now());
+    now.setDate(now.getDate() - 1); // Subtract one day
 
-  const timeframeClose = getMillisecondsForTime(twoClosesAgo, 20, 0);
+    const twoClosesAgo = getMostRecentMarketOpenDay(now);
+    const timeframeClose = getMillisecondsForTime(twoClosesAgo, 20, 0);
+    const timeframeOpen = getMillisecondsForTime(twoClosesAgo, 13, 30);
 
-  const timeframeOpen = getMillisecondsForTime(twoClosesAgo, 13, 30); //WHY IS THIS 9 ALL THE SUDDEN????
-  const range = "1/hour";
-  const url = `https://api.polygon.io/v2/aggs/ticker/${ticker}/range/${range}/${timeframeOpen}/${timeframeClose}?adjusted=true&sort=asc&limit=49999&apiKey=${polygonKey}`;
-  console.log("Polygon URL request in close: " + url);
-  const response = await axios.get(url);
-  prices[response.data.ticker] = [];
+    const range = "1/hour";
+    const url = `https://api.polygon.io/v2/aggs/ticker/${ticker}/range/${range}/${timeframeOpen}/${timeframeClose}?adjusted=true&sort=asc&limit=49999&apiKey=${polygonKey}`;
+    console.log("Polygon URL request in close: " + url);
 
-  res.status(200).json(response);
+    const response = await axios.get(url);
+    prices[response.data.ticker] = response.data.results || [];
+
+    res.status(200).json(prices);
+  } catch (error) {
+    console.error(error);
+    res
+      .status(500)
+      .json({ error: "An error occurred while processing the request." });
+  }
 });
 
 // Eendpoint to get one day stock prices for most recent day where market is open
