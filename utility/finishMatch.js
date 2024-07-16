@@ -17,7 +17,7 @@ const rankingAlgo = require("../utility/rankingAlgo");
 const finishMatch = async (matchToFinish) => {
   // 1. Get the matchID. We already gyatt matchToFinish
   const matchID = matchToFinish.matchID;
-  console.log("finishing match", matchToFinish);
+  console.log("STEP 3: Running finishing match at", Date.now(), matchToFinish);
 
   // 2. determine winner
   // calculate portfolio value of each user

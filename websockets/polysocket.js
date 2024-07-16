@@ -106,7 +106,8 @@ async function changeStream() {
     changeStream.on("change", (change) => {
       // check whether event is from assets
       console.log(
-        "polysocket.js change stream listener got a change here it is: ",
+        "STEP 1: Change stream listener got an event",
+        Date.now(),
         change
       );
 
@@ -120,6 +121,10 @@ async function changeStream() {
         console.log("RECOGNIZED CHANGE OPERATION TYPE AS INSERT");
         stockEmitter.emit("newMatch", change.fullDocument);
       } else if (change.operationType == "delete") {
+        console.log(
+          "STEP 2: Recognized change operation type as delete. About to run finishMatch.",
+          Date.now()
+        );
         finishMatch(change.fullDocumentBeforeChange);
         // here
         // grab userIDs of match
