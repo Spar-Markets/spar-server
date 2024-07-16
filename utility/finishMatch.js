@@ -154,6 +154,8 @@ const finishMatch = async (matchToFinish) => {
     { userID: loserUserID },
     { $pull: { activematches: matchID } }
   );
+  console.log("AFTER MATCH DELETION, winner user:", winnerWithRemovedMatchID);
+  console.log("AFTER MATCH DELETION, loser user:", loserWithRemovedMatchID);
 
   // 6. put match in each users match history
   // TODO: make custom match object to store in history.
