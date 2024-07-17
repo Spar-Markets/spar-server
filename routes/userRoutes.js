@@ -429,7 +429,7 @@ router.post("/updateUserProfile", async (req, res) => {
 
 router.post("/getPastMatches", async (req, res) => {
   const { userID } = req.body;
-
+  console.log("Hitting endpoint");
   try {
     const pastMatches = await MatchHistory.findOne({ userID: userID });
 
