@@ -427,4 +427,20 @@ router.post("/updateUserProfile", async (req, res) => {
   }
 });
 
+router.post("/getPastMatches", async (req, res) => {
+  const { userID } = req.body;
+
+  try {
+    const pastMatches = await MatchHistory.findOne({ userID: userID });
+
+    if (!pastMatches) {
+      return res.status(404).send("No match history found");
+    }
+
+    res.status(200).json({ message: "Match history found", pastMatches });
+  } catch (error) {
+    return res.status(500).send("Server error trying to get Match history");
+  }
+});
+
 module.exports = router;
