@@ -268,10 +268,8 @@ async function createMatch() {
 
           try {
             const [response] = await client.createTask({ parent, task });
-            res.status(200).send(`Created task ${response.name}`);
           } catch (error) {
             console.error(error);
-            res.status(500).send('Error creating task');
           }
           /**
            * End of Google match task creation. c
@@ -289,7 +287,14 @@ async function createMatch() {
 router.post("/deleteMatch", async (req, res) => {
   const { matchID } = req.body;
   // delete from mongo
-  console.log("GOOGLE CLOUD TASK: Delete from Mongo:", matchID);
+  console.log("GOOGLE CLOUD TASK: Delete from Mongo:", matchID, new Date(Date.now()));
+
+  try {
+    Match.deleteOne({ matchID: matchID });
+  } catch (error) {
+    console.error("Error automatically deleting document:", error);
+  }
+
 });
 
 // Run the matchmaking process every 10 seconds
