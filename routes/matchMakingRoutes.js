@@ -10,6 +10,9 @@ const generateRandomString = require("../utility/generateRandomString");
 const schedule = require("node-schedule");
 const { polygonKey } = require("../config/constants");
 
+const { CloudTasksClient } = require('@google-cloud/tasks');
+const { serverUrl } = require("../config/constants/serverUrl");
+
 // Define routes here
 
 // Returns Users Matches
@@ -173,12 +176,16 @@ async function createMatch() {
           const matchID = generateRandomString(45);
           console.log("ID", matchID);
 
+          // determine createdAt time and endAt time
+          const createdAt = new Date(Date.now());
+          const endAt = new Date(Date.now() + players[i].matchLengthInt * 1000);
+
           // Insert the matched users into the "matches" collection
           const match = new Match({
             matchID: matchID,
             timeframe: players[i].matchLengthInt,
-            endAt: new Date(Date.now() + players[i].matchLengthInt * 1000),
-            createdAt: new Date(Date.now()),
+            endAt: endAt,
+            createdAt: createdAt,
             matchType: players[i].matchType,
             wagerAmt: players[i].entryFeeInt,
             user1: {
@@ -233,13 +240,41 @@ async function createMatch() {
             _id: { $in: [players[i]._id, players[j]._id] },
           });
 
-          // Function to schedule tasks
-          // const scheduleTasks = async () => {
-          //   console.log("scheduling match end");
-          //   const endDate = new Date(match.endAt);
-          //   schedule.scheduleJob(endDate, () => finishMatch(match.matchID));
-          // };
-          // scheduleTasks();
+          /**
+           * Google cloud task creation to delete match.
+           */
+          const project = "sparmarkets";
+          const queue = "deleteMatchQueue";
+          const location = "us-east4";
+          const url = `${serverUrl}/deleteMatch`;
+
+          const parent = client.queuePath(project, location, queue);
+
+          const task = {
+            httpRequest: {
+              httpMethod: 'POST',
+              url: url,
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: Buffer.from(JSON.stringify({ matchID })).toString('base64'),
+            },
+            scheduleTime: {
+              seconds: Math.floor(endAt.getTime() / 1000),
+            },
+          };
+
+          try {
+            const [response] = await client.createTask({ parent, task });
+            res.status(200).send(`Created task ${response.name}`);
+          } catch (error) {
+            console.error(error);
+            res.status(500).send('Error creating task');
+          }
+          /**
+           * End of Google match task creation.
+           */
+
           console.log(`Match found and created: ${matchID}`);
         }
       }
@@ -248,6 +283,12 @@ async function createMatch() {
     console.log("Error in matchmaking", error);
   }
 }
+
+router.post("/deleteMatch", async (req, res) => {
+  const { matchID } = req.body;
+  // delete from mongo
+  console.log("GOOGLE CLOUD TASK: Delete from Mongo:", matchID);
+});
 
 // Run the matchmaking process every 10 seconds
 setInterval(async () => {
