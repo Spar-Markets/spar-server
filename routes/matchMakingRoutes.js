@@ -11,7 +11,7 @@ const schedule = require("node-schedule");
 const { polygonKey } = require("../config/constants");
 
 const { CloudTasksClient } = require('@google-cloud/tasks');
-const { serverUrl } = require("../config/constants/serverUrl");
+const { serverUrl } = require("../config/constants");
 
 // Define routes here
 
