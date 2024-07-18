@@ -290,11 +290,18 @@ router.post("/deleteMatch", async (req, res) => {
   console.log("GOOGLE CLOUD TASK: Delete from Mongo:", matchID, new Date(Date.now()));
 
   try {
-    Match.deleteOne({ matchID: matchID });
+    const result = await Match.deleteOne({ matchID: matchID });
+    if (result.deletedCount === 0) {
+      console.error("No match found with the given matchID");
+      return res.status(404).json({ message: "Match not found" });
+    } else {
+      console.log("Match deleted successfully at", new Date(Date.now()));
+      res.status(200).json({ message: "Match deleted successfully" });
+    }
   } catch (error) {
     console.error("Error automatically deleting document:", error);
+    res.status(500).json({ message: "Internal server error" });
   }
-
 });
 
 // Run the matchmaking process every 10 seconds
