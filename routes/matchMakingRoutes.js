@@ -272,7 +272,7 @@ async function createMatch() {
             res.status(500).send('Error creating task');
           }
           /**
-           * End of Google match task creation.
+           * End of Google match task creation. c
            */
 
           console.log(`Match found and created: ${matchID}`);
