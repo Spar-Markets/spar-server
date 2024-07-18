@@ -243,7 +243,7 @@ async function createMatch() {
           });
 
           /**
-           * Google cloud task creation to delete match.
+           * Google cloud task creation to delete match
            */
           const project = "sparmarkets"
           const queue = "deleteMatchQueue";
