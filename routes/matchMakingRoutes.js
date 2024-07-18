@@ -13,6 +13,8 @@ const { polygonKey } = require("../config/constants");
 const { CloudTasksClient } = require('@google-cloud/tasks');
 const { serverUrl } = require("../config/constants");
 
+const client = new CloudTasksClient();
+
 // Define routes here
 
 // Returns Users Matches
@@ -243,7 +245,7 @@ async function createMatch() {
           /**
            * Google cloud task creation to delete match.
            */
-          const project = "sparmarkets";
+          const project = "sparmarkets"
           const queue = "deleteMatchQueue";
           const location = "us-east4";
           const url = `${serverUrl}/deleteMatch`;
