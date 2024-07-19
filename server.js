@@ -31,6 +31,15 @@ const PORT = process.env.PORT || 3000;
 
 app.use(bodyParser.json());
 
+// Decode base64 Google Cloud encoded credentials on Heroku
+if (process.env.GOOGLE_APPLICATION_CREDENTIALS) {
+  const base64Credentials = process.env.GOOGLE_APPLICATION_CREDENTIALS;
+  const jsonCredentials = Buffer.from(base64Credentials, 'base64').toString('utf-8');
+  const fs = require('fs');
+  fs.writeFileSync('/tmp/service-account-file.json', jsonCredentials);
+  process.env.GOOGLE_APPLICATION_CREDENTIALS = '/tmp/service-account-file.json';
+}
+
 // use routes
 app.use(balanceRoutes);
 app.use(matchMakingRoutes);
