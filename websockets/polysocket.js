@@ -26,7 +26,7 @@ function stringToArrayBuffer(str) {
 stockEmitter.on("change", async (change) => {
   console.log("STEP 5: Stock emitter received CHANGES");
 
-  // conditional for whether it is a new match or a change in assets
+  // add a section to send updated buying power here
 
   // Get object id
   const objectID = change.documentKey._id;

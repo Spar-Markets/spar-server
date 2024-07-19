@@ -1,12 +1,12 @@
 const express = require("express");
 const router = express.Router();
-const waitListUser = require("../models/waitListUser.js");
 const { sparDB } = require("../config/mongoConnection.js");
+const WaitListUser = require("../models/WaitListUser.js");
 
-router.post("addToWaitlist", async (req, res) => {
+router.post("/addToWaitlist", async (req, res) => {
   const { email } = req.body;
   if (email) {
-    const waitListUser = new User({
+    const waitListUser = new WaitListUser({
       email: String(email),
     });
     await waitListUser.save();
@@ -16,7 +16,7 @@ router.post("addToWaitlist", async (req, res) => {
   }
 });
 
-router.get("fetchWaitlist", async (req, res) => {
+/*router.get("/fetchWaitlist", async (req, res) => {
   try {
     const collection = sparDB.collection("waitList"); // Replace 'yourCollectionName' with your actual collection name
     const count = await collection.countDocuments();
@@ -25,6 +25,6 @@ router.get("fetchWaitlist", async (req, res) => {
     console.error("Error counting documents:", error);
     res.status(500).send({ message: "Internal Server Error" });
   }
-});
+});*/
 
 module.exports = router;
