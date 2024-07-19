@@ -4,6 +4,7 @@ require("dotenv").config();
 
 const express = require("express");
 const bodyParser = require("body-parser");
+const cors = require("cors");
 
 const {
   setupPolySocket,
@@ -34,11 +35,21 @@ app.use(bodyParser.json());
 // Decode base64 Google Cloud encoded credentials on Heroku
 if (process.env.GOOGLE_APPLICATION_CREDENTIALS) {
   const base64Credentials = process.env.GOOGLE_APPLICATION_CREDENTIALS;
-  const jsonCredentials = Buffer.from(base64Credentials, 'base64').toString('utf-8');
-  const fs = require('fs');
-  fs.writeFileSync('/tmp/service-account-file.json', jsonCredentials);
-  process.env.GOOGLE_APPLICATION_CREDENTIALS = '/tmp/service-account-file.json';
+  const jsonCredentials = Buffer.from(base64Credentials, "base64").toString(
+    "utf-8"
+  );
+  const fs = require("fs");
+  fs.writeFileSync("/tmp/service-account-file.json", jsonCredentials);
+  process.env.GOOGLE_APPLICATION_CREDENTIALS = "/tmp/service-account-file.json";
 }
+
+app.use(
+  cors({
+    origin: "http://localhost:5173", // Allow requests from this origin
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"], // Allow these methods
+    allowedHeaders: ["Content-Type", "Authorization"], // Allow these headers
+  })
+);
 
 // use routes
 app.use(balanceRoutes);
