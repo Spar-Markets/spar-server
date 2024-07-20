@@ -32,6 +32,8 @@ const PORT = process.env.PORT || 3000;
 
 app.use(bodyParser.json());
 
+app.use(cors());
+
 // Decode base64 Google Cloud encoded credentials on Heroku
 if (process.env.GOOGLE_APPLICATION_CREDENTIALS) {
   const base64Credentials = process.env.GOOGLE_APPLICATION_CREDENTIALS;
@@ -42,14 +44,6 @@ if (process.env.GOOGLE_APPLICATION_CREDENTIALS) {
   fs.writeFileSync("/tmp/service-account-file.json", jsonCredentials);
   process.env.GOOGLE_APPLICATION_CREDENTIALS = "/tmp/service-account-file.json";
 }
-
-app.use(
-  cors({
-    origin: "http://localhost:5173", // Allow requests from this origin
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"], // Allow these methods
-    allowedHeaders: ["Content-Type", "Authorization"], // Allow these headers
-  })
-);
 
 // use routes
 app.use(balanceRoutes);
