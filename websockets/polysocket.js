@@ -23,7 +23,7 @@ function stringToArrayBuffer(str) {
 /**
  * Handle changes to assets and distribute to websockets
  */
-stockEmitter.on("changAssets", async (change) => {
+stockEmitter.on("changeAssets", async (change) => {
   console.log("STEP 5: Stock emitter received CHANGES");
   console.log("STEP 6: this isn't actually a step")
 
