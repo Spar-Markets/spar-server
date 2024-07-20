@@ -30,7 +30,7 @@ router.post("/getUserMatches", async function (req, res) {
   }
 });
 
-// Returns one match to the user as a match object
+// Returns one match to the user as a match object.
 router.post("/getMatchData", async function (req, res) {
   try {
     const { matchID } = req.body;
@@ -80,12 +80,16 @@ router.post("/getMatchData", async function (req, res) {
 // Inputs user into the mathcmkaing database
 router.post("/userToMatchmaking", async (req, res) => {
   try {
-    const { username, userID, skillRating, entryFee, matchLength, matchType } =
+    const { username, userID, entryFee, matchLength, matchType } =
       req.body;
 
     const entryFeeInt = parseInt(entryFee);
 
     const matchLengthInt = parseInt(matchLength);
+
+    // Get skill rating
+    const user = await User.findOne({ userID: userID }, { skillRating: 1, _id: 0 });
+    const skillRating = user.skillRating;
 
     const newPlayer = new Player({
       username,

@@ -161,15 +161,21 @@ const finishMatch = async (matchToFinish) => {
   // TODO: make custom match object to store in history.
   //       since each object is pegged to each user, we can clarify which is "you" and which is "opponent"
   //       we can also have a field for whether they won or lost
+  const matchHistoryObject = {
+    ...matchToFinish,
+    user1FinalValue: user1PortfolioValue,
+    user2FinalValue: user2PortfolioValue
+  }
+
   try {
     const resultWinner = await MatchHistory.updateOne(
       { userID: winnerUserID },
-      { $push: { pastMatches: matchToFinish } },
+      { $push: { pastMatches: matchHistoryObject } },
       { upsert: true }
     );
     const resultLoser = await MatchHistory.updateOne(
       { userID: loserUserID },
-      { $push: { pastMatches: matchToFinish } },
+      { $push: { pastMatches: matchHistoryObject } },
       { upsert: true }
     );
   } catch (error) {
