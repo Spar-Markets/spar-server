@@ -87,20 +87,21 @@ stockEmitter.on("newMatch", async (newMatch) => {
  * Handle updated buyingPower event and distribute to websockets.
  */
 stockEmitter.on("changeBuyingPower", async (change) => {
-  match = change.fullDocument;
+  console.log("Changed buying power. Here is the change:", change);
+  // match = change.fullDocument;
 
-  buyingPowerObject = {
-    type: "buyingPowerUpdate",
-    newBuyingPower: change.updateDescription.updatedFields.buyingPower
-  }
+  // buyingPowerObject = {
+  //   type: "buyingPowerUpdate",
+  //   newBuyingPower: change.updateDescription.updatedFields.buyingPower
+  // }
 
-  dataToSend = JSON.stringify(buyingPowerObject);
+  // dataToSend = JSON.stringify(buyingPowerObject);
 
-  if (matchClientList[match.matchID]) {
-    for (socket of matchClientList[match.matchID]) {
-      socket.send(dataToSend);
-    }
-  }
+  // if (matchClientList[match.matchID]) {
+  //   for (socket of matchClientList[match.matchID]) {
+  //     socket.send(dataToSend);
+  //   }
+  // }
 })
 
 async function changeStream() {
