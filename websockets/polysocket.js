@@ -25,7 +25,7 @@ function stringToArrayBuffer(str) {
  */
 stockEmitter.on("changeAssets", async (change) => {
   console.log("STEP 5: Stock emitter received CHANGES");
-  console.log("STEP 6: this isn't actually a step")
+  console.log("STEP 6: this isn't actually a step");
 
   console.log("HERE IS THE CHANGE:", change);
 
@@ -38,6 +38,8 @@ stockEmitter.on("changeAssets", async (change) => {
     type: "updatedAssets",
     user1Assets: match.user1.assets,
     user2Assets: match.user2.assets,
+    user1BuyingPower: match.user1.buyingPower,
+    user2BuyingPower: match.user2.buyingPower,
   };
   console.log("STEP 8: Updated assets about to send:", updatedAssets);
   const jsonString = JSON.stringify(updatedAssets);
@@ -84,27 +86,6 @@ stockEmitter.on("newMatch", async (newMatch) => {
   }
 });
 
-/**
- * Handle updated buyingPower event and distribute to websockets.
- */
-stockEmitter.on("changeBuyingPower", async (change) => {
-  console.log("Changed buying power. Here is the change:", change);
-  match = change.fullDocument;
-
-  buyingPowerObject = {
-    type: "buyingPowerUpdate",
-    newBuyingPower: change.updateDescription.updatedFields.buyingPower
-  }
-
-  dataToSend = JSON.stringify(buyingPowerObject);
-
-  if (matchClientList[match.matchID]) {
-    for (socket of matchClientList[match.matchID]) {
-      socket.send(dataToSend);
-    }
-  }
-})
-
 async function changeStream() {
   try {
     await client.connect();
@@ -141,9 +122,6 @@ async function changeStream() {
         if (key.includes("user1.assets") || key.includes("user2.assets")) {
           // change in assets
           stockEmitter.emit("changeAssets", change);
-        } else if (key.includes("user1.buyingPower") || key.includes("user2.buyingPower")) {
-          // change in buyingPower
-          stockEmitter.emit("changeBuyingPower", change);
         } else {
           console.log("this is not the change we really care about");
         }
