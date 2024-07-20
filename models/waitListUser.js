@@ -1,7 +1,7 @@
 const { sparDB } = require("../config/mongoConnection");
 const mongoose = require("mongoose");
 
-const waitListUser = new mongoose.Schema({
+const WaitListUser = new mongoose.Schema({
   email: {
     type: String,
     required: true,
@@ -10,4 +10,4 @@ const waitListUser = new mongoose.Schema({
   // You can add more fields as needed for your specific application
 });
 
-module.exports = sparDB.model("waitListUser", waitListUser);
+module.exports = sparDB.model("WaitListUser", WaitListUser);
