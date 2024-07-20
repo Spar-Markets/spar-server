@@ -198,14 +198,18 @@ router.post("/getMostRecentOneDayPrices", async (req, res) => {
 
   router.get("/getCurrentPrice/:ticker", async (req, res) => {
     const ticker = req.params.ticker;
-    const currentPrice = getCurrentPrice(ticker);
-
-    res.status(500).json({ currentPrice: currentPrice });
+    console.log("hit getCurrentPrice endpoint with ticker:", ticker);
+    try {
+      const currentPrice = await getCurrentPrice(ticker);
+      res.status(200).json({ currentPrice: currentPrice });
+    } catch (error) {
+      res.status(500).json({ error: error });
+    }
   })
 
 
 
-  //Modified for stockcards, for main details page it gets all data, for stock cards it only gets 1D.
+  //Modified for stockcards, for main details page it gets all data, for stock cards it only gets 1D
   const sendData = async () => {
     const timeframes = ["1D", "1W", "1M", "3M", "YTD", "1Y", "5Y"];
 
