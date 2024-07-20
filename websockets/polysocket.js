@@ -21,19 +21,14 @@ function stringToArrayBuffer(str) {
 }
 
 /**
- * This is where changes are sent and this is where we distribute them to websockets
+ * Handle changes to assets and distribute to websockets
  */
-stockEmitter.on("change", async (change) => {
+stockEmitter.on("changAssets", async (change) => {
   console.log("STEP 5: Stock emitter received CHANGES");
+  console.log("STEP 6: this isn't actually a step")
 
-  // add a section to send updated buying power here
-
-  // Get object id
-  const objectID = change.documentKey._id;
-  console.log("STEP 6: ObjectID:", objectID);
-
-  // find the match in mongo
-  const match = await Match.findOne();
+  // getthe match object
+  const match = change.fullDocument;
   console.log("STEP 7: Match:", match);
 
   // get user1 assets and user2 assets in JSON format
@@ -49,7 +44,7 @@ stockEmitter.on("change", async (change) => {
   if (matchClientList[match.matchID]) {
     for (socket of matchClientList[match.matchID]) {
       socket.send(arrayBuffer);
-      console.log("STEP 9: Just sent updated assets to client.");
+      console.log("STEP 9: Just sent updates to client.");
     }
   }
 
@@ -59,7 +54,7 @@ stockEmitter.on("change", async (change) => {
 });
 
 /**
- * Handle new match event.
+ * Handle new match event and distribute to websockets.
  */
 stockEmitter.on("newMatch", async (newMatch) => {
   console.log("Stock emitter NEW MATCH was hit.");
@@ -88,6 +83,26 @@ stockEmitter.on("newMatch", async (newMatch) => {
   }
 });
 
+/**
+ * Handle updated buyingPower event and distribute to websockets.
+ */
+stockEmitter.on("changeBuyingPower", async (change) => {
+  match = change.fullDocument;
+
+  buyingPowerObject = {
+    type: "buyingPowerUpdate",
+    newBuyingPower: change.updateDescription.updatedFields.buyingPower
+  }
+
+  dataToSend = JSON.stringify(buyingPowerObject);
+
+  if (matchClientList[match.matchID]) {
+    for (socket of matchClientList[match.matchID]) {
+      socket.send(dataToSend);
+    }
+  }
+})
+
 async function changeStream() {
   try {
     await client.connect();
@@ -104,15 +119,9 @@ async function changeStream() {
     console.log("Ran the change streams w the pipeline");
 
     changeStream.on("change", (change) => {
-      // check whether event is from assets
-      console.log(
-        "STEP 1: Change stream listener got an event",
-        Date.now(),
-        change
-      );
-
-      // A conditional that tells whether the match was added or if it's for a change in assets,
-      // Yes even though we have a pipeline for only assets it still detects if a match is created
+      // NOTES FOR PEOPLE READING THIS
+      // This change stream detects ANY change on the matches collection (creation, deletion, and updates to documents).
+      // We use conditionals to determine the type of change, and how we should handle it.
 
       // check operation type
       if (change.operationType == "insert") {
@@ -121,30 +130,17 @@ async function changeStream() {
         console.log("RECOGNIZED CHANGE OPERATION TYPE AS INSERT");
         stockEmitter.emit("newMatch", change.fullDocument);
       } else if (change.operationType == "delete") {
-        console.log(
-          "STEP 2: Recognized change operation type as delete. About to run finishMatch.",
-          Date.now()
-        );
         finishMatch(change.fullDocumentBeforeChange);
-        // here
-        // grab userIDs of match
-        // check for socket connections
-        // push update to them
       } else {
         const key = Object.keys(change.updateDescription.updatedFields)[0];
-        console.log("STEP 2: Here is change:", change);
-        console.log("Key:", key);
 
-        // CHECK 1: check for change in assets
-        const firstCheck = "user1.assets";
-        const secondCheck = "user2.assets";
-        if (key.includes(firstCheck) || key.includes(secondCheck)) {
-          console.log(
-            "STEP 3: Received change:\n",
-            JSON.stringify(change, null, 2)
-          );
-          stockEmitter.emit("change", change);
-          console.log("STEP 4: Just emitted stockEmitter change.");
+        // CHECK 1: check for change in assets or buying power
+        if (key.includes("user1.assets") || key.includes("user2.assets")) {
+          // change in assets
+          stockEmitter.emit("changeAssets", change);
+        } else if (key.includes("user1.buyingPower") || key.includes("user2.buyingPower")) {
+          // change in buyingPower
+          stockEmitter.emit("changeBuyingPower", change);
         } else {
           console.log("this is not the change we really care about");
         }
