@@ -33,6 +33,7 @@ const PORT = process.env.PORT || 3000;
 app.use(bodyParser.json());
 
 app.use(cors());
+app.options("*", cors()); // Pre-flight requests
 
 // Decode base64 Google Cloud encoded credentials on Heroku
 if (process.env.GOOGLE_APPLICATION_CREDENTIALS) {
