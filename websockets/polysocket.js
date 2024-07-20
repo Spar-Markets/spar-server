@@ -117,6 +117,7 @@ async function changeStream() {
 
     console.log("boutta run change streams with the pipeline");
     const changeStream = matches.watch([], {
+      fullDocument: "updateLookup",
       fullDocumentBeforeChange: "whenAvailable",
     });
     console.log("Ran the change streams w the pipeline");
