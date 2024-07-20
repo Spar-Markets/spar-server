@@ -27,6 +27,8 @@ stockEmitter.on("changeAssets", async (change) => {
   console.log("STEP 5: Stock emitter received CHANGES");
   console.log("STEP 6: this isn't actually a step")
 
+  console.log("HERE IS THE CHANGE:", change);
+
   // getthe match object
   const match = change.fullDocument;
   console.log("STEP 7: Match:", match);
