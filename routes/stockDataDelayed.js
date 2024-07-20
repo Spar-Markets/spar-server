@@ -6,6 +6,7 @@ const { polygonKey } = require("../config/constants");
 
 const getMostRecentMarketOpenDay = require("../utility/getMostRecentMarketOpenDay");
 const getPreviousDay = require("../utility/getPreviousDay");
+const getCurrentPrice = require("../utility/getCurrentPrice");
 const { json } = require("body-parser");
 
 /**
@@ -194,6 +195,15 @@ router.post("/getMostRecentOneDayPrices", async (req, res) => {
       return prices;
     }
   };
+
+  router.get("/getCurrentPrice/:ticker", async (req, res) => {
+    const ticker = req.params.ticker;
+    const currentPrice = getCurrentPrice(ticker);
+
+    res.status(500).json({ currentPrice: currentPrice });
+  })
+
+
 
   //Modified for stockcards, for main details page it gets all data, for stock cards it only gets 1D
   const sendData = async () => {
