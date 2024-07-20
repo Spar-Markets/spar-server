@@ -30,7 +30,7 @@ router.post("/getUserMatches", async function (req, res) {
   }
 });
 
-// Returns one match to the user as a match object
+// Returns one match to the user as a match object.
 router.post("/getMatchData", async function (req, res) {
   try {
     const { matchID } = req.body;
