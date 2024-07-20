@@ -4,7 +4,7 @@
   "description": "",
   "main": "server.js",
   "engines": {
-    "node": "22.2.x"
+    "node": "22.4.x"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -19,7 +19,6 @@
     "@mui/material": "^5.16.4",
     "aws-sdk": "^2.1637.0",
     "body-parser": "^1.20.2",
-    "cors": "^2.8.5",
     "crypto": "^1.0.1",
     "dotenv": "^16.4.5",
     "events": "^3.3.0",

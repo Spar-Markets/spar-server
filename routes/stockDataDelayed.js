@@ -188,7 +188,7 @@ router.post("/getMostRecentOneDayPrices", async (req, res) => {
       for (let pricestamp of response.data.results) {
         prices[response.data.ticker].push({
           timeField: pricestamp.t,
-          price: pricestamp.c,
+          price: pricestamp.o,
         });
       }
       return prices;

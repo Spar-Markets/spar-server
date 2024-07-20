@@ -4,7 +4,6 @@ require("dotenv").config();
 
 const express = require("express");
 const bodyParser = require("body-parser");
-const cors = require("cors");
 
 const {
   setupPolySocket,
@@ -31,9 +30,6 @@ const PORT = process.env.PORT || 3000;
 // const WsPort = 3001;
 
 app.use(bodyParser.json());
-
-app.use(cors());
-app.options("*", cors()); // Pre-flight requests
 
 // Decode base64 Google Cloud encoded credentials on Heroku
 if (process.env.GOOGLE_APPLICATION_CREDENTIALS) {
