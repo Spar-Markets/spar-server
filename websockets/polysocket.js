@@ -41,11 +41,10 @@ stockEmitter.on("changeAssets", async (change) => {
   };
   console.log("STEP 8: Updated assets about to send:", updatedAssets);
   const jsonString = JSON.stringify(updatedAssets);
-  const arrayBuffer = stringToArrayBuffer(jsonString);
 
   if (matchClientList[match.matchID]) {
     for (socket of matchClientList[match.matchID]) {
-      socket.send(arrayBuffer);
+      socket.send(jsonString);
       console.log("STEP 9: Just sent updates to client.");
     }
   }
