@@ -7,7 +7,7 @@ const WaitListUser = new mongoose.Schema({
     required: true,
     unique: true,
   },
-  // You can add more fields as needed for your specific application
+  // You can add more fields as needed for your specific application.
 });
 
 module.exports = sparDB.model("WaitListUser", WaitListUser);
