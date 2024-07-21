@@ -135,9 +135,10 @@ router.post("/getNews", async (req, res) => {
 });
 
 router.post("/getStockCardData", async (req, res) => {
+  const { ticker } = req.body;
   try {
     const response = await axios.get(
-      `https://api.polygon.io/v3/reference/tickers/AAPL?apiKey=${polygonKey}`
+      `https://api.polygon.io/v3/reference/tickers/${ticker}?apiKey=${polygonKey}`
     );
 
     if (response.data) {
