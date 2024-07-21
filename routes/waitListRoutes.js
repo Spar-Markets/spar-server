@@ -16,7 +16,7 @@ router.post("/addToWaitlist", async (req, res) => {
   }
 });
 
-/*router.get("/fetchWaitlist", async (req, res) => {
+/*router.get("/fetchWaitlist", async (req, res) => {.
   try {
     const collection = sparDB.collection("waitList"); // Replace 'yourCollectionName' with your actual collection name
     const count = await collection.countDocuments();
