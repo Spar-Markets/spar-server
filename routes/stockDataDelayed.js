@@ -6,6 +6,7 @@ const { polygonKey } = require("../config/constants");
 
 const getMostRecentMarketOpenDay = require("../utility/getMostRecentMarketOpenDay");
 const getPreviousDay = require("../utility/getPreviousDay");
+const getCurrentPrice = require("../utility/getCurrentPrice");
 const { json } = require("body-parser");
 
 /**
@@ -212,6 +213,17 @@ router.post("/getMostRecentOneDayPrices", async (req, res) => {
     }
   };
   sendData();
+});
+
+router.get("/getCurrentPrice/:ticker", async (req, res) => {
+  const ticker = req.params.ticker;
+  console.log("hit getCurrentPrice endpoint with ticker:", ticker);
+  try {
+    const currentPrice = await getCurrentPrice(ticker);
+    res.status(200).json({ currentPrice: currentPrice });
+  } catch (error) {
+    res.status(500).json({ error: error });
+  }
 });
 
 module.exports = router;
