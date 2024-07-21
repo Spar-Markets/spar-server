@@ -134,4 +134,18 @@ router.post("/getNews", async (req, res) => {
   }
 });
 
+router.post("/getStockCardData", async (req, res) => {
+  try {
+    const response = await axios.get(
+      `https://api.polygon.io/v3/reference/tickers/AAPL?apiKey=${polygonKey}`
+    );
+
+    if (response.data) {
+      res.status(200).send(response.data.results);
+    }
+  } catch (error) {
+    res.status(500).send({ message: "Error getting News", error });
+  }
+});
+
 module.exports = router;
