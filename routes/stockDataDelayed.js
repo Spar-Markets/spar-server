@@ -40,14 +40,16 @@ router.post("/closeEndpoint", async (req, res) => {
     let now = new Date(Date.now());
 
     // Subtract two days (if necessary, adjust based on your market day calculation logic)
-    now.setDate(now.getDate() - 3);
+    now.setDate(now.getDate() - 2);
     console.log("This is the date for two days ago", now);
-    const twoClosesAgo = getMostRecentMarketOpenDay(now);
-    const formattedDate = closeformatDate(twoClosesAgo);
+    const oneCloseAgo = getMostRecentMarketOpenDay(now);
+    oneCloseAgo.setDate(oneCloseAgo.getDate() - 1);
+    const twoCloseAgo = getMostRecentMarketOpenDay(oneCloseAgo);
+    const formattedDate = closeformatDate(twoCloseAgo);
 
     console.log(
       "This is two closes ago in a date, hopefully Thursday for this test:",
-      twoClosesAgo
+      twoCloseAgo
     );
 
     const url = `https://api.polygon.io/v1/open-close/${ticker}/${formattedDate}?adjusted=true&apiKey=${polygonKey}`;
