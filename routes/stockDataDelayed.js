@@ -48,10 +48,7 @@ router.post("/closeEndpoint", async (req, res) => {
     const closeComparison = getMostRecentMarketOpenDay(recentClose);
     const formattedDate = closeformatDate(closeComparison);
 
-    console.log(
-      "This is two closes ago in a date, hopefully Thursday for this test:",
-      twoCloseAgo
-    );
+    console.log("This is the closecomparison", closeComparison);
 
     const url = `https://api.polygon.io/v1/open-close/${ticker}/${formattedDate}?adjusted=true&apiKey=${polygonKey}`;
 
