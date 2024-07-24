@@ -41,11 +41,18 @@ router.post("/closeEndpoint", async (req, res) => {
 
     // Subtract two days (if necessary, adjust based on your market day calculation logic)
 
-    console.log("This is the date for two days ago", now);
-    // oneCloseAgo.setDate(oneCloseAgo.getDate() - 1);
+    console.log("This is the date for now", now);
+
     const recentClose = getMostRecentMarketOpenDay(now);
+    console.log("This is the most recent close date ", recentClose);
     recentClose.setDate(recentClose.getDate() - 1);
+    console.log("This is the most recent close date minus 1 ", recentClose);
     const closeComparison = getMostRecentMarketOpenDay(recentClose);
+    console.log(
+      "This is the most recent close FOR COMPARISION ",
+      closeComparison
+    );
+
     const formattedDate = closeformatDate(closeComparison);
 
     console.log("This is the closecomparison", closeComparison);
