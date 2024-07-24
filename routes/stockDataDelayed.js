@@ -43,7 +43,7 @@ router.post("/closeEndpoint", async (req, res) => {
     now.setDate(now.getDate() - 2);
     console.log("This is the date for two days ago", now);
     const oneCloseAgo = getMostRecentMarketOpenDay(now);
-    oneCloseAgo.setDate(oneCloseAgo.getDate() - 1);
+    // oneCloseAgo.setDate(oneCloseAgo.getDate() - 1);
     const twoCloseAgo = getMostRecentMarketOpenDay(oneCloseAgo);
     const formattedDate = closeformatDate(twoCloseAgo);
 
