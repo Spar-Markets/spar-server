@@ -38,16 +38,9 @@ router.post("/closeEndpoint", async (req, res) => {
     const { ticker } = req.body;
 
     let now = new Date(Date.now());
-    if (
-      13 > now.getHours() &&
-      now.getHours() > 0 &&
-      30 > now.getMinutes &&
-      now.getMinutes > 0
-    ) {
+    if (now.getHours() <= 13 && (now.getHours != 13 || now.getMinutes() < 30)) {
       now.setDate(now.getDate() - 1);
     }
-
-    // Subtract two days (if necessary, adjust based on your market day calculation logic)
 
     console.log("This is the date for now", now);
 
