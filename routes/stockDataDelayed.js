@@ -131,11 +131,11 @@ router.post("/getMostRecentOneDayPrices", async (req, res) => {
     if (timeframe == "1D") {
       // Gets the time for 1 day ago
       desiredOpenDay = mostRecentMarketDay;
-      range = "5/minute";
+      range = "1/minute";
     } else if (timeframe == "1W") {
       // Gets the time for 1 week ago
       desiredOpenDay = now - 14400000 - 518400000;
-      range = "30/minute";
+      range = "10/minute";
     } else if (timeframe == "1M") {
       // Gets the time for one month ago
       desiredOpenDay = now - 14400000 - 2628000000;
