@@ -8,7 +8,7 @@ const MatchSnapshotsSchema = new mongoose.Schema({
     unique: true,
   },
   user1Snapshots: {
-    type: Object, // Array of usernames participating in the match
+    type: Object,
     required: true,
   },
   user2Snapshots: {

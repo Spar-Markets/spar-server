@@ -169,6 +169,7 @@ router.post("/cancelMatchmaking", async (req, res) => {
 // Creates valid matches, runs on an interval
 async function createMatch() {
   try {
+    console.log("AYYYOOOO MATCH BEING CREATED!!! DUB!!! DUB APP!!!");
     const players = await Player.find({}).exec();
 
     for (let i = 0; i < players.length; i++) {
@@ -214,7 +215,8 @@ async function createMatch() {
             user1Snapshots: [{ value: 100000, timeField: Date.now() }],
             user2Snapshots: [{ value: 100000, timeField: Date.now() }],
           });
-          console.log("here's the match", match);
+          console.log("Alright bro here's the match", match);
+          console.log("Also bro here's the snapshots:", matchSnapshots)
           try {
             const test = await match.save();
             console.log(
