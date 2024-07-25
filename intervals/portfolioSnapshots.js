@@ -5,36 +5,26 @@ const Match = require("../models/Match");
 const axios = require("axios");
 const express = require("express");
 const router = express.Router();
-const secondsInOneDay = 86400;
-const secondsInOneHour = 3600;
-const secondsIn15min = 900;
+
+// constants
+const millisIn15min = 900;
+const millisInOneDay = 86400;
+const millisInOneWeek = 604800;
+
 const { polygonKey } = require("../config/constants");
 const getMostRecentMarketOpenDay = require("../utility/getMostRecentMarketOpenDay");
-let counter;
 
-async function updatePortfolioValues() {
+/**
+ * Create portfolio snapshot for a list of matches.
+ * @param matches array of matches to create snapshots for
+ */
+async function updatePortfolioValues(matches) {
   // grab all tickers current price
   // polygon call
   // grab current price for ALL tickers
   const url = `https://api.polygon.io/v2/snapshot/locale/us/markets/stocks/tickers?apiKey=${polygonKey}`;
   const allTickers = await axios.get(url);
-  counter = counter + 1;
-  // grab every match in mongo that meets timeframe condition
 
-  // always add to 15 min
-  let matches = [];
-  const fifteenMinMatches = await Match.find({ timeframe: secondsIn15min });
-  matches.push(...fifteenMinMatches); // Destructure the results before pushing
-
-  if (counter % 2 == 0) {
-    const oneHourMatches = await Match.find({ timeframe: secondsInOneHour });
-    matches.push(...oneHourMatches); // Destructure the results before pushing
-  }
-
-  if (counter % 10 == 0) {
-    const oneDayMatches = await Match.find({ timeframe: secondsInOneDay });
-    matches.push(...oneDayMatches); // Destructure the results before pushing
-  }
   console.log("MATCHES ARRAY", matches);
 
   console.log(
@@ -127,8 +117,12 @@ async function updatePortfolioValues() {
   // 4. append that johnson to the portfolio snapshots array, along with a timeField for current timestamp
 }
 
-const portfolioInterval = cron.schedule("*/30 * * * * *", () => {
-  console.log("Running cron schedule");
+/**
+ * Function that checks whether it is currently within market hours, then runs "updatePortfolioValues" if so.
+ * @param matches Array of matches to run interval function on.
+ */
+function runIntervalFunction(matches) {
+
   //this is the 15 min delay
   const now = new Date(Date.now());
   // convert to EST
@@ -136,9 +130,7 @@ const portfolioInterval = cron.schedule("*/30 * * * * *", () => {
   const minutes = now.getUTCMinutes();
   // Ensure it's within the specific time range
   // only runs if it is weekend and within market hours
-  console.log(
-    `SNAPSHOT INTERVAL RUNNING. --- Hours: ${hours}, Minutes: ${minutes}`
-  );
+
   const marketDay = getMostRecentMarketOpenDay(now);
   const condition1 = now.getUTCDate() == marketDay.getUTCDate();
   const condition2 =
@@ -151,12 +143,39 @@ const portfolioInterval = cron.schedule("*/30 * * * * *", () => {
       `CASE 1: Running portfolio snapshots, because we are in correct time range. --- Hours: ${hours}, Minutes: ${minutes}`
     );
     // Add your task here
-    updatePortfolioValues();
+    updatePortfolioValues(matches);
   } else {
     console.log(
       `CASE 2: NOT running portfolio snapshots. Outside market hours. --- Hours: ${hours}, Minutes: ${minutes}`
     );
   }
+}
+
+/**
+ * Run snapshots for fifteen minute matches every 10 seconds.
+ */
+const fiftenMinuteInterval = cron.schedule("*/10 * * * * *", async () => {
+  console.log("Running 10 second interval.");
+  const fifteenMinMatches = await Match.find({ timeframe: millisIn15min });
+  runIntervalFunction(fifteenMinMatches);
 });
+
+/**
+ * Run snapshots for one day matches every 5 minutes.
+ */
+const oneDayInterval = cron.schedule("*/5 * * * *", async () => {
+  console.log("Running 5 minute interval.");
+  const oneHourMatches = await Match.find({ timeframe: millisInOneDay });
+  runIntervalFunction(oneHourMatches);
+})
+
+/**
+ * Run snapshots for one week matches every 30 minutes.
+ */
+const oneWeekInterval = cron.schedule("*/30 * * * *", async () => {
+  console.log("Running 30 minute interval.");
+  const oneHourMatches = await Match.find({ timeframe: millisInOneWeek });
+  runIntervalFunction(oneHourMatches);
+})
 
 module.exports = { portfolioInterval };
