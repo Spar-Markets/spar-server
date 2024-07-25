@@ -15,7 +15,7 @@ const {
 // import routes
 const balanceRoutes = require("./routes/balanceRoutes");
 const matchMakingRoutes = require("./routes/matchMakingRoutes");
-const { portfolioInterval } = require("./intervals/portfolioSnapshots");
+const { fiftenMinuteInterval, oneDayInterval, oneWeekInterval } = require("./intervals/portfolioSnapshots");
 const plaidRoutes = require("./routes/plaidRoutes");
 const stockRoutes = require("./routes/stockRoutes");
 const tradeRoutes = require("./routes/tradeRoutes");
@@ -58,7 +58,9 @@ app.use(snapshotRoutes);
 app.use(waitListRoutes);
 
 // intervals
-portfolioInterval.start();
+fiftenMinuteInterval.start();
+oneDayInterval.start();
+oneWeekInterval.start();
 
 // websockets
 setupPolySocket();
