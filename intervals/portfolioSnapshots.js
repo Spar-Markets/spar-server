@@ -178,4 +178,4 @@ const oneWeekInterval = cron.schedule("*/30 * * * *", async () => {
   runIntervalFunction(oneHourMatches);
 })
 
-module.exports = { portfolioInterval };
+module.exports = { fiftenMinuteInterval, oneDayInterval, oneWeekInterval };
