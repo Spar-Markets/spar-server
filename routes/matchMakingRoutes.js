@@ -177,6 +177,7 @@ router.post("/cancelMatchmaking", async (req, res) => {
 // Creates a valid match if exists, otherwise puts you in matchmaking
 async function enterMatchmaking(player) {
   try {
+    console.log("STEP 1: Player in matchmaking");
     // check if there is a player that can be matched
 
     for (let i = 0; i < players.length; i++) {
@@ -186,9 +187,14 @@ async function enterMatchmaking(player) {
         player.skillRating - players[i].skillRating
       );
 
-      if (sameEntryFee && sameMatchLength && skillDifference <= 10 || "TODO: DELETE THIS" == "TODO: DELETE THIS") {
+      if (sameEntryFee && sameMatchLength && skillDifference <= 10) {
         createMatch(player, players[i]);
         return;
+      } else {
+        console.log("STEP 2: CONDITIONS wERE NOT MET.");
+        console.log("sameEntryFee:", sameEntryFee);
+        console.log("sameMatchLength", sameMatchLength);
+        console.log("skillDifference <= 10", skillDifference <= 10);
       }
     }
   } catch (error) {
@@ -199,7 +205,11 @@ async function enterMatchmaking(player) {
   Player.create(player);
 }
 
+/**
+ * Create match function
+ */
 async function createMatch(player1, player2) {
+  console.log("CREATE MATCH FUNCTION HIT");
   /**
   * Create match functionality here.
   * Player1 is NOT in matchmaking, player2 IS in matchmaking
