@@ -243,7 +243,7 @@ async function createMatch() {
             { userID: players[i].userID },
             {
               $addToSet: { activematches: match.matchID },
-              $inc: { balance: -5 }
+              $inc: { balance: -players[i].entryFeeInt }
             },
             { new: true } // Return the updated document
           );
@@ -252,7 +252,7 @@ async function createMatch() {
             { userID: players[j].userID },
             {
               $addToSet: { activematches: match.matchID },
-              $inc: { balance: -5 }
+              $inc: { balance: -players[i].entryFeeInt }
             },
             { new: true } // Return the updated document
           );
