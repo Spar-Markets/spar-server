@@ -1,5 +1,6 @@
 const express = require("express");
 const router = express.Router();
+const mongoose = require("mongoose"); // Import mongoose
 
 const User = require("../models/User");
 const getLeftOfAtSymbol = require("../utility/getLeftOfAtSymbol.js");
