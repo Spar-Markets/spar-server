@@ -179,21 +179,18 @@ async function enterMatchmaking(player) {
   try {
     console.log("STEP 1: Player in matchmaking");
     // check if there is a player that can be matched
+    const players = await Player.find({ entryFeeInt: player.entryFeeInt, matchLengthInt: player.matchLengthInt });
 
     for (let i = 0; i < players.length; i++) {
-      const sameEntryFee = player.entryFeeInt == players[i].entryFeeInt;
-      const sameMatchLength = player.matchLengthInt == players[i].matchLengthInt;
       const skillDifference = Math.abs(
         player.skillRating - players[i].skillRating
       );
 
-      if (sameEntryFee && sameMatchLength && skillDifference <= 10) {
+      if (skillDifference <= 10) {
         createMatch(player, players[i]);
         return;
       } else {
         console.log("STEP 2: CONDITIONS wERE NOT MET.");
-        console.log("sameEntryFee:", sameEntryFee);
-        console.log("sameMatchLength", sameMatchLength);
         console.log("skillDifference <= 10", skillDifference <= 10);
       }
     }
