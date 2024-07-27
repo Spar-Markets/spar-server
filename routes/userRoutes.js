@@ -452,11 +452,11 @@ router.post("/getPastMatches", async (req, res) => {
 });
 router.post("/updateImageStatus", async (req, res) => {
   const { status, userID } = req.body;
-
+  console.log("updatinggggg", userID, status);
   try {
     const updatedUser = await User.findOneAndUpdate(
       { _id: userID },
-      { $set: { hasDefaultProfileImage: status } },
+      { $set: { hasDefaultProfileImage: "false" } },
       { new: true }
     );
 
