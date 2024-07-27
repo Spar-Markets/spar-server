@@ -186,7 +186,7 @@ async function enterMatchmaking(player) {
         player.skillRating - players[i].skillRating
       );
 
-      if (skillDifference <= 10) {
+      if (skillDifference <= 10 && players[i].userID != player.userID) {
         createMatch(player, players[i]);
         return;
       } else {
