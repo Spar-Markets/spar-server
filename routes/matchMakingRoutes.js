@@ -178,9 +178,16 @@ async function createMatch() {
         );
         console.log(players[i]);
         if (skillDifference <= 10) {
+          /**
+           * Create match functionality here
+           */
+          // Remove matched players from the "matchmaking" collection
+          await Player.deleteMany({
+            _id: { $in: [players[i]._id, players[j]._id] },
+          });
+
           // Create a unique match ID (you might want to use a more sophisticated approach)
           const matchID = generateRandomString(45);
-          console.log("ID", matchID);
 
           // determine createdAt time and endAt time
           const createdAt = new Date(Date.now());
@@ -230,28 +237,31 @@ async function createMatch() {
 
           // Create an object representing the match
           console.log(players[i].userID, match.matchID);
-          // Add the match to both players' activematches field
+
+          // Add the match to both players' activematches field, add remove from balances
           await User.findOneAndUpdate(
             { userID: players[i].userID },
-            { $addToSet: { activematches: match.matchID } },
+            {
+              $addToSet: { activematches: match.matchID },
+              $inc: { balance: -players[i].entryFeeInt }
+            },
             { new: true } // Return the updated document
           );
 
           await User.findOneAndUpdate(
             { userID: players[j].userID },
-            { $addToSet: { activematches: match.matchID } },
+            {
+              $addToSet: { activematches: match.matchID },
+              $inc: { balance: -players[i].entryFeeInt }
+            },
             { new: true } // Return the updated document
           );
-          // Remove matched players from the "matchmaking" collection
-          await Player.deleteMany({
-            _id: { $in: [players[i]._id, players[j]._id] },
-          });
 
           /**
            * Google cloud task creation to delete match
            */
           const project = "sparmarkets"
-          const queue = "deleteMatchQueue";
+          const queue = "deleteMatchQueue0";
           const location = "us-east4";
           const url = `${serverUrl}/deleteMatch`;
 

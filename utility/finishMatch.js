@@ -1,6 +1,7 @@
 const User = require("../models/User");
 const Match = require("../models/Match");
 const MatchHistory = require("../models/MatchHistory");
+const MatchHistorySnapshots = require("../models/MatchHistorySnapshots");
 const axios = require("axios");
 const rankingAlgo = require("../utility/rankingAlgo");
 
@@ -17,7 +18,7 @@ const rankingAlgo = require("../utility/rankingAlgo");
 const finishMatch = async (matchToFinish) => {
   // 1. Get the matchID. We already gyatt matchToFinish
   const matchID = matchToFinish.matchID;
-  console.log("STEP 3: Running finishing match at", Date.now(), matchToFinish);
+  console.log("STEP 1: Running finishing match at", Date.now(), matchToFinish);
 
   // 2. determine winner
   // calculate portfolio value of each user
@@ -60,9 +61,15 @@ const finishMatch = async (matchToFinish) => {
     loser = "user2";
   }
 
+  console.log("STEP 2: The winner is", winner);
+  console.log("The loser is", loser);
+
   // get user IDs for winner and loser
   const winnerUserID = matchToFinish[winner].userID;
   const loserUserID = matchToFinish[loser].userID;
+
+  console.log("STEP 3: Winner user ID:", winnerUserID);
+  console.log("Loser user ID:", loserUserID);
 
   // get actual user in DB for winner and loser
   let winnerUser;
@@ -100,6 +107,9 @@ const finishMatch = async (matchToFinish) => {
   const newSkillRatingWinner = rankingAlgoResults.newEloA;
   const newSkillRatingLoser = rankingAlgoResults.newEloB;
 
+  console.log("STEP 4: New skill rating for winner:", newSkillRatingWinner);
+  console.log("New skill rating for loser:", newSkillRatingLoser);
+
   // update rank for each player
   winnerUser.skillRating = newSkillRatingWinner;
   loserUser.skillRating = newSkillRatingLoser;
@@ -129,7 +139,7 @@ const finishMatch = async (matchToFinish) => {
       loserUser.balance = loserUser.balance + initialWager;
       const updatedWinnerUser = await winnerUser.save();
       const updatedLoserUser = await loserUser.save();
-      console.log("updatedWinnerUser", updatedWinnerUser);
+      console.log("STEP 5: updatedWinnerUser", updatedWinnerUser);
       console.log("updatedLoserUser", updatedLoserUser);
     }
   } catch (error) {
@@ -154,7 +164,7 @@ const finishMatch = async (matchToFinish) => {
     { userID: loserUserID },
     { $pull: { activematches: matchID } }
   );
-  console.log("AFTER MATCH DELETION, winner user:", winnerWithRemovedMatchID);
+  console.log("STEP 6: AFTER MATCH DELETION, winner user:", winnerWithRemovedMatchID);
   console.log("AFTER MATCH DELETION, loser user:", loserWithRemovedMatchID);
 
   // 6. put match in each users match history
@@ -184,6 +194,22 @@ const finishMatch = async (matchToFinish) => {
       error
     );
   }
+
+    // 7. transfer match snapshots to matchHistorySnapshots
+    try {
+      // step 1: get match snapshots
+      const matchSnapshots = await MatchSnapshots.findOne({ matchID: matchID });
+      if (!matchSnapshots) {
+        throw new Error("MATCH SNAPSHOTS NOT FOUND");
+      }
+      // step 2: put match snapshots in matchhistorysnapshots
+      await MatchHistorySnapshots.create(matchSnapshots.toObject());
+
+      // step 3: remove the snapshot from MatchSnapshots
+      await MatchSnapshots.deleteOne({ matchID: matchID });
+    } catch (error) {
+      console.error("FinishMatch: Error transferring match snapshots to matchHistorySnapshots:", error);
+    }
 };
 
 module.exports = finishMatch;
