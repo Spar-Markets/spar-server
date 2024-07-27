@@ -91,18 +91,26 @@ router.post("/userToMatchmaking", async (req, res) => {
     const user = await User.findOne({ userID: userID }, { skillRating: 1, _id: 0 });
     const skillRating = user.skillRating;
 
-    const newPlayer = new Player({
+    const player = {
       username,
       userID,
       skillRating,
       entryFeeInt,
       matchLengthInt,
       matchType,
-    });
-    console.log("Logging player creds in Usertomatchmaking " + newPlayer);
+    };
 
-    await newPlayer.save();
-    console.log("Saved player to DB");
+    // const newPlayer = new Player({
+    //   username,
+    //   userID,
+    //   skillRating,
+    //   entryFeeInt,
+    //   matchLengthInt,
+    //   matchType,
+    // });
+
+    // await newPlayer.save();
+    enterMatchmaking(player);
 
     res.send(userID + "Entered Matchmaking");
   } catch (err) {
@@ -166,137 +174,142 @@ router.post("/cancelMatchmaking", async (req, res) => {
   }
 });
 
-// Creates valid matches, runs on an interval
-async function createMatch() {
+// Creates a valid match if exists, otherwise puts you in matchmaking
+async function enterMatchmaking(player) {
   try {
-    const players = await Player.find({}).exec();
+    // check if there is a player that can be matched
 
     for (let i = 0; i < players.length; i++) {
-      for (let j = i + 1; j < players.length; j++) {
-        const skillDifference = Math.abs(
-          players[i].skillRating - players[j].skillRating
-        );
-        console.log(players[i]);
-        if (skillDifference <= 10 || "TODO: DELETE THIS" == "TODO: DELETE THIS") {
-          /**
-           * Create match functionality here
-           */
-          // Remove matched players from the "matchmaking" collection
-          await Player.deleteMany({
-            _id: { $in: [players[i]._id, players[j]._id] },
-          });
+      const sameEntryFee = player.entryFeeInt == players[i].entryFeeInt;
+      const sameMatchLength = player.matchLengthInt == players[i].matchLengthInt;
+      const skillDifference = Math.abs(
+        player.skillRating - players[i].skillRating
+      );
 
-          // Create a unique match ID (you might want to use a more sophisticated approach)
-          const matchID = generateRandomString(45);
-
-          // determine createdAt time and endAt time
-          const createdAt = new Date(Date.now());
-          const endAt = new Date(Date.now() + players[i].matchLengthInt * 1000);
-
-          // Insert the matched users into the "matches" collection
-          const match = new Match({
-            matchID: matchID,
-            timeframe: players[i].matchLengthInt,
-            endAt: endAt,
-            createdAt: createdAt,
-            matchType: players[i].matchType,
-            wagerAmt: players[i].entryFeeInt,
-            user1: {
-              userID: players[i].userID,
-              assets: [],
-              trades: [],
-              buyingPower: 100000,
-            },
-            user2: {
-              userID: players[j].userID,
-              assets: [],
-              trades: [],
-              snapshots: [],
-              buyingPower: 100000,
-            },
-          });
-
-          const matchSnapshots = new MatchSnapshots({
-            matchID: matchID,
-            user1Snapshots: [{ value: 100000, timeField: Date.now() }],
-            user2Snapshots: [{ value: 100000, timeField: Date.now() }],
-          });
-          console.log("Alright bro here's the match", match);
-          console.log("Also bro here's the snapshots:", matchSnapshots)
-          try {
-            const test = await match.save();
-            console.log(
-              "THIS IS THE TEST REPSONSE THAT MATCH WAS SAVED:",
-              test
-            );
-            await matchSnapshots.save();
-          } catch (error) {
-            console.log("error creating match");
-          }
-          console.log("Updating user:", players[i].userID);
-
-          // Create an object representing the match
-          console.log(players[i].userID, match.matchID);
-
-          // Add the match to both players' activematches field, add remove from balances
-          await User.findOneAndUpdate(
-            { userID: players[i].userID },
-            {
-              $addToSet: { activematches: match.matchID },
-              $inc: { balance: -players[i].entryFeeInt }
-            },
-            { new: true } // Return the updated document
-          );
-
-          await User.findOneAndUpdate(
-            { userID: players[j].userID },
-            {
-              $addToSet: { activematches: match.matchID },
-              $inc: { balance: -players[i].entryFeeInt }
-            },
-            { new: true } // Return the updated document
-          );
-
-          /**
-           * Google cloud task creation to delete match
-           */
-          const project = "sparmarkets"
-          const queue = "deleteMatchQueue0";
-          const location = "us-east4";
-          const url = `${serverUrl}/deleteMatch`;
-
-          const parent = client.queuePath(project, location, queue);
-
-          const task = {
-            httpRequest: {
-              httpMethod: 'POST',
-              url: url,
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: Buffer.from(JSON.stringify({ matchID })).toString('base64'),
-            },
-            scheduleTime: {
-              seconds: Math.floor(endAt.getTime() / 1000),
-            },
-          };
-
-          try {
-            const [response] = await client.createTask({ parent, task });
-          } catch (error) {
-            console.error(error);
-          }
-          /**
-           * End of Google match task creation. c
-           */
-
-          console.log(`Match found and created: ${matchID}`);
-        }
+      if (sameEntryFee && sameMatchLength && skillDifference <= 10 || "TODO: DELETE THIS" == "TODO: DELETE THIS") {
+        createMatch(player, players[i]);
+        return;
       }
     }
   } catch (error) {
     console.log("Error in matchmaking", error);
   }
+
+  // If we get here, match was not made. Add user to matchmaking
+  Player.create(player);
+}
+
+async function createMatch(player1, player2) {
+  /**
+  * Create match functionality here.
+  * Player1 is NOT in matchmaking, player2 IS in matchmaking
+  */
+  // Remove matched players from the "matchmaking" collection
+  await Player.deleteMany({
+    _id: player2._id ,
+  });
+
+  // Create a unique match ID (you might want to use a more sophisticated approach)
+  const matchID = generateRandomString(45);
+
+  // determine createdAt time and endAt time
+  const createdAt = new Date(Date.now());
+  const endAt = new Date(Date.now() + player1.matchLengthInt * 1000);
+
+  // Insert the matched users into the "matches" collection
+  const match = new Match({
+    matchID: matchID,
+    timeframe: player1.matchLengthInt,
+    endAt: endAt,
+    createdAt: createdAt,
+    matchType: player1.matchType,
+    wagerAmt: player1.entryFeeInt,
+    user1: {
+      userID: player1.userID,
+      assets: [],
+      trades: [],
+      buyingPower: 100000,
+    },
+    user2: {
+      userID: player1.userID,
+      assets: [],
+      trades: [],
+      snapshots: [],
+      buyingPower: 100000,
+    },
+  });
+
+  const matchSnapshots = new MatchSnapshots({
+    matchID: matchID,
+    user1Snapshots: [{ value: 100000, timeField: Date.now() }],
+    user2Snapshots: [{ value: 100000, timeField: Date.now() }],
+  });
+  console.log("Alright bro here's the match", match);
+  console.log("Also bro here's the snapshots:", matchSnapshots)
+  try {
+    const test = await match.save();
+    console.log(
+      "THIS IS THE TEST REPSONSE THAT MATCH WAS SAVED:",
+      test
+    );
+    await matchSnapshots.save();
+  } catch (error) {
+    console.log("error creating match");
+  }
+
+  // Add the match to both players' activematches field, add remove from balances
+  await User.findOneAndUpdate(
+    { userID: player1.userID },
+    {
+      $addToSet: { activematches: match.matchID },
+      $inc: { balance: -player1.entryFeeInt }
+    },
+    { new: true } // Return the updated document
+  );
+
+  await User.findOneAndUpdate(
+    { userID: player2.userID },
+    {
+      $addToSet: { activematches: match.matchID },
+      $inc: { balance: -player2.entryFeeInt }
+    },
+    { new: true } // Return the updated document
+  );
+
+  /**
+   * Google cloud task creation to delete match
+   */
+  const project = "sparmarkets"
+  const queue = "deleteMatchQueue0";
+  const location = "us-east4";
+  const url = `${serverUrl}/deleteMatch`;
+
+  const parent = client.queuePath(project, location, queue);
+
+  const task = {
+    httpRequest: {
+      httpMethod: 'POST',
+      url: url,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: Buffer.from(JSON.stringify({ matchID })).toString('base64'),
+    },
+    scheduleTime: {
+      seconds: Math.floor(endAt.getTime() / 1000),
+    },
+  };
+
+  try {
+    const [response] = await client.createTask({ parent, task });
+  } catch (error) {
+    console.error(error);
+  }
+  /**
+   * End of Google match task creation. c
+   */
+
+  console.log(`Match found and created: ${matchID}`);
 }
 
 router.post("/deleteMatch", async (req, res) => {
@@ -318,14 +331,5 @@ router.post("/deleteMatch", async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 });
-
-// Run the matchmaking process every 10 seconds
-setInterval(async () => {
-  try {
-    await createMatch();
-  } catch (error) {
-    console.error("Error in matchmaking process:", error);
-  }
-}, 5000);
 
 module.exports = router;
