@@ -453,10 +453,16 @@ router.post("/getPastMatches", async (req, res) => {
 router.post("/updateImageStatus", async (req, res) => {
   const { status, userID } = req.body;
   console.log("updatinggggg", userID, status);
+
+  // Validate status
+  if (status !== "true" && status !== "false") {
+    return res.status(400).send("Status must be either 'true' or 'false'");
+  }
+
   try {
     const updatedUser = await User.findOneAndUpdate(
       { _id: userID },
-      { $set: { hasDefaultProfileImage: "false" } },
+      { $set: { hasDefaultProfileImage: status } },
       { new: true }
     );
 
@@ -474,5 +480,4 @@ router.post("/updateImageStatus", async (req, res) => {
       .send("Server error trying to update profile image status");
   }
 });
-
 module.exports = router;
