@@ -251,7 +251,7 @@ async function createMatch() {
            * Google cloud task creation to delete match
            */
           const project = "sparmarkets"
-          const queue = "deleteMatchQueue";
+          const queue = "deleteMatchQueue0";
           const location = "us-east4";
           const url = `${serverUrl}/deleteMatch`;
 
