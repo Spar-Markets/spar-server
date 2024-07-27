@@ -177,7 +177,7 @@ async function createMatch() {
           players[i].skillRating - players[j].skillRating
         );
         console.log(players[i]);
-        if (skillDifference <= 10) {
+        if (skillDifference <= 10 || "TODO: DELETE THIS" == "TODO: DELETE THIS") {
           /**
            * Create match functionality here
            */
