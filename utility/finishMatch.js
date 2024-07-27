@@ -17,7 +17,7 @@ const rankingAlgo = require("../utility/rankingAlgo");
 const finishMatch = async (matchToFinish) => {
   // 1. Get the matchID. We already gyatt matchToFinish
   const matchID = matchToFinish.matchID;
-  console.log("STEP 3: Running finishing match at", Date.now(), matchToFinish);
+  console.log("STEP 1: Running finishing match at", Date.now(), matchToFinish);
 
   // 2. determine winner
   // calculate portfolio value of each user
@@ -60,9 +60,15 @@ const finishMatch = async (matchToFinish) => {
     loser = "user2";
   }
 
+  console.log("STEP 2: The winner is", winner);
+  console.log("The loser is", loser);
+
   // get user IDs for winner and loser
   const winnerUserID = matchToFinish[winner].userID;
   const loserUserID = matchToFinish[loser].userID;
+
+  console.log("STEP 3: Winner user ID:", winnerUserID);
+  console.log("Loser user ID:", loserUserID);
 
   // get actual user in DB for winner and loser
   let winnerUser;
@@ -100,6 +106,9 @@ const finishMatch = async (matchToFinish) => {
   const newSkillRatingWinner = rankingAlgoResults.newEloA;
   const newSkillRatingLoser = rankingAlgoResults.newEloB;
 
+  console.log("STEP 4: New skill rating for winner:", newSkillRatingWinner);
+  console.log("New skill rating for loser:", newSkillRatingLoser);
+
   // update rank for each player
   winnerUser.skillRating = newSkillRatingWinner;
   loserUser.skillRating = newSkillRatingLoser;
@@ -129,7 +138,7 @@ const finishMatch = async (matchToFinish) => {
       loserUser.balance = loserUser.balance + initialWager;
       const updatedWinnerUser = await winnerUser.save();
       const updatedLoserUser = await loserUser.save();
-      console.log("updatedWinnerUser", updatedWinnerUser);
+      console.log("STEP 5: updatedWinnerUser", updatedWinnerUser);
       console.log("updatedLoserUser", updatedLoserUser);
     }
   } catch (error) {
@@ -154,7 +163,7 @@ const finishMatch = async (matchToFinish) => {
     { userID: loserUserID },
     { $pull: { activematches: matchID } }
   );
-  console.log("AFTER MATCH DELETION, winner user:", winnerWithRemovedMatchID);
+  console.log("STEP 6: AFTER MATCH DELETION, winner user:", winnerWithRemovedMatchID);
   console.log("AFTER MATCH DELETION, loser user:", loserWithRemovedMatchID);
 
   // 6. put match in each users match history
