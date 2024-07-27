@@ -453,11 +453,6 @@ router.post("/getPastMatches", async (req, res) => {
 router.post("/updateImageStatus", async (req, res) => {
   const { status, userID } = req.body;
 
-  // Validate status
-  if (typeof status !== "boolean") {
-    return res.status(400).send("Status must be a boolean value");
-  }
-
   try {
     const updatedUser = await User.findOneAndUpdate(
       { _id: userID },
