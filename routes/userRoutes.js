@@ -450,6 +450,7 @@ router.post("/getPastMatches", async (req, res) => {
     return res.status(500).send("Server error trying to get Match history");
   }
 });
+
 router.post("/updateImageStatus", async (req, res) => {
   const { status, userID } = req.body;
   console.log("updatinggggg", userID, status);
@@ -460,9 +461,17 @@ router.post("/updateImageStatus", async (req, res) => {
     return res.status(400).send("Status must be either 'true' or 'false'");
   }
 
+  // Validate and convert userID to ObjectId
+  if (!mongoose.Types.ObjectId.isValid(userID)) {
+    console.error("Invalid userID:", userID);
+    return res.status(400).send("Invalid userID");
+  }
+
+  const userIdObject = mongoose.Types.ObjectId(userID);
+
   try {
     const updatedUser = await User.findOneAndUpdate(
-      { _id: userID },
+      { _id: userIdObject },
       { $set: { hasDefaultProfileImage: status } }, // Use status directly as string
       { new: true }
     );
@@ -483,5 +492,4 @@ router.post("/updateImageStatus", async (req, res) => {
       .send("Server error trying to update profile image status");
   }
 });
-
 module.exports = router;
