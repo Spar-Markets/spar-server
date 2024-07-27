@@ -1,6 +1,5 @@
 const express = require("express");
 const router = express.Router();
-const mongoose = require("mongoose"); // Import mongoose
 
 const User = require("../models/User");
 const getLeftOfAtSymbol = require("../utility/getLeftOfAtSymbol.js");
@@ -454,7 +453,6 @@ router.post("/getPastMatches", async (req, res) => {
 
 router.post("/updateImageStatus", async (req, res) => {
   const { status, userID } = req.body;
-  console.log("updatinggggg", userID, status);
 
   // Validate status
   if (status !== "true" && status !== "false") {
@@ -462,17 +460,9 @@ router.post("/updateImageStatus", async (req, res) => {
     return res.status(400).send("Status must be either 'true' or 'false'");
   }
 
-  // Validate and convert userID to ObjectId
-  if (!mongoose.Types.ObjectId.isValid(userID)) {
-    console.error("Invalid userID:", userID);
-    return res.status(400).send("Invalid userID");
-  }
-
-  const userIdObject = mongoose.Types.ObjectId(userID);
-
   try {
     const updatedUser = await User.findOneAndUpdate(
-      { _id: userIdObject },
+      { userID: userID },
       { $set: { hasDefaultProfileImage: status } }, // Use status directly as string
       { new: true }
     );
