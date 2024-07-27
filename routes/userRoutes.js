@@ -456,17 +456,19 @@ router.post("/updateImageStatus", async (req, res) => {
 
   // Validate status
   if (status !== "true" && status !== "false") {
+    console.error("Invalid status value:", status);
     return res.status(400).send("Status must be either 'true' or 'false'");
   }
 
   try {
     const updatedUser = await User.findOneAndUpdate(
       { _id: userID },
-      { $set: { hasDefaultProfileImage: status } },
+      { $set: { hasDefaultProfileImage: status } }, // Use status directly as string
       { new: true }
     );
 
     if (!updatedUser) {
+      console.error("User not found with userID:", userID);
       return res.status(404).send("User not found");
     }
 
@@ -475,9 +477,11 @@ router.post("/updateImageStatus", async (req, res) => {
       user: updatedUser,
     });
   } catch (error) {
+    console.error("Server error:", error);
     return res
       .status(500)
       .send("Server error trying to update profile image status");
   }
 });
+
 module.exports = router;
