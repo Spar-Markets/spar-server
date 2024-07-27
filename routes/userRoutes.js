@@ -450,20 +450,33 @@ router.post("/getPastMatches", async (req, res) => {
     return res.status(500).send("Server error trying to get Match history");
   }
 });
-
-// updating mongodb user file to show that they do not have a default image any more
 router.post("/updateImageStatus", async (req, res) => {
   const { status, userID } = req.body;
-  try {
-    const pastMatches = await MatchHistory.findOne({ userID: userID });
 
-    if (!pastMatches) {
-      return res.status(404).send("No match history found");
+  // Validate status
+  if (typeof status !== "boolean") {
+    return res.status(400).send("Status must be a boolean value");
+  }
+
+  try {
+    const updatedUser = await User.findOneAndUpdate(
+      { _id: userID },
+      { $set: { hasDefaultProfileImage: status } },
+      { new: true }
+    );
+
+    if (!updatedUser) {
+      return res.status(404).send("User not found");
     }
 
-    res.status(200).json({ message: "Match history found", pastMatches });
+    res.status(200).json({
+      message: "User profile image status updated",
+      user: updatedUser,
+    });
   } catch (error) {
-    return res.status(500).send("Server error trying to get Match history");
+    return res
+      .status(500)
+      .send("Server error trying to update profile image status");
   }
 });
 
