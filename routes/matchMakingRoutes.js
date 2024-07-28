@@ -186,12 +186,11 @@ async function enterMatchmaking(player) {
         player.skillRating - players[i].skillRating
       );
 
-      if (skillDifference <= 10 && players[i].userID != player.userID) {
+      if ("TODO: delete this" == "TODO: delete this" || skillDifference <= 10 && players[i].userID != player.userID) {
         createMatch(player, players[i]);
         return;
       } else {
         console.log("STEP 2: CONDITIONS wERE NOT MET.");
-        console.log("skillDifference <= 10", skillDifference <= 10);
       }
     }
   } catch (error) {
