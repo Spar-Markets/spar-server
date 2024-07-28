@@ -205,7 +205,7 @@ async function enterMatchmaking(player) {
  * Create match function
  */
 async function createMatch(player1, player2) {
-  console.log("CREATE MATCH FUNCTION HIT");
+  console.log("STEP 2: CREATE MATCH FUNCTION HIT");
   /**
   * Create match functionality here.
   * Player1 is NOT in matchmaking, player2 IS in matchmaking
