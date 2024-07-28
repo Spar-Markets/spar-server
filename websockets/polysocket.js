@@ -73,7 +73,7 @@ stockEmitter.on("newMatch", async (newMatch) => {
       console.log("MATCH CREATION - INSIDE AREA TO SEND TO CLIENT");
       console.log("activeMatchmaking sockets:", activeMatchmakingSockets);
       console.log("activeMatchmakingSockets has", activeMatchmakingSockets.length, "connections");
-      counter = 0
+
       for (const socket of activeMatchmakingSockets) {
         socket.send(
           JSON.stringify({
@@ -81,7 +81,6 @@ stockEmitter.on("newMatch", async (newMatch) => {
             newMatch: newMatch,
           })
         );
-        console.log("JUST SENT NEW MATCH TO CLIENT" + counter + ":", socket);
       }
 
       // delete it ong
@@ -209,9 +208,6 @@ function subscribeToStocks(ws) {
   }
 }
 
-// TODO: Delete
-let count = 0
-
 function setupWebSocket(server) {
   const wss = new WebSocket.Server({ server });
 
@@ -236,8 +232,6 @@ function setupWebSocket(server) {
           // otherwise, create it
           userMatchmakingList[object.userID] = [socket];
         }
-        console.log("JUST ADDED TO USER MATCHMAKING LIST!! COUNT:", count);
-        count += 1
 
         // CASE 2: Interested in stocks
       } else if (object.matchID) {
