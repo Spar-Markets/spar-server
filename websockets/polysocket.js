@@ -209,6 +209,9 @@ function subscribeToStocks(ws) {
   }
 }
 
+// TODO: Delete
+const count = 0
+
 function setupWebSocket(server) {
   const wss = new WebSocket.Server({ server });
 
@@ -225,16 +228,16 @@ function setupWebSocket(server) {
 
       // CASE 1: Matchmaking
       if (object.type == "matchmaking") {
-        console.log("Matchmaking socket pinged.");
+        console.log("Matchmaking socket pinged with userID:", object.userID);
         // if userMatchMaking List already exists, push socket connection to it
-        console.log("Current userMatchmakingList before:", userMatchmakingList);
         if (userMatchmakingList[object.userID]) {
           userMatchmakingList[object.userID].push(socket);
         } else {
           // otherwise, create it
           userMatchmakingList[object.userID] = [socket];
         }
-        console.log("After userMatchmakingList:", userMatchmakingList);
+        console.log("JUST ADDED TO USER MATCHMAKING LIST!! COUNT:", count);
+        count += 1
 
         // CASE 2: Interested in stocks
       } else if (object.matchID) {
