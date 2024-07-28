@@ -71,6 +71,7 @@ stockEmitter.on("newMatch", async (newMatch) => {
     if (activeMatchmakingSockets) {
       // send them the match
       console.log("MATCH CREATION - INSIDE AREA TO SEND TO CLIENT");
+      console.log("activeMatchmaking sockets:", activeMatchmakingSockets);
       for (const socket of activeMatchmakingSockets) {
         socket.send(
           JSON.stringify({
@@ -78,6 +79,7 @@ stockEmitter.on("newMatch", async (newMatch) => {
             newMatch: newMatch,
           })
         );
+        console.log("JUST SENT NEW MATCH TO CLIENT:", socket);
       }
 
       // delete it ong
