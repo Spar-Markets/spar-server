@@ -187,7 +187,6 @@ async function enterMatchmaking(player) {
       );
 
       if (skillDifference <= 10 && players[i].userID != player.userID) {
-        console.log("Created match. Here are the user IDs:", players[i].userID, player.userID);
         createMatch(player, players[i]);
         return;
       } else {
@@ -239,7 +238,7 @@ async function createMatch(player1, player2) {
       buyingPower: 100000,
     },
     user2: {
-      userID: player1.userID,
+      userID: player2.userID,
       assets: [],
       trades: [],
       snapshots: [],
