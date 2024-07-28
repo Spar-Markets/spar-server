@@ -1,6 +1,7 @@
 const User = require("../models/User");
 const Match = require("../models/Match");
 const MatchHistory = require("../models/MatchHistory");
+const MatchSnapshots = require("../models/MatchSnapshots");
 const MatchHistorySnapshots = require("../models/MatchHistorySnapshots");
 const axios = require("axios");
 const rankingAlgo = require("../utility/rankingAlgo");
