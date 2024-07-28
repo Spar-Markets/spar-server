@@ -483,4 +483,21 @@ router.post("/updateImageStatus", async (req, res) => {
       .send("Server error trying to update profile image status");
   }
 });
+
+router.post("/deleteAccount", async (req, res) => {
+  const { userID } = req.body;
+
+  try {
+    const updatedUser = await User.findOneAndDelete({ userID: userID });
+
+    res.status(200).json({
+      message: "User profile deleted",
+      user: updatedUser,
+    });
+  } catch (error) {
+    console.error("Server error:", error);
+    return res.status(500).send("Server error trying to delete accounts");
+  }
+});
+
 module.exports = router;
