@@ -72,7 +72,7 @@ stockEmitter.on("newMatch", async (newMatch) => {
       // send them the match
       console.log("MATCH CREATION - INSIDE AREA TO SEND TO CLIENT");
       console.log("activeMatchmaking sockets:", activeMatchmakingSockets);
-      console.log("activeMatchmakingSockets has", len(activeMatchmakingSockets), "connections");
+      console.log("activeMatchmakingSockets has", activeMatchmakingSockets.length, "connections");
       counter = 0
       for (const socket of activeMatchmakingSockets) {
         socket.send(
