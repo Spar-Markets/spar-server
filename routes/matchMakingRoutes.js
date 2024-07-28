@@ -186,7 +186,7 @@ async function enterMatchmaking(player) {
         player.skillRating - players[i].skillRating
       );
 
-      if ("TODO: delete this" == "TODO: delete this" || skillDifference <= 10 && players[i].userID != player.userID) {
+      if (("TODO: delete this" == "TODO: delete this" || skillDifference <= 10) && players[i].userID != player.userID) {
         createMatch(player, players[i]);
         return;
       } else {
