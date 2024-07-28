@@ -210,7 +210,7 @@ function subscribeToStocks(ws) {
 }
 
 // TODO: Delete
-const count = 0
+let count = 0
 
 function setupWebSocket(server) {
   const wss = new WebSocket.Server({ server });
