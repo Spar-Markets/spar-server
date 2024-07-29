@@ -537,4 +537,8 @@ router.get("/checkEmail/:email", async (req, res) => {
   }
 });
 
+router.get("/ping", async (req, res) => {
+  res.status(200).send("pong");
+})
+
 module.exports = router;
