@@ -28,11 +28,20 @@ router.post("/createUser", async (req, res) => {
       hasDefaultProfileImage: String(hasDefaultProfileImage),
     });
 
+    try {
+      await newUser.save();
+    } catch (error) {
+      if (error.code === 11000) {
+        const field = Object.keys(error.keyPattern)[0];
+        return res.status(409).json({ error: `${field} is taken`});
+      }
+    }
+
     const userForPastMathces = new MatchHistory({
       userID: String(userID),
     });
     await userForPastMathces.save();
-    await newUser.save();
+
     console.log("New User Created");
     res
       .status(201)
