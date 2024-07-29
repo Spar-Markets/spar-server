@@ -509,4 +509,32 @@ router.post("/deleteAccount", async (req, res) => {
   }
 });
 
+router.get("/checkUsername/:username", async (req, res) => {
+  const { username } = req.params;
+  try {
+    const user = await User.findOne({ username: username });
+    if (user) {
+      return res.status(200).json({ taken: true });
+    } else {
+      return res.status(200).json({ taken: false });
+    }
+  } catch (error) {
+    return res.status(500).json({ error: "Server error on /checkUsername endpoint" })
+  }
+});
+
+router.get("/checkEmail/:email", async (req, res) => {
+  const { email } = req.params;
+  try {
+    const user = await User.findOne({ email: email });
+    if (user) {
+      return res.status(200).json({ taken: true });
+    } else {
+      return res.status(200).json({ taken: false });
+    }
+  } catch (error) {
+    return res.status(500).json({ error: "Server error on /checkEmail endpoint" })
+  }
+});
+
 module.exports = router;
