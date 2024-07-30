@@ -33,7 +33,7 @@ const finishMatch = async (matchToFinish) => {
       const response = await axios.get(
         `https://api.polygon.io/v2/snapshot/locale/us/markets/stocks/tickers/${tickerObject.ticker}?apiKey=${polygonKey}`
       );
-      const currentPrice = reponse.data.ticker.min.c;
+      const currentPrice = response.data.ticker.min.c;
 
       // add value of shares to portfolioValue
       portfolioValue += currentPrice * tickerObject.totalShares;
