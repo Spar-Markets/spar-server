@@ -85,8 +85,8 @@ router.post("/getMostRecentOneDayPrices", async (req, res) => {
   const tickers = [ticker];
 
   // validate ticker input
-  for (ticker of tickers) {
-    if (ticker == "") {
+  for (tick of tickers) {
+    if (tick == "") {
       return res.status(200).json({ error: "ticker invalid" });
     }
   }
