@@ -142,7 +142,7 @@ function runIntervalFunction(matches) {
     console.log(
       `CASE 1: Running portfolio snapshots, because we are in correct time range. --- Hours: ${hours}, Minutes: ${minutes}`
     );
-    // Add your task here.
+    // Add your task here
     updatePortfolioValues(matches);
   } else {
     console.log(
