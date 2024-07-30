@@ -83,6 +83,14 @@ router.post("/getMostRecentOneDayPrices", async (req, res) => {
   //timeframe is optional
   const { ticker, isOneDayData } = req.body; // req.body will contain the array sent by Axios
   const tickers = [ticker];
+
+  // validate ticker input
+  for (ticker of tickers) {
+    if (ticker == "") {
+      return res.status(200).json({ error: "ticker invalid" });
+    }
+  }
+
   const now = new Date(Date.now());
   let mostRecentMarketDay = getMostRecentMarketOpenDay(now);
   // edge case. if most recent market day is today, AND it is before 9:45am, go for the previous day before that
