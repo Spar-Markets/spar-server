@@ -49,7 +49,7 @@ const userSchema = new mongoose.Schema({
     default: {},
   },*/
   activematches: {
-    type: [string],
+    type: [String],
     default: [],
   },
 
