@@ -290,7 +290,7 @@ router.post("/addFollowRequest", async (req, res) => {
         $push: {
           followRequests: {
             from: userID,
-            username: username,
+            username: yourUsername,
             status: "pending",
             createdAt: new Date(),
           },
