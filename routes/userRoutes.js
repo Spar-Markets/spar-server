@@ -294,7 +294,7 @@ router.post("/addFollowRequest", async (req, res) => {
             status: "pending",
             createdAt: new Date(),
           },
-          followers: { userID, yourUsername },
+          followers: { userID: userID, username: yourUsername },
         },
       },
       { new: true, upsert: true } // new: true returns the updated document, upsert: true creates it if it doesn't exist
@@ -304,7 +304,7 @@ router.post("/addFollowRequest", async (req, res) => {
       { userID: userID },
       {
         $push: {
-          following: { otherUserID, otherUsername },
+          following: { userID: otherUserID, userName: otherUsername },
         },
       },
       { new: true, upsert: true } // new: true returns the updated document, upsert: true creates it if it doesn't exist
