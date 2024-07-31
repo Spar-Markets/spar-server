@@ -5,9 +5,10 @@ const MatchSnapshots = require("../models/MatchSnapshots");
 const MatchHistorySnapshots = require("../models/MatchHistorySnapshots");
 const axios = require("axios");
 const rankingAlgo = require("../utility/rankingAlgo");
+const { polygonKey } = require("../config/constants");
 
 /**
- * Logic to finish match
+ * Logic to finish match.
  * 1. grab match from matchID
  * 2. determine winner
  * 3. update rank
@@ -30,13 +31,18 @@ const finishMatch = async (matchToFinish) => {
 
     // get current price for each ticker
     for (tickerObject in assets) {
-      const response = await axios.get(
-        `https://api.polygon.io/v2/snapshot/locale/us/markets/stocks/tickers/${tickerObject.ticker}?apiKey=${polygonKey}`
-      );
-      const currentPrice = reponse.data.ticker.min.c;
+      try {
+        const response = await axios.get(
+          `https://api.polygon.io/v2/snapshot/locale/us/markets/stocks/tickers/${tickerObject.ticker}?apiKey=${polygonKey}`
+        );
+        const currentPrice = response.data.ticker.min.c;
+  
+        // add value of shares to portfolioValue
+        portfolioValue += currentPrice * tickerObject.totalShares;
+      } catch (error) {
+        console.error("ERROR GETTING DATA FOR TICKER:", tickerObject.ticker);
+      }
 
-      // add value of shares to portfolioValue
-      portfolioValue += currentPrice * tickerObject.totalShares;
     }
 
     // return portfolio value
@@ -157,6 +163,8 @@ const finishMatch = async (matchToFinish) => {
   // iterate over activematches field for each user until you find the match in question
   // delete that match
 
+  console.log("ABOUT TO REMOVE MATCH FROM USERIDs:", winnerUserID, loserUserID);
+
   const winnerWithRemovedMatchID = await User.updateOne(
     { userID: winnerUserID },
     { $pull: { activematches: matchID } }
@@ -196,21 +204,34 @@ const finishMatch = async (matchToFinish) => {
     );
   }
 
-    // 7. transfer match snapshots to matchHistorySnapshots
-    try {
-      // step 1: get match snapshots
-      const matchSnapshots = await MatchSnapshots.findOne({ matchID: matchID });
-      if (!matchSnapshots) {
-        throw new Error("MATCH SNAPSHOTS NOT FOUND");
-      }
-      // step 2: put match snapshots in matchhistorysnapshots
-      await MatchHistorySnapshots.create(matchSnapshots.toObject());
-
-      // step 3: remove the snapshot from MatchSnapshots
-      await MatchSnapshots.deleteOne({ matchID: matchID });
-    } catch (error) {
-      console.error("FinishMatch: Error transferring match snapshots to matchHistorySnapshots:", error);
+  // 7. transfer match snapshots to matchHistorySnapshots
+  try {
+    // step 1: get match snapshots
+    const matchSnapshots = await MatchSnapshots.findOne({ matchID: matchID });
+    if (!matchSnapshots) {
+      throw new Error("MATCH SNAPSHOTS NOT FOUND");
     }
+    // step 2: put match snapshots in matchhistorysnapshots
+    await MatchHistorySnapshots.create(matchSnapshots.toObject());
+
+    // step 3: remove the snapshot from MatchSnapshots
+    await MatchSnapshots.deleteOne({ matchID: matchID });
+  } catch (error) {
+    console.error("FinishMatch: Error transferring match snapshots to matchHistorySnapshots:", error);
+  }
+
+  // return the updated winnings
+  if (draw) {
+    return ({
+      [winnerUserID]: matchToFinish.wagerAmt,
+      [loserUserID]: matchToFinish
+    })
+  } else {
+    return ({
+      [winnerUserID]: matchToFinish.wagerAmt * 2 * 0.9
+    })
+  }
+
 };
 
 module.exports = finishMatch;

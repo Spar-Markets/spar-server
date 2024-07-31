@@ -106,8 +106,10 @@ router.post("/purchaseStock", async (req, res) => {
       );
 
       returnData = {
-        updatedMatchTrades,
-        updatedMatchAssets,
+        updatedTotalShares,
+        buyPrice,
+        avgCostBasis: asset.avgCostBasis,
+        date: Date.now(),
       };
       console.log("They have this ticker inside assets");
     } else {
@@ -128,8 +130,9 @@ router.post("/purchaseStock", async (req, res) => {
       );
 
       returnData = {
-        updatedMatchAssets,
-        updatedMatchTrades,
+        updatedTotalshares: shares,
+        buyPrice,
+        date: Date.now(),
       };
     }
 

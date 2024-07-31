@@ -134,9 +134,9 @@ function runIntervalFunction(matches) {
   const marketDay = getMostRecentMarketOpenDay(now);
   const condition1 = now.getUTCDate() == marketDay.getUTCDate();
   const condition2 =
-    (hours === 13 && minutes >= 45) ||
-    (hours === 20 && minutes <= 15) ||
-    (hours > 13 && hours < 20);
+    (hours === 8 && minutes >= 45) ||
+    (hours === 24 && minutes <= 15) ||
+    (hours > 8 && hours < 24);
   const isWithinMarketHours = condition1 && condition2;
   if (isWithinMarketHours) {
     console.log(
