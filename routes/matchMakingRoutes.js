@@ -340,7 +340,7 @@ async function createMatch(player1, player2) {
 
 router.post("/deleteMatch", async (req, res) => {
   const { matchID } = req.body;
-  // delete from mongo
+  // delete from mongo.
   console.log("GOOGLE CLOUD TASK: Delete from Mongo:", matchID, new Date(Date.now()));
 
   try {
