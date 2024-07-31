@@ -65,11 +65,11 @@ const userSchema = new mongoose.Schema({
     default: [],
   },
   followers: {
-    type: [String],
+    type: [Object],
     default: [],
   },
   following: {
-    type: [String],
+    type: [Object],
     default: [],
   },
   followRequests: {
