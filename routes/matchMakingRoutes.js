@@ -347,7 +347,7 @@ router.post("/deleteMatch", async (req, res) => {
     const result = await Match.deleteOne({ matchID: matchID });
     if (result.deletedCount === 0) {
       console.error("No match found with the given matchID");
-      return res.status(404).json({ message: "Match not found" });
+      return res.status(200).json({ message: "Match not found" });
     } else {
       console.log("Match deleted successfully at", new Date(Date.now()));
       res.status(200).json({ message: "Match deleted successfully" });
