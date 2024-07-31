@@ -117,6 +117,7 @@ router.post("/userToMatchmaking", async (req, res) => {
     res.send(userID + "Entered Matchmaking");
   } catch (err) {
     console.log("inmatchmaking " + err);
+    res.status(400).send({ error: err });
   }
 });
 
@@ -177,6 +178,12 @@ router.post("/cancelMatchmaking", async (req, res) => {
 // Creates a valid match if exists, otherwise puts you in matchmaking
 async function enterMatchmaking(player) {
   try {
+    // check if they have enough funds for the match
+    const user = await User.findOne({ userID: player.userID });
+    if (user.balance < player.entryFeeInt) {
+      throw new Error("Error entering matchmaking: insufficient funds");
+    }
+
     console.log("STEP 1: Player in matchmaking");
     // check if there is a player that can be matched
     const players = await Player.find({
@@ -189,10 +196,21 @@ async function enterMatchmaking(player) {
         player.skillRating - players[i].skillRating
       );
 
-      if (
-        ("TODO: delete this" == "TODO: delete this" || skillDifference <= 10) &&
-        players[i].userID != player.userID
-      ) {
+
+      if (("TODO: delete this" == "TODO: delete this" || skillDifference <= 10) && players[i].userID != player.userID) {
+        // check both player's buying power
+        const user1balance = await User.findOne({ userID: player.userID }, 'balance');
+        // if first user has insufficient funds, simply return, since they are not yet in matchmaking
+        if (user.balance < player.entryFeeInt) {
+          return;
+        }
+
+        const user2balance = await User.findOne({ userID: players[i].userID }, 'balance');
+        // if the second user is broke and can't afford the match, remove them from matchmaking
+        if (user.balance < player.entryFeeInt) {
+          await Player.deleteOne({ _id: players[i]._id });
+          return;
+        }
         createMatch(player, players[i]);
         return;
       } else {
@@ -323,6 +341,7 @@ async function createMatch(player1, player2) {
 
 router.post("/deleteMatch", async (req, res) => {
   const { matchID } = req.body;
+
   // delete from mongo
   console.log(
     "GOOGLE CLOUD TASK: Delete from Mongo:",
@@ -334,7 +353,7 @@ router.post("/deleteMatch", async (req, res) => {
     const result = await Match.deleteOne({ matchID: matchID });
     if (result.deletedCount === 0) {
       console.error("No match found with the given matchID");
-      return res.status(404).json({ message: "Match not found" });
+      return res.status(200).json({ message: "Match not found" });
     } else {
       console.log("Match deleted successfully at", new Date(Date.now()));
       res.status(200).json({ message: "Match deleted successfully" });

@@ -83,6 +83,14 @@ router.post("/getMostRecentOneDayPrices", async (req, res) => {
   //timeframe is optional
   const { ticker, isOneDayData } = req.body; // req.body will contain the array sent by Axios
   const tickers = [ticker];
+
+  // validate ticker input
+  for (tick of tickers) {
+    if (tick == "") {
+      return res.status(200).json({ error: "ticker invalid" });
+    }
+  }
+
   const now = new Date(Date.now());
   let mostRecentMarketDay = getMostRecentMarketOpenDay(now);
   // edge case. if most recent market day is today, AND it is before 9:45am, go for the previous day before that
@@ -192,17 +200,22 @@ router.post("/getMostRecentOneDayPrices", async (req, res) => {
       console.log(i, "Stock Data Delayed, trying", tickers[i]);
       const url = `https://api.polygon.io/v2/aggs/ticker/${tickers[i]}/range/${range}/${timeframeOpen}/${timeframeClose}?adjusted=true&sort=asc&limit=49999&apiKey=${polygonKey}`;
       console.log("Polygon URL request: " + url);
-      const response = await axios.get(url);
-      prices[response.data.ticker] = [];
-
-      for (let pricestamp of response.data.results) {
-        prices[response.data.ticker].push({
-          timeField: pricestamp.t,
-          price: pricestamp.o, //look at aggregates on polygon to undetsand
-        });
+      try {
+        const response = await axios.get(url);
+        prices[response.data.ticker] = [];
+  
+        for (let pricestamp of response.data.results) {
+          prices[response.data.ticker].push({
+            timeField: pricestamp.t,
+            price: pricestamp.o, //look at aggregates on polygon to undetsand
+          });
+        }
+      } catch (error) {
+        console.error("stockDataDelayed: error fetching prices from polygon");
+        return res.status(400).json({ error: error });
       }
-      return prices;
     }
+    return prices;
   };
 
   //Modified for stockcards, for main details page it gets all data, for stock cards it only gets 1D

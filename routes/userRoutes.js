@@ -28,11 +28,20 @@ router.post("/createUser", async (req, res) => {
       hasDefaultProfileImage: String(hasDefaultProfileImage),
     });
 
+    try {
+      await newUser.save();
+    } catch (error) {
+      if (error.code === 11000) {
+        const field = Object.keys(error.keyPattern)[0];
+        return res.status(409).json({ error: `${field} is taken`});
+      }
+    }
+
     const userForPastMathces = new MatchHistory({
       userID: String(userID),
     });
     await userForPastMathces.save();
-    await newUser.save();
+
     console.log("New User Created");
     res
       .status(201)
@@ -499,5 +508,37 @@ router.post("/deleteAccount", async (req, res) => {
     return res.status(500).send("Server error trying to delete accounts");
   }
 });
+
+router.get("/checkUsername/:username", async (req, res) => {
+  const { username } = req.params;
+  try {
+    const user = await User.findOne({ username: username });
+    if (user) {
+      return res.status(200).json({ taken: true });
+    } else {
+      return res.status(200).json({ taken: false });
+    }
+  } catch (error) {
+    return res.status(500).json({ error: "Server error on /checkUsername endpoint" })
+  }
+});
+
+router.get("/checkEmail/:email", async (req, res) => {
+  const { email } = req.params;
+  try {
+    const user = await User.findOne({ email: email });
+    if (user) {
+      return res.status(200).json({ taken: true });
+    } else {
+      return res.status(200).json({ taken: false });
+    }
+  } catch (error) {
+    return res.status(500).json({ error: "Server error on /checkEmail endpoint" })
+  }
+});
+
+router.get("/ping", async (req, res) => {
+  res.status(200).send("pong");
+})
 
 module.exports = router;
