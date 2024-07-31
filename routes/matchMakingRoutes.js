@@ -10,7 +10,7 @@ const generateRandomString = require("../utility/generateRandomString");
 const schedule = require("node-schedule");
 const { polygonKey } = require("../config/constants");
 
-const { CloudTasksClient } = require('@google-cloud/tasks');
+const { CloudTasksClient } = require("@google-cloud/tasks");
 const { serverUrl } = require("../config/constants");
 
 const client = new CloudTasksClient();
@@ -80,15 +80,17 @@ router.post("/getMatchData", async function (req, res) {
 // Inputs user into the mathcmkaing database
 router.post("/userToMatchmaking", async (req, res) => {
   try {
-    const { username, userID, entryFee, matchLength, matchType } =
-      req.body;
+    const { username, userID, entryFee, matchLength, matchType } = req.body;
 
     const entryFeeInt = parseInt(entryFee);
 
     const matchLengthInt = parseInt(matchLength);
 
     // Get skill rating
-    const user = await User.findOne({ userID: userID }, { skillRating: 1, _id: 0 });
+    const user = await User.findOne(
+      { userID: userID },
+      { skillRating: 1, _id: 0 }
+    );
     const skillRating = user.skillRating;
 
     const player = {
@@ -155,12 +157,10 @@ router.post("/cancelMatchmaking", async (req, res) => {
 
     if (!player) {
       // Player not found, send an error response
-      return res
-        .status(400)
-        .json({
-          message:
-            "Cancel matchmaking failed, because player is not in matchmaking.",
-        });
+      return res.status(400).json({
+        message:
+          "Cancel matchmaking failed, because player is not in matchmaking.",
+      });
     }
 
     // Delete the player from the matchmaking collection
@@ -179,14 +179,20 @@ async function enterMatchmaking(player) {
   try {
     console.log("STEP 1: Player in matchmaking");
     // check if there is a player that can be matched
-    const players = await Player.find({ entryFeeInt: player.entryFeeInt, matchLengthInt: player.matchLengthInt });
+    const players = await Player.find({
+      entryFeeInt: player.entryFeeInt,
+      matchLengthInt: player.matchLengthInt,
+    });
 
     for (let i = 0; i < players.length; i++) {
       const skillDifference = Math.abs(
         player.skillRating - players[i].skillRating
       );
 
-      if (("TODO: delete this" == "TODO: delete this" || skillDifference <= 10) && players[i].userID != player.userID) {
+      if (
+        ("TODO: delete this" == "TODO: delete this" || skillDifference <= 10) &&
+        players[i].userID != player.userID
+      ) {
         createMatch(player, players[i]);
         return;
       } else {
@@ -207,12 +213,12 @@ async function enterMatchmaking(player) {
 async function createMatch(player1, player2) {
   console.log("STEP 2: CREATE MATCH FUNCTION HIT");
   /**
-  * Create match functionality here.
-  * Player1 is NOT in matchmaking, player2 IS in matchmaking
-  */
+   * Create match functionality here.
+   * Player1 is NOT in matchmaking, player2 IS in matchmaking
+   */
   // Remove matched players from the "matchmaking" collection
   await Player.deleteMany({
-    _id: player2._id ,
+    _id: player2._id,
   });
 
   // Create a unique match ID (you might want to use a more sophisticated approach)
@@ -251,24 +257,21 @@ async function createMatch(player1, player2) {
     user2Snapshots: [{ value: 100000, timeField: Date.now() }],
   });
   console.log("Alright bro here's the match", match);
-  console.log("Also bro here's the snapshots:", matchSnapshots)
+  console.log("Also bro here's the snapshots:", matchSnapshots);
   try {
     const test = await match.save();
-    console.log(
-      "THIS IS THE TEST REPSONSE THAT MATCH WAS SAVED:",
-      test
-    );
+    console.log("THIS IS THE TEST REPSONSE THAT MATCH WAS SAVED:", test);
     await matchSnapshots.save();
   } catch (error) {
     console.log("error creating match");
   }
 
-  // Add the match to both players' activematches field, add remove from balances
+  // Add the match to both players' activeMatches field and remove from balances
   await User.findOneAndUpdate(
     { userID: player1.userID },
     {
-      $addToSet: { activematches: match.matchID },
-      $inc: { balance: -player1.entryFeeInt }
+      $set: { [`activeMatches.${matchID}`]: endAt },
+      $inc: { balance: -player1.entryFeeInt },
     },
     { new: true } // Return the updated document
   );
@@ -276,8 +279,8 @@ async function createMatch(player1, player2) {
   await User.findOneAndUpdate(
     { userID: player2.userID },
     {
-      $addToSet: { activematches: match.matchID },
-      $inc: { balance: -player2.entryFeeInt }
+      $set: { [`activeMatches.${matchID}`]: endAt },
+      $inc: { balance: -player2.entryFeeInt },
     },
     { new: true } // Return the updated document
   );
@@ -285,7 +288,7 @@ async function createMatch(player1, player2) {
   /**
    * Google cloud task creation to delete match
    */
-  const project = "sparmarkets"
+  const project = "sparmarkets";
   const queue = "deleteMatchQueue0";
   const location = "us-east4";
   const url = `${serverUrl}/deleteMatch`;
@@ -294,12 +297,12 @@ async function createMatch(player1, player2) {
 
   const task = {
     httpRequest: {
-      httpMethod: 'POST',
+      httpMethod: "POST",
       url: url,
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
-      body: Buffer.from(JSON.stringify({ matchID })).toString('base64'),
+      body: Buffer.from(JSON.stringify({ matchID })).toString("base64"),
     },
     scheduleTime: {
       seconds: Math.floor(endAt.getTime() / 1000),
@@ -321,7 +324,11 @@ async function createMatch(player1, player2) {
 router.post("/deleteMatch", async (req, res) => {
   const { matchID } = req.body;
   // delete from mongo
-  console.log("GOOGLE CLOUD TASK: Delete from Mongo:", matchID, new Date(Date.now()));
+  console.log(
+    "GOOGLE CLOUD TASK: Delete from Mongo:",
+    matchID,
+    new Date(Date.now())
+  );
 
   try {
     const result = await Match.deleteOne({ matchID: matchID });

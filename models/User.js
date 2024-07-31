@@ -43,10 +43,10 @@ const userSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
-  activematches: {
-    type: [String],
-    default: [],
-    required: true,
+  activeMatches: {
+    type: Map,
+    of: Date,
+    default: {},
   },
   pastmatches: {
     type: [Object],
