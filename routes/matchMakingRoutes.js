@@ -24,10 +24,15 @@ router.post("/getUserMatches", async function (req, res) {
     const user = await User.findOne({ userID: userID });
     console.log("grant", user);
     if (user) {
-      res.send(user.activematches);
+      // Convert Map to Object
+      const activeMatchesObject = Object.fromEntries(user.activematches);
+      res.send(activeMatchesObject);
+    } else {
+      res.status(404).send("User not found");
     }
-  } catch {
+  } catch (error) {
     console.error("Error retrieving active matches.", error);
+    res.status(500).send("Error retrieving active matches.");
   }
 });
 
@@ -35,6 +40,7 @@ router.post("/getUserMatches", async function (req, res) {
 router.post("/getMatchData", async function (req, res) {
   try {
     const { matchID } = req.body;
+    console.log("hello we are getting match data", matchID);
     console.log(
       "MATCH DATA FROM GAME SCREEN BEFORE:",
       new Date(Date.now()).toString()
