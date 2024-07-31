@@ -204,34 +204,21 @@ const finishMatch = async (matchToFinish) => {
     );
   }
 
-  // 7. transfer match snapshots to matchHistorySnapshots
-  try {
-    // step 1: get match snapshots
-    const matchSnapshots = await MatchSnapshots.findOne({ matchID: matchID });
-    if (!matchSnapshots) {
-      throw new Error("MATCH SNAPSHOTS NOT FOUND");
+    // 7. transfer match snapshots to matchHistorySnapshots
+    try {
+      // step 1: get match snapshots
+      const matchSnapshots = await MatchSnapshots.findOne({ matchID: matchID });
+      if (!matchSnapshots) {
+        throw new Error("MATCH SNAPSHOTS NOT FOUND");
+      }
+      // step 2: put match snapshots in matchhistorysnapshots
+      await MatchHistorySnapshots.create(matchSnapshots.toObject());
+
+      // step 3: remove the snapshot from MatchSnapshots
+      await MatchSnapshots.deleteOne({ matchID: matchID });
+    } catch (error) {
+      console.error("FinishMatch: Error transferring match snapshots to matchHistorySnapshots:", error);
     }
-    // step 2: put match snapshots in matchhistorysnapshots
-    await MatchHistorySnapshots.create(matchSnapshots.toObject());
-
-    // step 3: remove the snapshot from MatchSnapshots
-    await MatchSnapshots.deleteOne({ matchID: matchID });
-  } catch (error) {
-    console.error("FinishMatch: Error transferring match snapshots to matchHistorySnapshots:", error);
-  }
-
-  // return the updated winnings
-  if (draw) {
-    return ({
-      [winnerUserID]: matchToFinish.wagerAmt,
-      [loserUserID]: matchToFinish
-    })
-  } else {
-    return ({
-      [winnerUserID]: matchToFinish.wagerAmt * 2 * 0.9
-    })
-  }
-
 };
 
 module.exports = finishMatch;
