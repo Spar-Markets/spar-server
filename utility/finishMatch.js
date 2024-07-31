@@ -157,6 +157,8 @@ const finishMatch = async (matchToFinish) => {
   // iterate over activematches field for each user until you find the match in question
   // delete that match
 
+  console.log("ABOUT TO REMOVE MATCH FROM USERIDs:", winnerUserID, loserUserID);
+
   const winnerWithRemovedMatchID = await User.updateOne(
     { userID: winnerUserID },
     { $pull: { activematches: matchID } }
