@@ -8,7 +8,7 @@ const rankingAlgo = require("../utility/rankingAlgo");
 const { polygonKey } = require("../config/constants");
 
 /**
- * Logic to finish match
+ * Logic to finish match.
  * 1. grab match from matchID
  * 2. determine winner
  * 3. update rank
