@@ -31,13 +31,18 @@ const finishMatch = async (matchToFinish) => {
 
     // get current price for each ticker
     for (tickerObject in assets) {
-      const response = await axios.get(
-        `https://api.polygon.io/v2/snapshot/locale/us/markets/stocks/tickers/${tickerObject.ticker}?apiKey=${polygonKey}`
-      );
-      const currentPrice = response.data.ticker.min.c;
+      try {
+        const response = await axios.get(
+          `https://api.polygon.io/v2/snapshot/locale/us/markets/stocks/tickers/${tickerObject.ticker}?apiKey=${polygonKey}`
+        );
+        const currentPrice = response.data.ticker.min.c;
+  
+        // add value of shares to portfolioValue
+        portfolioValue += currentPrice * tickerObject.totalShares;
+      } catch (error) {
+        console.error("ERROR GETTING DATA FOR TICKER:", tickerObject.ticker);
+      }
 
-      // add value of shares to portfolioValue
-      portfolioValue += currentPrice * tickerObject.totalShares;
     }
 
     // return portfolio value
