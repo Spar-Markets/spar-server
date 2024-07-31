@@ -22,6 +22,7 @@ router.post("/getUserMatches", async function (req, res) {
   try {
     const { userID } = req.body;
     const user = await User.findOne({ userID: userID });
+    console.log("grant", user);
     if (user) {
       res.send(user.activematches);
     }
@@ -196,16 +197,24 @@ async function enterMatchmaking(player) {
         player.skillRating - players[i].skillRating
       );
 
-
-      if (("TODO: delete this" == "TODO: delete this" || skillDifference <= 10) && players[i].userID != player.userID) {
+      if (
+        ("TODO: delete this" == "TODO: delete this" || skillDifference <= 10) &&
+        players[i].userID != player.userID
+      ) {
         // check both player's buying power
-        const user1balance = await User.findOne({ userID: player.userID }, 'balance');
+        const user1balance = await User.findOne(
+          { userID: player.userID },
+          "balance"
+        );
         // if first user has insufficient funds, simply return, since they are not yet in matchmaking
         if (user.balance < player.entryFeeInt) {
           return;
         }
 
-        const user2balance = await User.findOne({ userID: players[i].userID }, 'balance');
+        const user2balance = await User.findOne(
+          { userID: players[i].userID },
+          "balance"
+        );
         // if the second user is broke and can't afford the match, remove them from matchmaking
         if (user.balance < player.entryFeeInt) {
           await Player.deleteOne({ _id: players[i]._id });
