@@ -33,7 +33,7 @@ router.post("/createUser", async (req, res) => {
     } catch (error) {
       if (error.code === 11000) {
         const field = Object.keys(error.keyPattern)[0];
-        return res.status(409).json({ error: `${field} is taken`});
+        return res.status(409).json({ error: `${field} is taken` });
       }
     }
 
@@ -281,7 +281,7 @@ router.post("/getProfileList", async (req, res) => {
 });
 
 router.post("/addFollowRequest", async (req, res) => {
-  const { userID, otherUserID } = req.body;
+  const { userID, otherUserID, yourUsername, otherUsername } = req.body;
 
   try {
     const updatedOtherUser = await User.findOneAndUpdate(
@@ -290,10 +290,11 @@ router.post("/addFollowRequest", async (req, res) => {
         $push: {
           followRequests: {
             from: userID,
+            username: username,
             status: "pending",
             createdAt: new Date(),
           },
-          followers: userID,
+          followers: { userID, yourUsername },
         },
       },
       { new: true, upsert: true } // new: true returns the updated document, upsert: true creates it if it doesn't exist
@@ -303,7 +304,7 @@ router.post("/addFollowRequest", async (req, res) => {
       { userID: userID },
       {
         $push: {
-          following: otherUserID,
+          following: { otherUserID, otherUsername },
         },
       },
       { new: true, upsert: true } // new: true returns the updated document, upsert: true creates it if it doesn't exist
@@ -519,7 +520,9 @@ router.get("/checkUsername/:username", async (req, res) => {
       return res.status(200).json({ taken: false });
     }
   } catch (error) {
-    return res.status(500).json({ error: "Server error on /checkUsername endpoint" })
+    return res
+      .status(500)
+      .json({ error: "Server error on /checkUsername endpoint" });
   }
 });
 
@@ -533,12 +536,14 @@ router.get("/checkEmail/:email", async (req, res) => {
       return res.status(200).json({ taken: false });
     }
   } catch (error) {
-    return res.status(500).json({ error: "Server error on /checkEmail endpoint" })
+    return res
+      .status(500)
+      .json({ error: "Server error on /checkEmail endpoint" });
   }
 });
 
 router.get("/ping", async (req, res) => {
   res.status(200).send("pong");
-})
+});
 
 module.exports = router;

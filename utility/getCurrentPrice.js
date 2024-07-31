@@ -5,7 +5,6 @@ const { polygonKey } = require("../config/constants");
 async function getCurrentPrice(ticker) {
   const url = `https://api.polygon.io/v2/snapshot/locale/us/markets/stocks/tickers/${ticker}?apiKey=${polygonKey}`;
   const response = await axios.get(url);
-  console.log(`BUYING ${ticker} @ PRICE: $` + response.data.ticker.day.c);
   const currPrice = response.data.ticker.day.c;
 
   return currPrice;
