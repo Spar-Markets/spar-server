@@ -369,7 +369,7 @@ router.post("/checkIncomingFriendRequests", async (req, res) => {
 });
 
 router.post("/acceptFollowRequest", async (req, res) => {
-  const { userID, otherUserID } = req.body;
+  const { yourUsername, otherUsername, userID, otherUserID } = req.body;
 
   try {
     // Find the target user and remove the follow request
@@ -377,7 +377,9 @@ router.post("/acceptFollowRequest", async (req, res) => {
       { userID: userID },
       {
         $pull: { followRequests: { from: otherUserID } }, // Remove the follow request
-        $addToSet: { following: otherUserID }, // Add userID to followers
+        $addToSet: {
+          following: { userID: otherUserID, username: otherUsername },
+        }, // Add userID to followers
       },
       { new: true } // Return the updated document
     );
@@ -390,7 +392,7 @@ router.post("/acceptFollowRequest", async (req, res) => {
     const updatedUser = await User.findOneAndUpdate(
       { userID: otherUserID },
       {
-        $addToSet: { followers: userID }, // Add otherUserID to following
+        $addToSet: { followers: { userID: userID, username: yourUsername } }, // Add otherUserID to following
       },
       { new: true } // Return the updated document
     );
