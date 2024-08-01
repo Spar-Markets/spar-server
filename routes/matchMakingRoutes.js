@@ -303,7 +303,7 @@ async function createMatch(player1, player2) {
   await User.findOneAndUpdate(
     { userID: player1.userID },
     {
-      $set: { [`activeMatches.${matchID}`]: endAt },
+      $set: { [`activematches.${matchID}`]: endAt },
       $inc: { balance: -player1.entryFeeInt },
     },
     { new: true } // Return the updated document
@@ -312,7 +312,7 @@ async function createMatch(player1, player2) {
   await User.findOneAndUpdate(
     { userID: player2.userID },
     {
-      $set: { [`activeMatches.${matchID}`]: endAt },
+      $set: { [`activematches.${matchID}`]: endAt },
       $inc: { balance: -player2.entryFeeInt },
     },
     { new: true } // Return the updated document
