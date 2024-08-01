@@ -72,7 +72,11 @@ stockEmitter.on("newMatch", async (newMatch) => {
       // send them the match
       console.log("MATCH CREATION - INSIDE AREA TO SEND TO CLIENT");
       console.log("activeMatchmaking sockets:", activeMatchmakingSockets);
-      console.log("activeMatchmakingSockets has", activeMatchmakingSockets.length, "connections");
+      console.log(
+        "activeMatchmakingSockets has",
+        activeMatchmakingSockets.length,
+        "connections"
+      );
 
       for (const socket of activeMatchmakingSockets) {
         socket.send(
@@ -117,7 +121,15 @@ async function changeStream() {
         console.log("RECOGNIZED CHANGE OPERATION TYPE AS INSERT");
         stockEmitter.emit("newMatch", change.fullDocument);
       } else if (change.operationType == "delete") {
-        finishMatch(change.fullDocumentBeforeChange);
+        const winnings = finishMatch(change.fullDocumentBeforeChange);
+        if (matchClientList[match.matchID]) {
+          for (socket of matchClientList[match.matchID]) {
+            socket.send({
+              ...winnings,
+              type: "updateWinnings",
+            });
+          }
+        }
       } else {
         const key = Object.keys(change.updateDescription.updatedFields)[0];
 
