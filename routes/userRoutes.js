@@ -544,6 +544,31 @@ router.get("/checkEmail/:email", async (req, res) => {
   }
 });
 
+router.get("/getProfileImages/:userID", async (req, res) => {
+  const { userID } = req.params;
+
+  try {
+    const user = await User.findOne(
+      { userID: userID },
+      "hasDefaultProfileImage defaultProfileImage"
+    );
+
+    if (!user) {
+      return res.status(404).send("User not found");
+    }
+
+    res.status(200).json({
+      hasDefaultProfileImage: user.hasDefaultProfileImage,
+      defaultProfileImage: user.defaultProfileImage,
+    });
+  } catch (error) {
+    console.error("Error fetching profile images:", error);
+    res
+      .status(500)
+      .json({ error: "Server error when trying to fetch profile images" });
+  }
+});
+
 router.get("/ping", async (req, res) => {
   res.status(200).send("pong");
 });
