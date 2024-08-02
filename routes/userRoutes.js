@@ -467,7 +467,7 @@ router.post("/updateImageStatus", async (req, res) => {
   const { status, userID } = req.body;
 
   // Validate status
-  if (status !== "true" && status !== "false") {
+  if (status !== true && status !== false) {
     console.error("Invalid status value:", status);
     return res.status(400).send("Status must be either 'true' or 'false'");
   }
