@@ -299,23 +299,32 @@ async function createMatch(player1, player2) {
     console.log("error creating match");
   }
 
-  // Add the match to both players' activeMatches field and remove from balances
   await User.findOneAndUpdate(
     { userID: player1.userID },
     {
-      $set: { [`activematches.${matchID}`]: endAt },
+      $push: {
+        activematches: {
+          $each: [{ matchID: matchID, endAt: endAt }],
+          $sort: { endAt: 1 }, // 1 for ascending order
+        },
+      },
       $inc: { balance: -player1.entryFeeInt },
     },
-    { new: true } // Return the updated document
+    { new: true }
   );
 
   await User.findOneAndUpdate(
     { userID: player2.userID },
     {
-      $set: { [`activematches.${matchID}`]: endAt },
+      $push: {
+        activematches: {
+          $each: [{ matchID: matchID, endAt: endAt }],
+          $sort: { endAt: 1 },
+        },
+      },
       $inc: { balance: -player2.entryFeeInt },
     },
-    { new: true } // Return the updated document
+    { new: true }
   );
 
   /**
