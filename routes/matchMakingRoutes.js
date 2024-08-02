@@ -24,9 +24,9 @@ router.post("/getUserMatches", async function (req, res) {
     const user = await User.findOne({ userID: userID });
     console.log("grant", user);
     if (user) {
-      // Convert Map to Object
-      const activeMatchesObject = Object.fromEntries(user.activematches);
-      res.send(activeMatchesObject);
+      // Convert Map to Array
+      const activeMatchesArray = Array.from(user.activematches.values());
+      res.send(activeMatchesArray);
     } else {
       res.status(404).send("User not found");
     }
