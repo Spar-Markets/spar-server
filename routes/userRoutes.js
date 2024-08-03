@@ -496,17 +496,19 @@ router.post("/checkIncomingFriendRequests", async (req, res) => {
 
   try {
     // Find the user by userID
-    const user = await User.findOne({ userID });
-    if (!user) {
+    const incomingFriendRequests = await Friends.findOne(
+      { userID },
+      "incomingFriendRequests -_id"
+    );
+    if (!incomingFriendRequests) {
       return res.status(404).send("User not found");
     }
 
-    // Get incoming friend requests
-    const incomingRequests = user.followRequests.filter(
-      (request) => request.status === "pending"
-    );
+    console.log(Object.keys(incomingFriendRequests));
 
-    res.status(200).json({ incomingRequests });
+    // Get incoming friend requests
+
+    res.status(200).send(incomingFriendRequests);
   } catch (error) {
     console.error("Error checking incoming friend requests:", error);
     res
