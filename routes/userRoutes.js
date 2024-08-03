@@ -500,6 +500,7 @@ router.post("/checkIncomingFriendRequests", async (req, res) => {
       { userID },
       "incomingFriendRequests -_id"
     );
+
     if (!incomingFriendRequestsDoc) {
       return res.status(404).send("User not found");
     }

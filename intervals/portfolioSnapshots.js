@@ -27,9 +27,6 @@ async function updatePortfolioValues(matches) {
 
   console.log("MATCHES ARRAY", matches);
 
-  console.log(
-    "JUNE 10TH 2024: JOSEPH JAMES QUARATIELLO. LOOK AT THIS!!! These are the matches that the interval is taking portfolio snapshots for:"
-  );
   console.log(matches);
 
   // for each match:
@@ -122,7 +119,6 @@ async function updatePortfolioValues(matches) {
  * @param matches Array of matches to run interval function on.
  */
 function runIntervalFunction(matches) {
-
   //this is the 15 min delay
   const now = new Date(Date.now());
   // convert to EST
@@ -139,15 +135,15 @@ function runIntervalFunction(matches) {
     (hours > 8 && hours < 24);
   const isWithinMarketHours = condition1 && condition2;
   if (isWithinMarketHours) {
-    console.log(
-      `CASE 1: Running portfolio snapshots, because we are in correct time range. --- Hours: ${hours}, Minutes: ${minutes}`
-    );
+    // console.log(
+    //   `CASE 1: Running portfolio snapshots, because we are in correct time range. --- Hours: ${hours}, Minutes: ${minutes}`
+    // );
     // Add your task here
     updatePortfolioValues(matches);
   } else {
-    console.log(
-      `CASE 2: NOT running portfolio snapshots. Outside market hours. --- Hours: ${hours}, Minutes: ${minutes}`
-    );
+    // console.log(
+    //   `CASE 2: NOT running portfolio snapshots. Outside market hours. --- Hours: ${hours}, Minutes: ${minutes}`
+    // );
   }
 }
 
@@ -155,7 +151,6 @@ function runIntervalFunction(matches) {
  * Run snapshots for fifteen minute matches every 10 seconds.
  */
 const fiftenMinuteInterval = cron.schedule("*/10 * * * * *", async () => {
-  console.log("Running 10 second interval.");
   const fifteenMinMatches = await Match.find({ timeframe: millisIn15min });
   runIntervalFunction(fifteenMinMatches);
 });
@@ -164,18 +159,16 @@ const fiftenMinuteInterval = cron.schedule("*/10 * * * * *", async () => {
  * Run snapshots for one day matches every 5 minutes.
  */
 const oneDayInterval = cron.schedule("*/5 * * * *", async () => {
-  console.log("Running 5 minute interval.");
   const oneHourMatches = await Match.find({ timeframe: millisInOneDay });
   runIntervalFunction(oneHourMatches);
-})
+});
 
 /**
  * Run snapshots for one week matches every 30 minutes.
  */
 const oneWeekInterval = cron.schedule("*/30 * * * *", async () => {
-  console.log("Running 30 minute interval.");
   const oneHourMatches = await Match.find({ timeframe: millisInOneWeek });
   runIntervalFunction(oneHourMatches);
-})
+});
 
 module.exports = { fiftenMinuteInterval, oneDayInterval, oneWeekInterval };
