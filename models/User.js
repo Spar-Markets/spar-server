@@ -78,7 +78,7 @@ const userSchema = new mongoose.Schema({
     default: [],
   },
   invitations: {
-    type: [Object],
+    type: Object,
     default: [],
   },
 });

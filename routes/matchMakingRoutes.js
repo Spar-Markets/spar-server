@@ -250,12 +250,15 @@ router.post("/challengeFriend", async (req, res) => {
     timeframe,
     createdAt: Date.now(),
     mode,
+    type,
   };
+
+  const invitationID = generateRandomString(45);
 
   try {
     const response = await User.updateOne(
       { userID: invitedUserID },
-      { $push: { invitations: invitation } },
+      { $set: { [`invitations.${invitationID}`]: invitation } },
       { upsert: true }
     );
     if (!response) {
@@ -274,7 +277,9 @@ router.post("/challengeFriend", async (req, res) => {
   }
 });
 
-// router.post("/acceptChallenge", asy)
+// router.post("/acceptChallenge", async (req, res) => {
+//   const { invitationID, }
+// })
 
 /**
  * Create match function
