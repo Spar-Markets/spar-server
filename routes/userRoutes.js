@@ -326,7 +326,7 @@ router.post("/addFriendRequest", async (req, res) => {
     }
 
     // Now we actually add the friend request
-    const updatedFriendRequest = await Friend.updateOne(
+    const updatedFriendRequest = await Friends.updateOne(
       { userID: requestedUserID },
       {
         $push: {
