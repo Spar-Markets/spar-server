@@ -299,9 +299,10 @@ router.post("/addFriendRequest", async (req, res) => {
     console.log("requestedUser:", requestedUser);
     console.log("keys:", Object.keys(requestedUser));
 
-    const incomingRequestExists = requestedUser.incomingFriendRequests.some(
-      (friendRequest) => friendRequest.userID == requestedUserID
-    );
+    const incomingRequestExists =
+      requestedUser._doc.incomingFriendRequests.some(
+        (friendRequest) => friendRequest.userID == requestedUserID
+      );
 
     if (incomingRequestExists) {
       return res
@@ -330,10 +331,15 @@ router.post("/addFriendRequest", async (req, res) => {
       { userID: requestedUserID },
       {
         $push: {
-          friendRequests: { userID: requestedUserID, createdAt: Date.now() },
+          incomingFriendRequests: {
+            userID: requestedUserID,
+            createdAt: Date.now(),
+          },
         },
       }
     );
+
+    console.log("updatedFriendRequest:", updatedFriendRequest);
 
     return res.status(200);
   } catch (error) {
