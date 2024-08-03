@@ -226,7 +226,16 @@ async function enterMatchmaking(player) {
           await Player.deleteOne({ _id: players[i]._id });
           return;
         }
-        createMatch(player, players[i]);
+        // create match
+
+        createMatch(
+          player.userID,
+          players[i].userID,
+          player.entryFeeInt,
+          player.matchLengthInt,
+          "Stock",
+          player.matchType
+        );
         return;
       } else {
         console.log("STEP 2: CONDITIONS WERE NOT MET.");
@@ -278,14 +287,62 @@ router.post("/challengeFriend", async (req, res) => {
   }
 });
 
-// router.post("/acceptChallenge", async (req, res) => {
-//   const { invitationID, }
-// })
+router.post("/acceptChallenge", async (req, res) => {
+  const { invitationID, invitedUserID } = req.body;
+
+  try {
+    // get necessary information to create match
+    // step 1: retrieve the value to be deleted
+    const user = await User.findOne(
+      { userID: invitedUserID },
+      { [`invitations.${invitationID}`]: 1, _id: 0 }
+    );
+
+    const deletedInvitation = user ? user.invitations[invitationID] : null;
+
+    if (deletedInvitation) {
+      // step 2: delete the key-value pair
+      await User.updateOne(
+        { userID: invitedUserID },
+        { $unset: { [`invitations.${invitationID}`]: "" } }
+      );
+
+      // step 3: create the match
+      const { challengerUserID, wager, timeframe, mode, type } =
+        deletedInvitation;
+
+      createMatch(
+        challengerUserID,
+        invitedUserID,
+        wager,
+        timeframe,
+        mode,
+        type
+      );
+    }
+  } catch (error) {
+    console.error("Error on /acceptChallenge endpoint:", error);
+    res.status(500).json({ error: error });
+  }
+});
 
 /**
  * Create match function
+ * @param player1UserID
+ * @param player2UserID
+ * @param wager
+ * @param matchLength
+ * @param matchMode
+ * @param matchType
  */
-async function createMatch(player1, player2) {
+async function createMatch(
+  player1UserID,
+  player2UserID,
+  wager,
+  matchLength,
+  matchMode,
+  matchType
+) {
   console.log("STEP 2: CREATE MATCH FUNCTION HIT");
   /**
    * Create match functionality here.
@@ -301,24 +358,24 @@ async function createMatch(player1, player2) {
 
   // determine createdAt time and endAt time
   const createdAt = new Date(Date.now());
-  const endAt = new Date(Date.now() + player1.matchLengthInt * 1000);
+  const endAt = new Date(Date.now() + matchLength * 1000);
 
   // Insert the matched users into the "matches" collection
   const match = new Match({
     matchID: matchID,
-    timeframe: player1.matchLengthInt,
+    timeframe: matchLength,
     endAt: endAt,
     createdAt: createdAt,
-    matchType: player1.matchType,
-    wagerAmt: player1.entryFeeInt,
+    matchType: matchType,
+    wagerAmt: wager,
     user1: {
-      userID: player1.userID,
+      userID: player1UserID,
       assets: [],
       trades: [],
       buyingPower: 100000,
     },
     user2: {
-      userID: player2.userID,
+      userID: player2UserID,
       assets: [],
       trades: [],
       snapshots: [],
@@ -342,7 +399,7 @@ async function createMatch(player1, player2) {
   }
 
   await User.findOneAndUpdate(
-    { userID: player1.userID },
+    { userID: player1UserID },
     {
       $push: {
         activematches: {
@@ -350,13 +407,13 @@ async function createMatch(player1, player2) {
           $sort: { endAt: 1 }, // 1 for ascending order
         },
       },
-      $inc: { balance: -player1.entryFeeInt },
+      $inc: { balance: -wager },
     },
     { new: true }
   );
 
   await User.findOneAndUpdate(
-    { userID: player2.userID },
+    { userID: player2UserID },
     {
       $push: {
         activematches: {
@@ -364,7 +421,7 @@ async function createMatch(player1, player2) {
           $sort: { endAt: 1 },
         },
       },
-      $inc: { balance: -player2.entryFeeInt },
+      $inc: { balance: -wager },
     },
     { new: true }
   );
