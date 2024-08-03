@@ -242,7 +242,8 @@ async function enterMatchmaking(player) {
 
 router.post("/challengeFriend", async (req, res) => {
   // needs userID of challenger, wager, timeframe, and timestamp
-  const { challengerUserID, invitedUserID, wager, timeframe, mode } = req.body;
+  const { challengerUserID, invitedUserID, wager, timeframe, mode, type } =
+    req.body;
 
   const invitation = {
     challengerUserID,
