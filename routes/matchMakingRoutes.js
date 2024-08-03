@@ -306,18 +306,22 @@ router.post("/acceptChallenge", async (req, res) => {
 
     const deletedInvitation = user ? user?.invitations?.[invitationID] : null;
 
+    console.log("STEP 6: deletedInvitation:", deletedInvitation);
+
     if (deletedInvitation) {
       // step 2: delete the key-value pair
-      await User.updateOne(
+      const deletedUser = await User.updateOne(
         { userID: invitedUserID },
         { $unset: { [`invitations.${invitationID}`]: "" } }
       );
+
+      console.log("STEP 7: modified count:", deletedUser.modifiedCount);
 
       // step 3: create the match
       const { challengerUserID, wager, timeframe, mode, type } =
         deletedInvitation;
 
-      createMatch(
+      await createMatch(
         challengerUserID,
         invitedUserID,
         wager,
@@ -325,6 +329,8 @@ router.post("/acceptChallenge", async (req, res) => {
         mode,
         type
       );
+
+      res.status(200).send("Created match");
     }
   } catch (error) {
     console.error("Error on /acceptChallenge endpoint:", error);
