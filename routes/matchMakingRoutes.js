@@ -303,9 +303,9 @@ router.post("/acceptChallenge", async (req, res) => {
     console.log("Step 4, user.invitations:", user.invitations);
     console.log('Step 5: user["invitations"]:', user["invitations"]);
     // console.log("STEP 6: Chat method:", user.invitations[invitationID]);
-    console.log("STEP 7: Lean user", user.lean());
+    // console.log("STEP 7: Lean user", user.lean());
     console.log("STEP 8: JSON stringify", JSON.stringify(user, null, 2));
-    console.log("STEP 9: lean keys", Object.keys(user.lean()));
+    // console.log("STEP 9: lean keys", Object.keys(user.lean()));
     console.log("STEP 10: raw keys", Object.keys(user));
 
     const deletedInvitation = user ? user?.invitations?.[invitationID] : null;
