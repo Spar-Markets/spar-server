@@ -62,8 +62,12 @@ const userSchema = new mongoose.Schema({
   },
   friendCount: {
     type: Number,
-    default: 0
-  }
+    default: 0,
+  },
+  invitations: {
+    type: Object,
+    default: {},
+  },
 });
 
 module.exports = sparDB.model("User", userSchema);
