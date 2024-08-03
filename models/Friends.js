@@ -11,10 +11,14 @@ const Friends = new mongoose.Schema({
         type: [String],
         default: [],
     },
-    friendRequests: {
+    outgoingFriendRequests: {
         type: [Object],
         default: [],
     },
+    incomingFriendRequests: {
+        type: [Object],
+        default: []
+    }
   });
   
   module.exports = sparDB.model("Friends", Friends);

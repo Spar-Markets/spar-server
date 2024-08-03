@@ -5,6 +5,7 @@ const User = require("../models/User");
 const getLeftOfAtSymbol = require("../utility/getLeftOfAtSymbol.js");
 const generateRandomString = require("../utility/generateRandomString");
 const MatchHistory = require("../models/MatchHistory");
+const Friends = require("../models/Friends");
 
 // define routes here
 
@@ -280,41 +281,76 @@ router.post("/getProfileList", async (req, res) => {
   }
 });
 
-router.post("/addFollowRequest", async (req, res) => {
-  const { userID, otherUserID, yourUsername, otherUsername } = req.body;
+router.post("/addFriendRequest", async (req, res) => {
+  const { userID, requestedUserID } = req.body;
 
   try {
-    const updatedOtherUser = await User.findOneAndUpdate(
-      { userID: otherUserID },
-      {
-        $push: {
-          followRequests: {
-            from: userID,
-            username: yourUsername,
-            status: "pending",
-            createdAt: new Date(),
-          },
-          followers: { userID: userID, username: yourUsername },
-        },
-      },
-      { new: true, upsert: true } // new: true returns the updated document, upsert: true creates it if it doesn't exist
-    );
-
-    const updatedUser = await User.findOneAndUpdate(
+    // ERROR CHECK 1: check to make sure there is not an existing incoming friend request from the other user
+    const requestedUser = await Friend.findOne(
       { userID: userID },
-      {
-        $push: {
-          following: { userID: otherUserID, userName: otherUsername },
-        },
-      },
-      { new: true, upsert: true } // new: true returns the updated document, upsert: true creates it if it doesn't exist
+      "incomingFriendRequests -_id"
     );
 
-    res.status(200).send(updatedUser);
+    const incomingRequestExists = requestedUser.incomingFriendRequests.some(
+      (friendRequest) => friendRequest.userID == requestedUserID
+    );
+
+    if (alreadyContainsRequest) {
+      return res
+        .status(409)
+        .json({ error: "Incoming friend request already exists" });
+    }
+
+    // ERROR CHECK 2: check to make sure there is not an existing outgoing friend request to the other user
+    const requestingUser = await Friend.findOne(
+      { userID: userID },
+      "outgoingFriendRequests -_id"
+    );
+
+    const outgoingRequestExists = requestingUser.outgoingFriendRequests.some(
+      (request) => request.userID === userID
+    );
+
+    if (outgoingRequestExists) {
+      return res
+        .status(409)
+        .json({ error: "Outgoing friend request already exists" });
+    }
+
+    // Now we actually add the friend request
+    const updatedFriendRequest = await Friend.updateOne(
+      { userID: requestedUserID },
+      {
+        $push: {
+          friendRequests: { userID: requestedUserID, createdAt: Date.now() },
+        },
+      }
+    );
+
+    return res.status(200).send(updatedUser);
   } catch (error) {
     console.error("Error adding follow request:", error);
-    res.status(500).send("An error occurred while adding the follow request");
+    return res
+      .status(500)
+      .send("An error occurred while adding the follow request");
   }
+});
+
+router.post("/acceptFriendRequest", async (req, res) => {
+  const { userID, newFriendUserID } = req.body;
+
+  // STEP 1: check if friend request actualy exists
+  const requestor = await Friend.findOne(
+    { userID: userID },
+    "incomingFriendRequests -_id"
+  );
+
+  // STEP 2: remove from incoming friend requests
+  // const response = await Friend.
+
+  // STEP 3: remove from outgoing friend requests
+  // STEP 4: add friend to each user's friends
+  // STEP 5: increment each user's friend count
 });
 
 router.post("/checkFollowStatus", async (req, res) => {
