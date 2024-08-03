@@ -396,7 +396,7 @@ router.post("/acceptFriendRequest", async (req, res) => {
       { userID: requestorUserID },
       {
         $inc: {
-          friendcount: 1,
+          friendCount: 1,
         },
       }
     );
@@ -405,7 +405,7 @@ router.post("/acceptFriendRequest", async (req, res) => {
       { userID: acceptedUserID },
       {
         $inc: {
-          friendcount: 1,
+          friendCount: 1,
         },
       }
     );
