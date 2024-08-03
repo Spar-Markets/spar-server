@@ -303,7 +303,7 @@ router.post("/addFriendRequest", async (req, res) => {
       (friendRequest) => friendRequest.userID == requestedUserID
     );
 
-    if (alreadyContainsRequest) {
+    if (incomingRequestExists) {
       return res
         .status(409)
         .json({ error: "Incoming friend request already exists" });
