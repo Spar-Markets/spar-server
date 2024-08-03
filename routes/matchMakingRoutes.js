@@ -302,8 +302,9 @@ router.post("/acceptChallenge", async (req, res) => {
     console.log("step 3, user:", user);
     console.log("Step 4, user.invitations:", user.invitations);
     console.log('Step 5: user["invitations"]:', user["invitations"]);
+    console.log("STEP 6: Chat method:", user?.invitations?.[invitationID]);
 
-    const deletedInvitation = user ? user.invitations[invitationID] : null;
+    const deletedInvitation = user ? user?.invitations?.[invitationID] : null;
 
     if (deletedInvitation) {
       // step 2: delete the key-value pair
