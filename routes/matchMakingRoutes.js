@@ -229,7 +229,7 @@ async function enterMatchmaking(player) {
         createMatch(player, players[i]);
         return;
       } else {
-        console.log("STEP 2: CONDITIONS wERE NOT MET.");
+        console.log("STEP 2: CONDITIONS WERE NOT MET.");
       }
     }
   } catch (error) {
@@ -239,6 +239,41 @@ async function enterMatchmaking(player) {
   // If we get here, match was not made. Add user to matchmaking
   Player.create(player);
 }
+
+router.post("/challengeFriend", async (req, res) => {
+  // needs userID of challenger, wager, timeframe, and timestamp
+  const { challengerUserID, invitedUserID, wager, timeframe, mode } = req.body;
+
+  const invitation = {
+    challengerUserID,
+    wagerAmt,
+    matchLength,
+    createdAt,
+  };
+
+  try {
+    const response = await User.updateOne(
+      { userID: invitedUserID },
+      { $push: { invitations: invitation } },
+      { upsert: true }
+    );
+    if (!response) {
+      res.status(404).send("");
+    } else if (response.matchedCount === 0) {
+      res.status(404).send("No document found with the specified userID.");
+    } else if (response.modifiedCount === 0) {
+      res.status(404).send("No document was modified.");
+    } else {
+      res.status(200).send("Document was successfully modified.");
+    }
+  } catch {
+    return res
+      .status(500)
+      .send("Server error trying to send invitation", invitation);
+  }
+});
+
+// router.post("/acceptChallenge", asy)
 
 /**
  * Create match function

@@ -76,6 +76,10 @@ const userSchema = new mongoose.Schema({
     type: [Object],
     default: [],
   },
+  invitations: {
+    type: [Object],
+    default: [],
+  },
 });
 
 module.exports = sparDB.model("User", userSchema);
