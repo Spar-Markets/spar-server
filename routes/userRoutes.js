@@ -335,7 +335,7 @@ router.post("/addFriendRequest", async (req, res) => {
       }
     );
 
-    return res.status(200).send(updatedUser);
+    return res.status(200);
   } catch (error) {
     console.error("Error adding follow request:", error);
     return res
