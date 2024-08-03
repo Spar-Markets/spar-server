@@ -291,6 +291,9 @@ router.post("/addFriendRequest", async (req, res) => {
       "incomingFriendRequests -_id"
     );
 
+    console.log("requestedUser:", requestedUser);
+    console.log("keys:", Object.keys(requestedUser));
+
     const incomingRequestExists = requestedUser.incomingFriendRequests.some(
       (friendRequest) => friendRequest.userID == requestedUserID
     );
