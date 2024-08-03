@@ -299,7 +299,7 @@ router.post("/acceptChallenge", async (req, res) => {
       { userID: invitedUserID },
       { [`invitations.${invitationID}`]: 1, _id: 0 }
     );
-    console.log("step 3, user:", user);
+    console.log(user);
     console.log("Step 4, user.invitations:", user.invitations);
     console.log('Step 5: user["invitations"]:', user["invitations"]);
     console.log("STEP 6: Chat method:", user.invitations[invitationID]);
