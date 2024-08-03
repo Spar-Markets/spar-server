@@ -48,11 +48,6 @@ const userSchema = new mongoose.Schema({
     default: [],
     required: true,
   },
-  pastmatches: {
-    type: [Object],
-    default: [],
-    required: true,
-  },
   plaidPersonalAccess: {
     type: String,
     default: "",
@@ -64,18 +59,10 @@ const userSchema = new mongoose.Schema({
     type: [Object],
     default: [],
   },
-  followers: {
-    type: [String],
-    default: [],
-  },
-  following: {
-    type: [String],
-    default: [],
-  },
-  followRequests: {
-    type: [Object],
-    default: [],
-  },
+  friendCount: {
+    type: Number,
+    default: 0
+  }
 });
 
 module.exports = sparDB.model("User", userSchema);
