@@ -286,6 +286,28 @@ router.post("/getProfileList", async (req, res) => {
   }
 });
 
+router.post("/getFriends", async (req, res) => {
+  const { userID } = req.body;
+
+  try {
+    // Find the document in the Friends collection by userID
+    const userFriends = await Friends.findOne(
+      { userID: userID },
+      "friends -_id"
+    );
+
+    if (!userFriends) {
+      return res.status(404).send("No friends found for this user");
+    }
+
+    // Return the friends array
+    res.status(200).send(userFriends.friends);
+  } catch (error) {
+    console.error("Error retrieving friends:", error);
+    res.status(500).send("Server error when trying to get friends");
+  }
+});
+
 router.post("/addFriendRequest", async (req, res) => {
   const { userID, requestedUserID } = req.body;
 
@@ -490,52 +512,6 @@ router.post("/checkIncomingFriendRequests", async (req, res) => {
     res
       .status(500)
       .send("An error occurred while checking incoming friend requests");
-  }
-});
-
-router.post("/acceptFollowRequest", async (req, res) => {
-  const { yourUsername, otherUsername, userID, otherUserID } = req.body;
-
-  try {
-    // Find the target user and remove the follow request
-    const updatedOtherUser = await User.findOneAndUpdate(
-      { userID: userID },
-      {
-        $pull: { followRequests: { from: otherUserID } }, // Remove the follow request
-        $addToSet: {
-          following: { userID: otherUserID, username: otherUsername },
-        }, // Add userID to followers
-      },
-      { new: true } // Return the updated document
-    );
-
-    if (!updatedOtherUser) {
-      return res.status(404).send("Target user not found");
-    }
-
-    // Find the user and add the otherUserID to the following array
-    const updatedUser = await User.findOneAndUpdate(
-      { userID: otherUserID },
-      {
-        $addToSet: { followers: { userID: userID, username: yourUsername } }, // Add otherUserID to following
-      },
-      { new: true } // Return the updated document
-    );
-
-    if (!updatedUser) {
-      return res.status(404).send("User not found");
-    }
-
-    res.status(200).json({
-      message: "Follow request accepted successfully",
-      updatedUser,
-      updatedOtherUser,
-    });
-  } catch (error) {
-    console.error("Error accepting follow request:", error);
-    res
-      .status(500)
-      .send("An error occurred while accepting the follow request");
   }
 });
 
