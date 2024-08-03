@@ -23,7 +23,7 @@ const userSchema = new mongoose.Schema({
     unique: false,
   },
   hasDefaultProfileImage: {
-    type: String,
+    type: Boolean,
     required: true,
     unique: false,
   },
@@ -43,11 +43,12 @@ const userSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
-  activematches: {
-    type: [String],
-    default: [],
-    required: true,
-  },
+  activematches: [
+    {
+      matchID: { type: String, required: true },
+      endAt: { type: Date, required: true },
+    },
+  ],
   plaidPersonalAccess: {
     type: String,
     default: "",

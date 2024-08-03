@@ -33,7 +33,7 @@ router.post("/createUser", async (req, res) => {
     } catch (error) {
       if (error.code === 11000) {
         const field = Object.keys(error.keyPattern)[0];
-        return res.status(409).json({ error: `${field} is taken`});
+        return res.status(409).json({ error: `${field} is taken` });
       }
     }
 
@@ -281,7 +281,7 @@ router.post("/getProfileList", async (req, res) => {
 });
 
 router.post("/addFollowRequest", async (req, res) => {
-  const { userID, otherUserID } = req.body;
+  const { userID, otherUserID, yourUsername, otherUsername } = req.body;
 
   try {
     const updatedOtherUser = await User.findOneAndUpdate(
@@ -290,10 +290,11 @@ router.post("/addFollowRequest", async (req, res) => {
         $push: {
           followRequests: {
             from: userID,
+            username: yourUsername,
             status: "pending",
             createdAt: new Date(),
           },
-          followers: userID,
+          followers: { userID: userID, username: yourUsername },
         },
       },
       { new: true, upsert: true } // new: true returns the updated document, upsert: true creates it if it doesn't exist
@@ -303,7 +304,7 @@ router.post("/addFollowRequest", async (req, res) => {
       { userID: userID },
       {
         $push: {
-          following: otherUserID,
+          following: { userID: otherUserID, userName: otherUsername },
         },
       },
       { new: true, upsert: true } // new: true returns the updated document, upsert: true creates it if it doesn't exist
@@ -368,7 +369,7 @@ router.post("/checkIncomingFriendRequests", async (req, res) => {
 });
 
 router.post("/acceptFollowRequest", async (req, res) => {
-  const { userID, otherUserID } = req.body;
+  const { yourUsername, otherUsername, userID, otherUserID } = req.body;
 
   try {
     // Find the target user and remove the follow request
@@ -376,7 +377,9 @@ router.post("/acceptFollowRequest", async (req, res) => {
       { userID: userID },
       {
         $pull: { followRequests: { from: otherUserID } }, // Remove the follow request
-        $addToSet: { following: otherUserID }, // Add userID to followers
+        $addToSet: {
+          following: { userID: otherUserID, username: otherUsername },
+        }, // Add userID to followers
       },
       { new: true } // Return the updated document
     );
@@ -389,7 +392,7 @@ router.post("/acceptFollowRequest", async (req, res) => {
     const updatedUser = await User.findOneAndUpdate(
       { userID: otherUserID },
       {
-        $addToSet: { followers: userID }, // Add otherUserID to following
+        $addToSet: { followers: { userID: userID, username: yourUsername } }, // Add otherUserID to following
       },
       { new: true } // Return the updated document
     );
@@ -464,7 +467,7 @@ router.post("/updateImageStatus", async (req, res) => {
   const { status, userID } = req.body;
 
   // Validate status
-  if (status !== "true" && status !== "false") {
+  if (status !== true && status !== false) {
     console.error("Invalid status value:", status);
     return res.status(400).send("Status must be either 'true' or 'false'");
   }
@@ -519,7 +522,9 @@ router.get("/checkUsername/:username", async (req, res) => {
       return res.status(200).json({ taken: false });
     }
   } catch (error) {
-    return res.status(500).json({ error: "Server error on /checkUsername endpoint" })
+    return res
+      .status(500)
+      .json({ error: "Server error on /checkUsername endpoint" });
   }
 });
 
@@ -533,12 +538,39 @@ router.get("/checkEmail/:email", async (req, res) => {
       return res.status(200).json({ taken: false });
     }
   } catch (error) {
-    return res.status(500).json({ error: "Server error on /checkEmail endpoint" })
+    return res
+      .status(500)
+      .json({ error: "Server error on /checkEmail endpoint" });
+  }
+});
+
+router.get("/getProfileImages/:userID", async (req, res) => {
+  const { userID } = req.params;
+
+  try {
+    const user = await User.findOne(
+      { userID: userID },
+      "hasDefaultProfileImage defaultProfileImage"
+    );
+
+    if (!user) {
+      return res.status(404).send("User not found");
+    }
+
+    res.status(200).json({
+      hasDefaultProfileImage: user.hasDefaultProfileImage,
+      defaultProfileImage: user.defaultProfileImage,
+    });
+  } catch (error) {
+    console.error("Error fetching profile images:", error);
+    res
+      .status(500)
+      .json({ error: "Server error when trying to fetch profile images" });
   }
 });
 
 router.get("/ping", async (req, res) => {
   res.status(200).send("pong");
-})
+});
 
 module.exports = router;

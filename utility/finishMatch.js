@@ -36,13 +36,12 @@ const finishMatch = async (matchToFinish) => {
           `https://api.polygon.io/v2/snapshot/locale/us/markets/stocks/tickers/${tickerObject.ticker}?apiKey=${polygonKey}`
         );
         const currentPrice = response.data.ticker.min.c;
-  
+
         // add value of shares to portfolioValue
         portfolioValue += currentPrice * tickerObject.totalShares;
       } catch (error) {
         console.error("ERROR GETTING DATA FOR TICKER:", tickerObject.ticker);
       }
-
     }
 
     // return portfolio value
@@ -167,13 +166,17 @@ const finishMatch = async (matchToFinish) => {
 
   const winnerWithRemovedMatchID = await User.updateOne(
     { userID: winnerUserID },
-    { $pull: { activematches: matchID } }
+    { $unset: { [`activematches.${matchID}`]: "" } }
   );
   const loserWithRemovedMatchID = await User.updateOne(
     { userID: loserUserID },
-    { $pull: { activematches: matchID } }
+    { $unset: { [`activematches.${matchID}`]: "" } } //{matchID: endAt, ...},
   );
-  console.log("STEP 6: AFTER MATCH DELETION, winner user:", winnerWithRemovedMatchID);
+  // { matchID: date, matchID2: date }
+  console.log(
+    "STEP 6: AFTER MATCH DELETION, winner user:",
+    winnerWithRemovedMatchID
+  );
   console.log("AFTER MATCH DELETION, loser user:", loserWithRemovedMatchID);
 
   // 6. put match in each users match history
@@ -183,8 +186,8 @@ const finishMatch = async (matchToFinish) => {
   const matchHistoryObject = {
     ...matchToFinish,
     user1FinalValue: user1PortfolioValue,
-    user2FinalValue: user2PortfolioValue
-  }
+    user2FinalValue: user2PortfolioValue,
+  };
 
   try {
     const resultWinner = await MatchHistory.updateOne(
@@ -217,21 +220,23 @@ const finishMatch = async (matchToFinish) => {
     // step 3: remove the snapshot from MatchSnapshots
     await MatchSnapshots.deleteOne({ matchID: matchID });
   } catch (error) {
-    console.error("FinishMatch: Error transferring match snapshots to matchHistorySnapshots:", error);
+    console.error(
+      "FinishMatch: Error transferring match snapshots to matchHistorySnapshots:",
+      error
+    );
   }
 
   // return the updated winnings
   if (draw) {
-    return ({
+    return {
       [winnerUserID]: matchToFinish.wagerAmt,
-      [loserUserID]: matchToFinish
-    })
+      [loserUserID]: matchToFinish,
+    };
   } else {
-    return ({
-      [winnerUserID]: matchToFinish.wagerAmt * 2 * 0.9
-    })
+    return {
+      [winnerUserID]: matchToFinish.wagerAmt * 2 * 0.9,
+    };
   }
-
 };
 
 module.exports = finishMatch;

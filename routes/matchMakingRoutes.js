@@ -10,7 +10,7 @@ const generateRandomString = require("../utility/generateRandomString");
 const schedule = require("node-schedule");
 const { polygonKey } = require("../config/constants");
 
-const { CloudTasksClient } = require('@google-cloud/tasks');
+const { CloudTasksClient } = require("@google-cloud/tasks");
 const { serverUrl } = require("../config/constants");
 
 const client = new CloudTasksClient();
@@ -22,11 +22,17 @@ router.post("/getUserMatches", async function (req, res) {
   try {
     const { userID } = req.body;
     const user = await User.findOne({ userID: userID });
+    console.log("grant", user);
     if (user) {
-      res.send(user.activematches);
+      // Convert Map to Array
+      const activeMatchesArray = Array.from(user.activematches.values());
+      res.send(activeMatchesArray);
+    } else {
+      res.status(404).send("User not found");
     }
-  } catch {
+  } catch (error) {
     console.error("Error retrieving active matches.", error);
+    res.status(500).send("Error retrieving active matches.");
   }
 });
 
@@ -34,6 +40,7 @@ router.post("/getUserMatches", async function (req, res) {
 router.post("/getMatchData", async function (req, res) {
   try {
     const { matchID } = req.body;
+    console.log("hello we are getting match data", matchID);
     console.log(
       "MATCH DATA FROM GAME SCREEN BEFORE:",
       new Date(Date.now()).toString()
@@ -80,15 +87,17 @@ router.post("/getMatchData", async function (req, res) {
 // Inputs user into the mathcmkaing database
 router.post("/userToMatchmaking", async (req, res) => {
   try {
-    const { username, userID, entryFee, matchLength, matchType } =
-      req.body;
+    const { username, userID, entryFee, matchLength, matchType } = req.body;
 
     const entryFeeInt = parseInt(entryFee);
 
     const matchLengthInt = parseInt(matchLength);
 
     // Get skill rating
-    const user = await User.findOne({ userID: userID }, { skillRating: 1, _id: 0 });
+    const user = await User.findOne(
+      { userID: userID },
+      { skillRating: 1, _id: 0 }
+    );
     const skillRating = user.skillRating;
 
     const player = {
@@ -156,12 +165,10 @@ router.post("/cancelMatchmaking", async (req, res) => {
 
     if (!player) {
       // Player not found, send an error response
-      return res
-        .status(400)
-        .json({
-          message:
-            "Cancel matchmaking failed, because player is not in matchmaking.",
-        });
+      return res.status(400).json({
+        message:
+          "Cancel matchmaking failed, because player is not in matchmaking.",
+      });
     }
 
     // Delete the player from the matchmaking collection
@@ -186,31 +193,52 @@ async function enterMatchmaking(player) {
 
     console.log("STEP 1: Player in matchmaking");
     // check if there is a player that can be matched
-    const players = await Player.find({ entryFeeInt: player.entryFeeInt, matchLengthInt: player.matchLengthInt });
+    const players = await Player.find({
+      entryFeeInt: player.entryFeeInt,
+      matchLengthInt: player.matchLengthInt,
+    });
 
     for (let i = 0; i < players.length; i++) {
       const skillDifference = Math.abs(
         player.skillRating - players[i].skillRating
       );
 
-      if (("TODO: delete this" == "TODO: delete this" || skillDifference <= 10) && players[i].userID != player.userID) {
+      if (
+        ("TODO: delete this" == "TODO: delete this" || skillDifference <= 10) &&
+        players[i].userID != player.userID
+      ) {
         // check both player's buying power
-        const user1balance = await User.findOne({ userID: player.userID }, 'balance');
+        const user1balance = await User.findOne(
+          { userID: player.userID },
+          "balance"
+        );
         // if first user has insufficient funds, simply return, since they are not yet in matchmaking
         if (user.balance < player.entryFeeInt) {
           return;
         }
 
-        const user2balance = await User.findOne({ userID: players[i].userID }, 'balance');
+        const user2balance = await User.findOne(
+          { userID: players[i].userID },
+          "balance"
+        );
         // if the second user is broke and can't afford the match, remove them from matchmaking
         if (user.balance < player.entryFeeInt) {
           await Player.deleteOne({ _id: players[i]._id });
           return;
         }
-        createMatch(player, players[i]);
+        // create match
+
+        createMatch(
+          player.userID,
+          players[i].userID,
+          player.entryFeeInt,
+          player.matchLengthInt,
+          "Stock",
+          player.matchType
+        );
         return;
       } else {
-        console.log("STEP 2: CONDITIONS wERE NOT MET.");
+        console.log("STEP 2: CONDITIONS WERE NOT MET.");
       }
     }
   } catch (error) {
@@ -221,18 +249,108 @@ async function enterMatchmaking(player) {
   Player.create(player);
 }
 
+router.post("/challengeFriend", async (req, res) => {
+  // needs userID of challenger, wager, timeframe, and timestamp
+  const { challengerUserID, invitedUserID, wager, timeframe, mode, type } =
+    req.body;
+
+  const invitation = {
+    challengerUserID,
+    wager,
+    timeframe,
+    createdAt: Date.now(),
+    mode,
+    type,
+  };
+
+  const invitationID = generateRandomString(45);
+
+  try {
+    const response = await User.updateOne(
+      { userID: invitedUserID },
+      { $set: { [`invitations.${invitationID}`]: invitation } },
+      { upsert: true }
+    );
+    if (!response) {
+      res.status(404).send("");
+    } else if (response.matchedCount === 0) {
+      res.status(404).send("No document found with the specified userID.");
+    } else if (response.modifiedCount === 0) {
+      res.status(404).send("No document was modified.");
+    } else {
+      res.status(200).send("Document was successfully modified.");
+    }
+  } catch {
+    return res
+      .status(500)
+      .send("Server error trying to send invitation", invitation);
+  }
+});
+
+router.post("/acceptChallenge", async (req, res) => {
+  const { invitationID, invitedUserID } = req.body;
+
+  try {
+    // get necessary information to create match
+    // step 1: retrieve the value to be deleted
+    const user = await User.findOne(
+      { userID: invitedUserID },
+      { [`invitations.${invitationID}`]: 1, _id: 0 }
+    );
+
+    const deletedInvitation = user ? user.invitations[invitationID] : null;
+
+    if (deletedInvitation) {
+      // step 2: delete the key-value pair
+      await User.updateOne(
+        { userID: invitedUserID },
+        { $unset: { [`invitations.${invitationID}`]: "" } }
+      );
+
+      // step 3: create the match
+      const { challengerUserID, wager, timeframe, mode, type } =
+        deletedInvitation;
+
+      createMatch(
+        challengerUserID,
+        invitedUserID,
+        wager,
+        timeframe,
+        mode,
+        type
+      );
+    }
+  } catch (error) {
+    console.error("Error on /acceptChallenge endpoint:", error);
+    res.status(500).json({ error: error });
+  }
+});
+
 /**
  * Create match function
+ * @param player1UserID
+ * @param player2UserID
+ * @param wager
+ * @param matchLength
+ * @param matchMode
+ * @param matchType
  */
-async function createMatch(player1, player2) {
+async function createMatch(
+  player1UserID,
+  player2UserID,
+  wager,
+  matchLength,
+  matchMode,
+  matchType
+) {
   console.log("STEP 2: CREATE MATCH FUNCTION HIT");
   /**
-  * Create match functionality here.
-  * Player1 is NOT in matchmaking, player2 IS in matchmaking
-  */
+   * Create match functionality here.
+   * Player1 is NOT in matchmaking, player2 IS in matchmaking
+   */
   // Remove matched players from the "matchmaking" collection
   await Player.deleteMany({
-    _id: player2._id ,
+    _id: player2._id,
   });
 
   // Create a unique match ID (you might want to use a more sophisticated approach)
@@ -240,24 +358,24 @@ async function createMatch(player1, player2) {
 
   // determine createdAt time and endAt time
   const createdAt = new Date(Date.now());
-  const endAt = new Date(Date.now() + player1.matchLengthInt * 1000);
+  const endAt = new Date(Date.now() + matchLength * 1000);
 
   // Insert the matched users into the "matches" collection
   const match = new Match({
     matchID: matchID,
-    timeframe: player1.matchLengthInt,
+    timeframe: matchLength,
     endAt: endAt,
     createdAt: createdAt,
-    matchType: player1.matchType,
-    wagerAmt: player1.entryFeeInt,
+    matchType: matchType,
+    wagerAmt: wager,
     user1: {
-      userID: player1.userID,
+      userID: player1UserID,
       assets: [],
       trades: [],
       buyingPower: 100000,
     },
     user2: {
-      userID: player2.userID,
+      userID: player2UserID,
       assets: [],
       trades: [],
       snapshots: [],
@@ -271,41 +389,47 @@ async function createMatch(player1, player2) {
     user2Snapshots: [{ value: 100000, timeField: Date.now() }],
   });
   console.log("Alright bro here's the match", match);
-  console.log("Also bro here's the snapshots:", matchSnapshots)
+  console.log("Also bro here's the snapshots:", matchSnapshots);
   try {
     const test = await match.save();
-    console.log(
-      "THIS IS THE TEST REPSONSE THAT MATCH WAS SAVED:",
-      test
-    );
+    console.log("THIS IS THE TEST REPSONSE THAT MATCH WAS SAVED:", test);
     await matchSnapshots.save();
   } catch (error) {
     console.log("error creating match");
   }
 
-  // Add the match to both players' activematches field, add remove from balances
   await User.findOneAndUpdate(
-    { userID: player1.userID },
+    { userID: player1UserID },
     {
-      $addToSet: { activematches: match.matchID },
-      $inc: { balance: -player1.entryFeeInt }
+      $push: {
+        activematches: {
+          $each: [{ matchID: matchID, endAt: endAt }],
+          $sort: { endAt: 1 }, // 1 for ascending order
+        },
+      },
+      $inc: { balance: -wager },
     },
-    { new: true } // Return the updated document
+    { new: true }
   );
 
   await User.findOneAndUpdate(
-    { userID: player2.userID },
+    { userID: player2UserID },
     {
-      $addToSet: { activematches: match.matchID },
-      $inc: { balance: -player2.entryFeeInt }
+      $push: {
+        activematches: {
+          $each: [{ matchID: matchID, endAt: endAt }],
+          $sort: { endAt: 1 },
+        },
+      },
+      $inc: { balance: -wager },
     },
-    { new: true } // Return the updated document
+    { new: true }
   );
 
   /**
    * Google cloud task creation to delete match
    */
-  const project = "sparmarkets"
+  const project = "sparmarkets";
   const queue = "deleteMatchQueue0";
   const location = "us-east4";
   const url = `${serverUrl}/deleteMatch`;
@@ -314,12 +438,12 @@ async function createMatch(player1, player2) {
 
   const task = {
     httpRequest: {
-      httpMethod: 'POST',
+      httpMethod: "POST",
       url: url,
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
-      body: Buffer.from(JSON.stringify({ matchID })).toString('base64'),
+      body: Buffer.from(JSON.stringify({ matchID })).toString("base64"),
     },
     scheduleTime: {
       seconds: Math.floor(endAt.getTime() / 1000),
@@ -340,8 +464,13 @@ async function createMatch(player1, player2) {
 
 router.post("/deleteMatch", async (req, res) => {
   const { matchID } = req.body;
-  // delete from mongo.
-  console.log("GOOGLE CLOUD TASK: Delete from Mongo:", matchID, new Date(Date.now()));
+
+  // delete from mongo
+  console.log(
+    "GOOGLE CLOUD TASK: Delete from Mongo:",
+    matchID,
+    new Date(Date.now())
+  );
 
   try {
     const result = await Match.deleteOne({ matchID: matchID });

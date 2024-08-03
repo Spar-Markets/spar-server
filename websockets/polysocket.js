@@ -72,7 +72,11 @@ stockEmitter.on("newMatch", async (newMatch) => {
       // send them the match
       console.log("MATCH CREATION - INSIDE AREA TO SEND TO CLIENT");
       console.log("activeMatchmaking sockets:", activeMatchmakingSockets);
-      console.log("activeMatchmakingSockets has", activeMatchmakingSockets.length, "connections");
+      console.log(
+        "activeMatchmakingSockets has",
+        activeMatchmakingSockets.length,
+        "connections"
+      );
 
       for (const socket of activeMatchmakingSockets) {
         socket.send(
@@ -122,7 +126,7 @@ async function changeStream() {
           for (socket of matchClientList[match.matchID]) {
             socket.send({
               ...winnings,
-              type: "updateWinnings"
+              type: "updateWinnings",
             });
           }
         }
