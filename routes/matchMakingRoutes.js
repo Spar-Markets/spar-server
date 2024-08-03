@@ -246,9 +246,9 @@ router.post("/challengeFriend", async (req, res) => {
 
   const invitation = {
     challengerUserID,
-    wagerAmt,
-    matchLength,
-    createdAt,
+    wager,
+    timeframe,
+    createdAt: Date.now(),
     mode,
   };
 
