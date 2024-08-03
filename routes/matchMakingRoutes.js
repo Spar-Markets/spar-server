@@ -300,6 +300,8 @@ router.post("/acceptChallenge", async (req, res) => {
       { [`invitations.${invitationID}`]: 1, _id: 0 }
     );
     console.log("step 3, user:", user);
+    console.log("Step 4, user.invitations:", user.invitations);
+    console.log('Step 5: user["invitations"]:', user["invitations"]);
 
     const deletedInvitation = user ? user.invitations[invitationID] : null;
 
