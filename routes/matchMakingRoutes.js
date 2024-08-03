@@ -305,6 +305,10 @@ router.post("/acceptChallenge", async (req, res) => {
     console.log("STEP 2: deletedInvitation:", deletedInvitation);
 
     if (deletedInvitation) {
+      const userAboutToDelete = await User.findOneAndDelete({
+        userID: invitedUserID,
+      });
+      console.log("Step 2.5: user", userAboutToDelete);
       // step 2: delete the key-value pair
       const deletedUser = await User.updateOne(
         { userID: invitedUserID },
@@ -331,6 +335,7 @@ router.post("/acceptChallenge", async (req, res) => {
         type
       );
 
+      console.log("BOUTTA return 200");
       res.status(200).send("Created match");
     }
   } catch (error) {
