@@ -337,20 +337,83 @@ router.post("/addFriendRequest", async (req, res) => {
 });
 
 router.post("/acceptFriendRequest", async (req, res) => {
-  const { userID, newFriendUserID } = req.body;
+  const { acceptedUserID, requestorUserID } = req.body;
 
-  // STEP 1: check if friend request actualy exists
-  const requestor = await Friend.findOne(
-    { userID: userID },
-    "incomingFriendRequests -_id"
-  );
+  try {
+    // STEP 1: check if friend request actualy exists
+    const requestingUser = await Friends.findOne(
+      { userID: requestorUserID },
+      "outgoingFriendRequests -_id"
+    );
 
-  // STEP 2: remove from incoming friend requests
-  // const response = await Friend.
+    if (!requestingUser || !requestingUser.outgoingFriendRequests) {
+      return res.status(404).json({ error: "Requesting user not found" });
+    }
 
-  // STEP 3: remove from outgoing friend requests
-  // STEP 4: add friend to each user's friends
-  // STEP 5: increment each user's friend count
+    // ADD ERROR HANDLING
+
+    // STEP 2: remove from incoming friend requests
+    const accepted = await Friends.updateOne(
+      { userID: acceptedUserID },
+      {
+        $pull: {
+          incomingFriendRequests: { userID: requestorUserID },
+        },
+      }
+    );
+
+    // STEP 3: remove from outgoing friend requests
+    await Friends.updateOne(
+      { userID: requestorUserID },
+      {
+        $pull: {
+          outgoingFriendRequests: { userID: acceptedUserID },
+        },
+      }
+    );
+
+    // STEP 4: add friend to each user's friends
+    await Friends.updateOne(
+      { userID: requestorUserID },
+      {
+        $push: {
+          friends: acceptedUserID,
+        },
+      }
+    );
+
+    await Friends.updateOne(
+      { userID: acceptedUserID },
+      {
+        $push: {
+          friends: requestorUserID,
+        },
+      }
+    );
+
+    // STEP 5: increment each user's friend count
+    await User.updateOne(
+      { userID: requestorUserID },
+      {
+        $inc: {
+          friendcount: 1,
+        },
+      }
+    );
+
+    await User.updateOne(
+      { userID: acceptedUserID },
+      {
+        $inc: {
+          friendcount: 1,
+        },
+      }
+    );
+
+    return res.status(200).send("Friend request succesfully accepted");
+  } catch (error) {
+    console.error("error in /acceptFriendRequest:", error);
+  }
 });
 
 router.post("/checkFollowStatus", async (req, res) => {

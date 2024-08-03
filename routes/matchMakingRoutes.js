@@ -305,7 +305,7 @@ router.post("/acceptChallenge", async (req, res) => {
     console.log("STEP 2: deletedInvitation:", deletedInvitation);
 
     if (deletedInvitation) {
-      const userAboutToDelete = await User.findOneAndDelete({
+      const userAboutToDelete = await User.findOne({
         userID: invitedUserID,
       });
       console.log("Step 2.5: user", userAboutToDelete);
