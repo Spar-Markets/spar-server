@@ -299,22 +299,34 @@ router.post("/acceptChallenge", async (req, res) => {
       { userID: invitedUserID },
       { [`invitations.${invitationID}`]: 1, _id: 0 }
     );
-    console.log("step 3, user:", user);
 
-    const deletedInvitation = user ? user.invitations[invitationID] : null;
+    const deletedInvitation = user ? user._doc.invitations[invitationID] : null;
+
+    console.log("STEP 2: deletedInvitation:", deletedInvitation);
 
     if (deletedInvitation) {
+      const userAboutToDelete = await User.findOne({
+        userID: invitedUserID,
+      });
+      console.log("Step 2.5: user", userAboutToDelete);
       // step 2: delete the key-value pair
-      await User.updateOne(
+      const deletedUser = await User.updateOne(
         { userID: invitedUserID },
         { $unset: { [`invitations.${invitationID}`]: "" } }
       );
+
+      console.log("STEP 3: deleted user:");
+      console.log(deletedUser);
+
+      console.log("STEP 4: modified count:", deletedUser.modifiedCount);
 
       // step 3: create the match
       const { challengerUserID, wager, timeframe, mode, type } =
         deletedInvitation;
 
-      createMatch(
+      console.log;
+
+      await createMatch(
         challengerUserID,
         invitedUserID,
         wager,
@@ -322,6 +334,9 @@ router.post("/acceptChallenge", async (req, res) => {
         mode,
         type
       );
+
+      console.log("BOUTTA return 200");
+      res.status(200).send("Created match");
     }
   } catch (error) {
     console.error("Error on /acceptChallenge endpoint:", error);
@@ -353,7 +368,7 @@ async function createMatch(
    */
   // Remove matched players from the "matchmaking" collection
   await Player.deleteMany({
-    _id: player2._id,
+    userID: player2UserID,
   });
 
   // Create a unique match ID (you might want to use a more sophisticated approach)
