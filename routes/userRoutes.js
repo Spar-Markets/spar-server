@@ -286,7 +286,7 @@ router.post("/addFriendRequest", async (req, res) => {
 
   try {
     // ERROR CHECK 1: check to make sure there is not an existing incoming friend request from the other user
-    const requestedUser = await Friend.findOne(
+    const requestedUser = await Friends.findOne(
       { userID: userID },
       "incomingFriendRequests -_id"
     );
@@ -302,7 +302,7 @@ router.post("/addFriendRequest", async (req, res) => {
     }
 
     // ERROR CHECK 2: check to make sure there is not an existing outgoing friend request to the other user
-    const requestingUser = await Friend.findOne(
+    const requestingUser = await Friends.findOne(
       { userID: userID },
       "outgoingFriendRequests -_id"
     );
