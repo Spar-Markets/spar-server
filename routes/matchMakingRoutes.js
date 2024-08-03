@@ -288,7 +288,9 @@ router.post("/challengeFriend", async (req, res) => {
 });
 
 router.post("/acceptChallenge", async (req, res) => {
+  console.log("step 0");
   const { invitationID, invitedUserID } = req.body;
+  console.log("step 1");
 
   try {
     // get necessary information to create match
@@ -297,6 +299,7 @@ router.post("/acceptChallenge", async (req, res) => {
       { userID: invitedUserID },
       { [`invitations.${invitationID}`]: 1, _id: 0 }
     );
+    console.log("step 3, user:", user);
 
     const deletedInvitation = user ? user.invitations[invitationID] : null;
 
