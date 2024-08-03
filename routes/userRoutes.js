@@ -496,7 +496,7 @@ router.post("/checkIncomingFriendRequests", async (req, res) => {
 
   try {
     // Find the user by userID
-    const incomingFriendRequests = await Friends.findOne(
+    const incomingFriendRequestsDoc = await Friends.findOne(
       { userID },
       "incomingFriendRequests -_id"
     );
@@ -504,11 +504,7 @@ router.post("/checkIncomingFriendRequests", async (req, res) => {
       return res.status(404).send("User not found");
     }
 
-    console.log(Object.keys(incomingFriendRequests));
-
-    // Get incoming friend requests
-
-    res.status(200).send(incomingFriendRequests);
+    res.status(200).send(incomingFriendRequestsDoc._doc.incomingFriendRequests);
   } catch (error) {
     console.error("Error checking incoming friend requests:", error);
     res
