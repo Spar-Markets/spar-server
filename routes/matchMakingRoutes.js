@@ -295,16 +295,14 @@ router.post("/acceptChallenge", async (req, res) => {
   try {
     // get necessary information to create match
     // step 1: retrieve the value to be deleted
-    const user = JSON.parse(
-      await User.findOne(
-        { userID: invitedUserID },
-        { [`invitations.${invitationID}`]: 1, _id: 0 }
-      )
+    const user = await User.findOne(
+      { userID: invitedUserID },
+      { [`invitations.${invitationID}`]: 1, _id: 0 }
     );
     console.log("step 3, user:", user);
     console.log("Step 4, user.invitations:", user.invitations);
     console.log('Step 5: user["invitations"]:', user["invitations"]);
-    console.log("STEP 6: Chat method:", user?.invitations?.[invitationID]);
+    console.log("STEP 6: Chat method:", user.invitations[invitationID]);
 
     const deletedInvitation = user ? user?.invitations?.[invitationID] : null;
 
