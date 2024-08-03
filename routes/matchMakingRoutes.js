@@ -24,9 +24,9 @@ router.post("/getUserMatches", async function (req, res) {
     const user = await User.findOne({ userID: userID });
     console.log("grant", user);
     if (user) {
-      // Convert Map to Object
-      const activeMatchesObject = Object.fromEntries(user.activematches);
-      res.send(activeMatchesObject);
+      // Convert Map to Array
+      const activeMatchesArray = Array.from(user.activematches.values());
+      res.send(activeMatchesArray);
     } else {
       res.status(404).send("User not found");
     }
@@ -249,6 +249,7 @@ router.post("/challengeFriend", async (req, res) => {
     wagerAmt,
     matchLength,
     createdAt,
+    mode,
   };
 
   try {
@@ -334,23 +335,32 @@ async function createMatch(player1, player2) {
     console.log("error creating match");
   }
 
-  // Add the match to both players' activeMatches field and remove from balances
   await User.findOneAndUpdate(
     { userID: player1.userID },
     {
-      $set: { [`activematches.${matchID}`]: endAt },
+      $push: {
+        activematches: {
+          $each: [{ matchID: matchID, endAt: endAt }],
+          $sort: { endAt: 1 }, // 1 for ascending order
+        },
+      },
       $inc: { balance: -player1.entryFeeInt },
     },
-    { new: true } // Return the updated document
+    { new: true }
   );
 
   await User.findOneAndUpdate(
     { userID: player2.userID },
     {
-      $set: { [`activematches.${matchID}`]: endAt },
+      $push: {
+        activematches: {
+          $each: [{ matchID: matchID, endAt: endAt }],
+          $sort: { endAt: 1 },
+        },
+      },
       $inc: { balance: -player2.entryFeeInt },
     },
-    { new: true } // Return the updated document
+    { new: true }
   );
 
   /**
