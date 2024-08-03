@@ -29,8 +29,13 @@ router.post("/createUser", async (req, res) => {
       hasDefaultProfileImage: String(hasDefaultProfileImage),
     });
 
+    const newFriendsUser = new Friends({
+      userID: String(userID),
+    });
+
     try {
       await newUser.save();
+      await newFriendsUser.save();
     } catch (error) {
       if (error.code === 11000) {
         const field = Object.keys(error.keyPattern)[0];
