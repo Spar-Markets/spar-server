@@ -311,11 +311,16 @@ router.post("/acceptChallenge", async (req, res) => {
         { $unset: { [`invitations.${invitationID}`]: "" } }
       );
 
-      console.log("STEP 3: modified count:", deletedUser.modifiedCount);
+      console.log("STEP 3: deleted user:");
+      console.log(deletedUser);
+
+      console.log("STEP 4: modified count:", deletedUser.modifiedCount);
 
       // step 3: create the match
       const { challengerUserID, wager, timeframe, mode, type } =
         deletedInvitation;
+
+      console.log;
 
       await createMatch(
         challengerUserID,
@@ -358,7 +363,7 @@ async function createMatch(
    */
   // Remove matched players from the "matchmaking" collection
   await Player.deleteMany({
-    _id: player2._id,
+    userID: player2UserID,
   });
 
   // Create a unique match ID (you might want to use a more sophisticated approach)
