@@ -444,7 +444,7 @@ router.get("/getProfileImages/:userID", async (req, res) => {
 router.get("/getUsernameSearchResults/:searchQuery", async (req, res) => {
   const searchQuery = req.params.searchQuery;
 
-  const results = await User.find({ username: { $regex: searchTerm, $options: 'i' } }).limit(10);
+  const results = await User.find({ username: { $regex: searchQuery, $options: 'i' } }).limit(10);
 
   console.log("RESULTS:", results);
 })
