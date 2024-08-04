@@ -513,7 +513,7 @@ router.post("/checkRequestedStatus", async (req, res) => {
   const { yourUserID, checkUserID } = req.body;
   try {
     const outgoingFriendRequests = await Friends.findOne(
-      { userID: userID },
+      { userID: yourUserID },
       "outgoingFriendRequests -_id"
     );
     const requestedStatus =
