@@ -222,7 +222,6 @@ router.post("/friendshipCheck", async (req, res) => {
 
   try {
     const user1FriendsDoc = await Friends.findOne({ userID: user1ID }, 'friends -_id');
-    console.log("user1FriendsDoc", user1FriendsDoc);
     const isFriends = user1FriendsDoc._doc.friends.some(id => id == user2ID);
     return res.status(200).send(isFriends);
   } catch (error) {
