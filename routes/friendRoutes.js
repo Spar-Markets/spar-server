@@ -217,4 +217,34 @@ router.post("/getFriends", async (req, res) => {
   }
 });
 
+router.post("/deleteFriendRequest", async (req, res) => {
+  const { requestedUserID, requestorUserID } = req.body;
+
+  try {
+    // decline it
+    await Friends.updateOne(
+      { userID: requestedUserID },
+      {
+        $pull: {
+          incomingFriendRequests: { userID: requestorUserID },
+        },
+      }
+    );
+
+    await Friends.updateOne(
+      { userID: requestorUserID },
+      {
+        $pull: {
+          outgoingFriendRequests: { userID: requestedUserID },
+        },
+      }
+    );
+
+    return res.status(200).send("Successfully declined friend request");
+  } catch (error) {
+    console.error("error in /declineFriendRequest endpoint:", error);
+    return res.status(500).json({ error: error })
+  }
+})
+
 module.exports = router;
