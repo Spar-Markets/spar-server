@@ -441,16 +441,4 @@ router.get("/getProfileImages/:userID", async (req, res) => {
   }
 });
 
-router.get("/getUsernameSearchResults/:searchQuery", async (req, res) => {
-  const searchQuery = req.params.searchQuery;
-
-  const results = await User.find({ username: { $regex: searchQuery, $options: 'i' } }).limit(10);
-
-  console.log("RESULTS:", results);
-})
-
-router.get("/ping", async (req, res) => {
-  res.status(200).send("pong");
-});
-
 module.exports = router;
