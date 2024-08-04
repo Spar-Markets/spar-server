@@ -217,6 +217,20 @@ router.post("/getFriends", async (req, res) => {
   }
 });
 
+router.post("/friendshipCheck", async (req, res) => {
+  const { user1ID, user2ID } = req.body;
+
+  try {
+    const user1FriendsDoc = await Friends.findOne({ userID: user1ID }, 'friends -_id');
+    const isFriends = user1FriendsDoc._doc.friends.some(id => id == user2ID);
+    return res.status(200).send(isFriends);
+  } catch (error) {
+    console.error("error in /friendshipCheck");
+    return res.status(500).json({ error: error });
+  }
+
+})
+
 router.post("/deleteFriendRequest", async (req, res) => {
   const { targetUserID, requesterUserID } = req.body;
 
