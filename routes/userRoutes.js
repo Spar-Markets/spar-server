@@ -518,7 +518,7 @@ router.post("/checkRequestedStatus", async (req, res) => {
     );
     const requestedStatus =
       outgoingFriendRequests._doc.outgoingFriendRequests.some(
-        (id) => checkUserID == id
+        (obj) => obj.userID == checkUserID
       );
     return res.status(200).send(requestedStatus);
   } catch (error) {
