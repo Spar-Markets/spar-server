@@ -514,6 +514,19 @@ router.post("/checkIncomingFriendRequests", async (req, res) => {
   }
 });
 
+router.post("/checkRequestedStatus", async (req, res) => {
+  const { userID, checkUserID } = req.body;
+  const outgoingFriendRequests = await Friends.findOne(
+    { userID: userID },
+    "outgoingFriendRequests -_id"
+  );
+  const requestedStatus =
+    outgoingFriendRequests._doc.outgoingFriendRequests.some(
+      (id) => checkUserID == id
+    );
+  return res.status(200).send(requestedStatus);
+});
+
 router.post("/updateUserProfile", async (req, res) => {
   const { userID, newUsername, newBio } = req.body;
 
