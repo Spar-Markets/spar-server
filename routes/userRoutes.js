@@ -510,7 +510,7 @@ router.post("/checkIncomingFriendRequests", async (req, res) => {
 });
 
 router.post("/checkRequestedStatus", async (req, res) => {
-  const { userID, checkUserID } = req.body;
+  const { yourUserID, checkUserID } = req.body;
   try {
     const outgoingFriendRequests = await Friends.findOne(
       { userID: userID },
