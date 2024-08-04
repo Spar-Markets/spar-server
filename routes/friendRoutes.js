@@ -75,12 +75,12 @@ router.post("/addFriendRequest", async (req, res) => {
 });
 
 router.post("/acceptFriendRequest", async (req, res) => {
-  const { acceptedUserID, requestorUserID } = req.body;
+  const { acceptedUserID, requesterUserID } = req.body;
 
   try {
     // STEP 1: check if friend request actualy exists
     const requestingUser = await Friends.findOne(
-      { userID: requestorUserID },
+      { userID: requesterUserID },
       "outgoingFriendRequests -_id"
     );
 
@@ -95,14 +95,14 @@ router.post("/acceptFriendRequest", async (req, res) => {
       { userID: acceptedUserID },
       {
         $pull: {
-          incomingFriendRequests: { userID: requestorUserID },
+          incomingFriendRequests: { userID: requesterUserID },
         },
       }
     );
 
     // STEP 3: remove from outgoing friend requests
     await Friends.updateOne(
-      { userID: requestorUserID },
+      { userID: requesterUserID },
       {
         $pull: {
           outgoingFriendRequests: { userID: acceptedUserID },
@@ -112,7 +112,7 @@ router.post("/acceptFriendRequest", async (req, res) => {
 
     // STEP 4: add friend to each user's friends
     await Friends.updateOne(
-      { userID: requestorUserID },
+      { userID: requesterUserID },
       {
         $push: {
           friends: acceptedUserID,
@@ -124,14 +124,14 @@ router.post("/acceptFriendRequest", async (req, res) => {
       { userID: acceptedUserID },
       {
         $push: {
-          friends: requestorUserID,
+          friends: requesterUserID,
         },
       }
     );
 
     // STEP 5: increment each user's friend count
     await User.updateOne(
-      { userID: requestorUserID },
+      { userID: requesterUserID },
       {
         $inc: {
           friendCount: 1,
@@ -218,24 +218,24 @@ router.post("/getFriends", async (req, res) => {
 });
 
 router.post("/deleteFriendRequest", async (req, res) => {
-  const { requestedUserID, requestorUserID } = req.body;
+  const { targetUserID, requesterUserID } = req.body;
 
   try {
     // decline it
     await Friends.updateOne(
-      { userID: requestedUserID },
+      { userID: targetUserID },
       {
         $pull: {
-          incomingFriendRequests: { userID: requestorUserID },
+          incomingFriendRequests: { userID: requesterUserID },
         },
       }
     );
 
     await Friends.updateOne(
-      { userID: requestorUserID },
+      { userID: requesterUserID },
       {
         $pull: {
-          outgoingFriendRequests: { userID: requestedUserID },
+          outgoingFriendRequests: { userID: targetUserID },
         },
       }
     );
