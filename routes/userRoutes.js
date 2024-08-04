@@ -318,9 +318,6 @@ router.post("/addFriendRequest", async (req, res) => {
       "incomingFriendRequests -_id"
     );
 
-    console.log("requestedUser:", requestedUser);
-    console.log("keys:", Object.keys(requestedUser));
-
     const incomingRequestExists =
       requestedUser._doc.incomingFriendRequests.some(
         (friendRequest) => friendRequest.userID == requestedUserID
@@ -350,22 +347,10 @@ router.post("/addFriendRequest", async (req, res) => {
 
     // Now we actually add the friend request
     const updatedOutgoingFriendRequest = await Friends.updateOne(
-      { userID: requestedUserID },
-      {
-        $push: {
-          outgoingFriendRequests: {
-            userID: userID,
-            createdAt: Date.now(),
-          },
-        },
-      }
-    );
-
-    const updatedFriendRequest = await Friends.updateOne(
       { userID: userID },
       {
         $push: {
-          incomingFriendRequests: {
+          outgoingFriendRequests: {
             userID: requestedUserID,
             createdAt: Date.now(),
           },
@@ -373,7 +358,17 @@ router.post("/addFriendRequest", async (req, res) => {
       }
     );
 
-    console.log("updatedFriendRequest:", updatedFriendRequest);
+    const updatedIncomingFriendRequest = await Friends.updateOne(
+      { userID: requestedUserID },
+      {
+        $push: {
+          incomingFriendRequests: {
+            userID: userID,
+            createdAt: Date.now(),
+          },
+        },
+      }
+    );
 
     return res.status(200).send("Successfully updated friend request");
   } catch (error) {
