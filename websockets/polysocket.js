@@ -230,7 +230,7 @@ function setupWebSocket(server) {
 
     socket.on("message", async function message(data) {
       const object = JSON.parse(data);
-      console.log("Socket message received:", object);
+      // console.log("Socket message received:", object);
 
       // If type match, get their UserID so we can push updates to them when their match object changes
 
@@ -258,7 +258,6 @@ function setupWebSocket(server) {
         // CASE 3: Subscribing to heartbeat to keep socket open
       } else if (object.type === "heartbeat") {
         // do nothing
-        console.log("Heartbeat received.");
       } else if (object.type == "GameScreenConnection") {
         console.log("GameScreenConnection");
       } else {

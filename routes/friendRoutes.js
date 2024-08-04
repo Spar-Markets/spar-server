@@ -261,4 +261,24 @@ router.post("/deleteFriendRequest", async (req, res) => {
   }
 })
 
+router.post("/getUsernamesByIDs", async (req, res) => {
+  const { userIDs } = req.body;
+
+  try {
+    // Fetch usernames for the provided userIDs
+    const users = await User.find({ userID: { $in: userIDs } }, "userID username -_id");
+
+    // Transform the result to the desired format
+    const result = users.map(user => ({
+      userID: user.userID,
+      username: user.username
+    }));
+
+    return res.status(200).json(result);
+  } catch (error) {
+    console.error("Error retrieving usernames by userIDs:", error);
+    return res.status(500).send("An error occurred while retrieving usernames");
+  }
+});
+
 module.exports = router;
