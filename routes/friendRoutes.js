@@ -274,7 +274,7 @@ router.post("/getUsernamesByIDs", async (req, res) => {
       username: user.username
     }));
 
-    return res.status(200).json(result);
+    return res.status(200).send(result);
   } catch (error) {
     console.error("Error retrieving usernames by userIDs:", error);
     return res.status(500).send("An error occurred while retrieving usernames");
