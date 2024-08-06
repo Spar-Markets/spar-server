@@ -7,7 +7,19 @@ router.post("/addFriendRequest", async (req, res) => {
   const { userID, requestedUserID } = req.body;
 
   try {
-    // ERROR CHECK 1: check to make sure there is not an existing incoming friend request from the other user
+    // ERROR CHECK 1: check to make sure they are not already friends
+    const requestingUser = await Friends.findOne(
+      { userID: userID },
+      "outgoingFriendRequests friends -_id"
+    );
+
+    for (const user of requestingUser._doc.friends) {
+      if (user == requestedUserID) {
+        res.status(409).json({ error: "Users are already friends" });
+      }
+    }
+
+    // ERROR CHECK 2: check to make sure there is not an existing incoming friend request from the other user
     const requestedUser = await Friends.findOne(
       { userID: userID },
       "incomingFriendRequests -_id"
@@ -24,12 +36,7 @@ router.post("/addFriendRequest", async (req, res) => {
         .json({ error: "Incoming friend request already exists" });
     }
 
-    // ERROR CHECK 2: check to make sure there is not an existing outgoing friend request to the other user
-    const requestingUser = await Friends.findOne(
-      { userID: userID },
-      "outgoingFriendRequests -_id"
-    );
-
+    // ERROR CHECK 3: check to make sure there is not an existing outgoing friend request to the other user
     const outgoingRequestExists = requestingUser.outgoingFriendRequests.some(
       (request) => request.userID === userID
     );
@@ -221,15 +228,17 @@ router.post("/friendshipCheck", async (req, res) => {
   const { user1ID, user2ID } = req.body;
 
   try {
-    const user1FriendsDoc = await Friends.findOne({ userID: user1ID }, 'friends -_id');
-    const isFriends = user1FriendsDoc._doc.friends.some(id => id == user2ID);
+    const user1FriendsDoc = await Friends.findOne(
+      { userID: user1ID },
+      "friends -_id"
+    );
+    const isFriends = user1FriendsDoc._doc.friends.some((id) => id == user2ID);
     return res.status(200).send(isFriends);
   } catch (error) {
     console.error("error in /friendshipCheck");
     return res.status(500).json({ error: error });
   }
-
-})
+});
 
 router.post("/deleteFriendRequest", async (req, res) => {
   const { targetUserID, requesterUserID } = req.body;
@@ -257,21 +266,24 @@ router.post("/deleteFriendRequest", async (req, res) => {
     return res.status(200).send("Successfully declined friend request");
   } catch (error) {
     console.error("error in /declineFriendRequest endpoint:", error);
-    return res.status(500).json({ error: error })
+    return res.status(500).json({ error: error });
   }
-})
+});
 
 router.post("/getUsernamesByIDs", async (req, res) => {
   const { userIDs } = req.body;
 
   try {
     // Fetch usernames for the provided userIDs
-    const users = await User.find({ userID: { $in: userIDs } }, "userID username -_id");
+    const users = await User.find(
+      { userID: { $in: userIDs } },
+      "userID username -_id"
+    );
 
     // Transform the result to the desired format
-    const result = users.map(user => ({
+    const result = users.map((user) => ({
       userID: user.userID,
-      username: user.username
+      username: user.username,
     }));
 
     return res.status(200).send(result);

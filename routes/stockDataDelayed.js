@@ -203,7 +203,7 @@ router.post("/getMostRecentOneDayPrices", async (req, res) => {
       try {
         const response = await axios.get(url);
         prices[response.data.ticker] = [];
-  
+
         for (let pricestamp of response.data.results) {
           prices[response.data.ticker].push({
             timeField: pricestamp.t,
@@ -228,6 +228,7 @@ router.post("/getMostRecentOneDayPrices", async (req, res) => {
       for (const timeframe of timeframes) {
         response[timeframe] = await getChartData(timeframe);
       }
+      console.log("RESPONSE JACKSON:", response);
       res.send(response);
     } else {
       response["1D"] = await getChartData("1D");

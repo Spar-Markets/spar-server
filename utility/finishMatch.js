@@ -166,11 +166,11 @@ const finishMatch = async (matchToFinish) => {
 
   const winnerWithRemovedMatchID = await User.updateOne(
     { userID: winnerUserID },
-    { $pull: { activeMatches: { matchID: matchID } } }
+    { $pull: { activematches: { matchID: matchID } } }
   );
   const loserWithRemovedMatchID = await User.updateOne(
     { userID: loserUserID },
-    { $pull: { activeMatches: { matchID: matchID } } } //{matchID: endAt, ...},
+    { $pull: { activematches: { matchID: matchID } } } //{matchID: endAt, ...},
   );
   // { matchID: date, matchID2: date }
   console.log(

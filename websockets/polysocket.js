@@ -121,7 +121,8 @@ async function changeStream() {
         console.log("RECOGNIZED CHANGE OPERATION TYPE AS INSERT");
         stockEmitter.emit("newMatch", change.fullDocument);
       } else if (change.operationType == "delete") {
-        const winnings = finishMatch(change.fullDocumentBeforeChange);
+        const match = change.fullDocumentBeforeChange;
+        const winnings = finishMatch(match);
         if (matchClientList[match.matchID]) {
           for (socket of matchClientList[match.matchID]) {
             socket.send({
