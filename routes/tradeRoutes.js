@@ -130,7 +130,7 @@ router.post("/purchaseStock", async (req, res) => {
       );
 
       returnData = {
-        updatedTotalshares: shares,
+        updatedTotalshares: totalShares + shares,
         buyPrice,
         date: Date.now(),
       };
@@ -264,20 +264,20 @@ router.post("/sellStock", async (req, res) => {
 
       // return successful
       returnData = {
-        updatedMatchTrades,
-        updatedMatchAssets,
+        updatedMatchShares: totalShares - shares,
+        sellPrice,
+        date: Date.now(),
       };
 
       return res.status(200).send(returnData);
     }
 
     // define new fields for assets
-    const newFields = {
-      ticker: ticker,
-      totalShares: updatedTotalShares,
-      avgCostBasis: sellAsset.avgCostBasis,
+    returnData = {
+      updatedMatchShares: totalShares - shares,
+      sellPrice,
+      date: Date.now(),
     };
-
     // update share amount and average cost basis
     const updatedMatchAssets = await Match.updateOne(
       // grabs doc with matchID and queries for object in "assets" array that matches ticker
@@ -286,17 +286,12 @@ router.post("/sellStock", async (req, res) => {
       { $set: { [`${user}.assets.$`]: newFields } }
     );
 
-    returnData = {
-      updatedMatchTrades,
-      updatedMatchAssets,
-    };
-
     return res.status(200).send(returnData);
   } catch (error) {
-    console.error("Error in purchaseStock endpoint:", error);
+    console.error("Error in /sellStock endpoint:", error);
     res
       .status(500)
-      .send("An error occurred while processing the purchaseStock request");
+      .send("An error occurred while processing the /sellStock request");
   }
 });
 

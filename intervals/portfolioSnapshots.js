@@ -150,7 +150,7 @@ function runIntervalFunction(matches) {
 /**
  * Run snapshots for fifteen minute matches every 10 seconds.
  */
-const fiftenMinuteInterval = cron.schedule("*/10 * * * * *", async () => {
+const fifteenMinuteInterval = cron.schedule("*/10 * * * * *", async () => {
   const fifteenMinMatches = await Match.find({ timeframe: millisIn15min });
   runIntervalFunction(fifteenMinMatches);
 });
@@ -171,4 +171,4 @@ const oneWeekInterval = cron.schedule("*/30 * * * *", async () => {
   runIntervalFunction(oneHourMatches);
 });
 
-module.exports = { fiftenMinuteInterval, oneDayInterval, oneWeekInterval };
+module.exports = { fifteenMinuteInterval, oneDayInterval, oneWeekInterval };
