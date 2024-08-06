@@ -288,44 +288,40 @@ router.post("/challengeFriend", async (req, res) => {
 });
 
 router.post("/acceptChallenge", async (req, res) => {
-  console.log("step 0");
   const { invitationID, invitedUserID } = req.body;
-  console.log("step 1");
 
   try {
     // get necessary information to create match
-    // step 1: retrieve the value to be deleted
+    // step 1: retrieve the invitation to be deleted
     const user = await User.findOne(
       { userID: invitedUserID },
-      { [`invitations.${invitationID}`]: 1, _id: 0 }
+      { [`invitations.${invitationID}`]: 1, balance: 1, _id: 0 }
     );
 
+    // get invitation details
     const deletedInvitation = user ? user._doc.invitations[invitationID] : null;
 
-    console.log("STEP 2: deletedInvitation:", deletedInvitation);
-
     if (deletedInvitation) {
+      // destructure object fields
+      const { challengerUserID, wager, timeframe, mode, type } =
+        deletedInvitation;
+
+      // server side balance check
+      if (wager * 1.1 > balance) {
+        return res.status(402).send("Insufficient funds to accept challenge.");
+      }
+
       const userAboutToDelete = await User.findOne({
         userID: invitedUserID,
       });
-      console.log("Step 2.5: user", userAboutToDelete);
-      // step 2: delete the key-value pair
+
+      // step 2: delete the key-value pair representing the invitation
       const deletedUser = await User.updateOne(
         { userID: invitedUserID },
         { $unset: { [`invitations.${invitationID}`]: "" } }
       );
 
-      console.log("STEP 3: deleted user:");
-      console.log(deletedUser);
-
-      console.log("STEP 4: modified count:", deletedUser.modifiedCount);
-
-      // step 3: create the match
-      const { challengerUserID, wager, timeframe, mode, type } =
-        deletedInvitation;
-
-      console.log;
-
+      // step 3: create the matcj
       await createMatch(
         challengerUserID,
         invitedUserID,
@@ -335,7 +331,6 @@ router.post("/acceptChallenge", async (req, res) => {
         type
       );
 
-      console.log("BOUTTA return 200");
       res.status(200).send("Created match");
     }
   } catch (error) {
