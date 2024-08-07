@@ -5,15 +5,10 @@ const getCurrentPrice = require("../utility/getCurrentPrice");
 
 router.post("/purchaseStock", async (req, res) => {
   try {
+    // TODO: shares
     console.log("purchaseStock: hit endpoint");
-    const { userID, matchID, ticker, shares } = req.body;
-    console.log(
-      "purchaseStock: received request: ",
-      userID,
-      matchID,
-      ticker,
-      shares
-    );
+    const { userID, matchID, ticker, type } = req.body;
+    
 
     const match = await Match.findOne({ matchID: matchID });
     //console.log("purchaseStock: got match: ", match);
@@ -38,7 +33,9 @@ router.post("/purchaseStock", async (req, res) => {
     console.log(`purchaseStock: current price of ${ticker}: ${buyPrice}`);
 
     // check how much this trade will cost
-    const tradeCost = parseFloat(buyPrice) * parseFloat(shares);
+    // determine trade cost based on type (shares or dollars)
+    const tradeCost = (type == "shares") ? parseFloat(buyPrice) * parseFloat(shares) : parseFloat(req.body.dollars);
+    const shares = (type == "shares") ? req.body.shares : parseFloat(req.body.dollars) / parseFloat(buyPrice);
     console.log("purchaseStock: trade cost:", tradeCost);
 
     if (match[user].buyingPower < tradeCost) {
