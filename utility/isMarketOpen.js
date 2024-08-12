@@ -1,6 +1,7 @@
 import {formatInTimeZone} from 'date-fns-tz';
 
 const isMarketOpen = () => {
+    console.log("time within hours")
   // Define the Eastern Time time zone
   const timeZone = 'America/New_York';
 
