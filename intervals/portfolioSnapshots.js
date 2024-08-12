@@ -5,6 +5,9 @@ const Match = require("../models/Match");
 const axios = require("axios");
 const express = require("express");
 const router = express.Router();
+const isMarketOpen = require("../utility/isMarketOpen")
+
+
 
 // constants
 const millisIn15min = 900;
@@ -119,22 +122,10 @@ async function updatePortfolioValues(matches) {
  * @param matches Array of matches to run interval function on.
  */
 function runIntervalFunction(matches) {
-  //this is the 15 min delay
-  const now = new Date(Date.now());
-  // convert to EST
-  const hours = now.getUTCHours();
-  const minutes = now.getUTCMinutes();
-  // Ensure it's within the specific time range
-  // only runs if it is weekend and within market hours
 
-  const marketDay = getMostRecentMarketOpenDay(now);
-  const condition1 = now.getUTCDate() == marketDay.getUTCDate();
-  const condition2 =
-    (hours === 8 && minutes >= 45) ||
-    (hours === 24 && minutes <= 15) ||
-    (hours > 8 && hours < 24);
-  const isWithinMarketHours = condition1 && condition2;
-  if (isWithinMarketHours) {
+  const isWithinMarketHours = isMarketOpen()
+  console.log(isWithinMarketHours, "grant called check 1")
+  if (isWithinMarketHours == true) {
     // console.log(
     //   `CASE 1: Running portfolio snapshots, because we are in correct time range. --- Hours: ${hours}, Minutes: ${minutes}`
     // );
