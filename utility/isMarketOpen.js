@@ -1,4 +1,4 @@
-import {formatInTimeZone} from 'date-fns-tz';
+const { formatInTimeZone } = require('date-fns-tz');
 
 const isMarketOpen = () => {
     console.log("time within hours")
