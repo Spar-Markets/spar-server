@@ -9,6 +9,7 @@ const getPreviousDay = require("../utility/getPreviousDay");
 const getCurrentPrice = require("../utility/getCurrentPrice");
 const { json } = require("body-parser");
 
+
 /**
  * STOCK DATA
  */

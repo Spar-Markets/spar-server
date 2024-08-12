@@ -122,10 +122,8 @@ async function updatePortfolioValues(matches) {
  * @param matches Array of matches to run interval function on.
  */
 function runIntervalFunction(matches) {
-  console.log("grant called check 1")
-
+  
   const isWithinMarketHours = isMarketOpen()
-  console.log(isWithinMarketHours, "grant called check 1")
   if (isWithinMarketHours == true) {
     // console.log(
     //   `CASE 1: Running portfolio snapshots, because we are in correct time range. --- Hours: ${hours}, Minutes: ${minutes}`
