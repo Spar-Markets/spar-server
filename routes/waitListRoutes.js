@@ -5,14 +5,28 @@ const WaitListUser = require("../models/WaitListUser.js");
 
 router.post("/addToWaitlist", async (req, res) => {
   const { email } = req.body;
-  if (email) {
+  if (!email) {
+    return res.status(400).send({ message: "Email is required" });
+  }
+
+  try {
+    // Check if the email already exists in the waitlist
+    const existingUser = await WaitListUser.findOne({ email: String(email) });
+
+    if (existingUser) {
+      return res.status(409).send({ message: "Email is already on the waitlist" });
+    }
+
+    // If not, create a new WaitListUser
     const waitListUser = new WaitListUser({
       email: String(email),
     });
+
     await waitListUser.save();
     res.status(200).send({ message: "Successfully added to waitlist" });
-  } else {
-    res.status(400).send({ message: "Email is required" });
+  } catch (error) {
+    console.error("Error adding to waitlist:", error);
+    res.status(500).send({ message: "Server error, please try again later" });
   }
 });
 
