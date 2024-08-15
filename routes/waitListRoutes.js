@@ -20,8 +20,7 @@ router.post("/sendConfirmationEmail", async (req, res) => {
 
     // Configure Nodemailer
     const transporter = nodemailer.createTransport({
-      service: 'smtp.gmail.com',
-      port: 456,
+      service: 'gmail',
       secure: true,
       auth: {
         user: "sparmarketsdev@gmail.com",
@@ -30,7 +29,7 @@ router.post("/sendConfirmationEmail", async (req, res) => {
     });
 
     // Generate a unique confirmation URL
-    const confirmationUrl = `${process.env.CLIENT_URL}/confirm-waitlist?email=${encodeURIComponent(email)}`;
+    const confirmationUrl = `https://www.sparmarkets.com/confirm-waitlist?email=${encodeURIComponent(email)}`;
 
     // Email content
     const mailOptions = {
