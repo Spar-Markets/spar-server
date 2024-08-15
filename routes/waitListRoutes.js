@@ -50,7 +50,7 @@ router.post("/sendConfirmationEmail", async (req, res) => {
     transporter.sendMail(mailOptions, (error, info) => {
       if (error) {
         console.error("Error sending confirmation email:", error);
-        return res.status(500).send({ message: "Failed to send confirmation email, please try again later." });
+        return res.status(500).send({ message: `Failed to send confirmation email, please try again later. ${error}` });
       }
       res.status(200).send({ message: "Confirmation email sent, please check your inbox." });
     });
