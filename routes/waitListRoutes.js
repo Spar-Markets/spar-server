@@ -60,6 +60,7 @@ router.post("/sendConfirmationEmail", async (req, res) => {
 });
 
 router.get("/confirm-waitlist", async (req, res) => {
+  console.log("GET /confirm-waitlist endpoint hit");
   const { email } = req.query;
 
   if (!email) {
