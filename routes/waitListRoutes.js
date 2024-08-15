@@ -51,7 +51,7 @@ router.post("/sendConfirmationEmail", async (req, res) => {
       `,
       attachments: [{
         filename: 'logo.png',
-        path: '../assets/logo.png',
+        path: './assets/logo.png',
         cid: 'logo'
       }]
     };
