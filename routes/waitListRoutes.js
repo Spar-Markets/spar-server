@@ -38,11 +38,11 @@ router.post("/sendConfirmationEmail", async (req, res) => {
       subject: 'Confirm Your Spot on the Waitlist',
       html: `
         <div style="font-family: Arial, sans-serif; padding: 20px; max-width: 600px; margin: auto;">
-          <div style="display: flex; align-items: flex-start; padding: 20px 20px 0 20px; text-align: left;">
+          <div style="display: flex; align-items: center; padding: 20px 20px 0 20px;">
             <div style="background-color: black; width: 60px; height: 60px; border-radius: 8px; display: flex; justify-content: center; align-items: center; padding: 8px; overflow: hidden; margin-right: 20px;">
               <img src="cid:logo" alt="Spar Markets Logo" style="max-width: 100%; max-height: 100%; object-fit: contain;">
             </div>
-            <h1 style="color: black;">Confirm Your Spot on the Waitlist</h1>
+            <h1 style="color: black; margin: 0;">Confirm Your Spot on the Waitlist</h1>
           </div>
           <div style="margin-top: 20px; text-align: left;">
             <p>Thank you for signing up for our waitlist! Please confirm your spot by clicking the button below:</p>
