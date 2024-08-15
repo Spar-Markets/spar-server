@@ -67,14 +67,12 @@ router.get("/confirm-waitlist", async (req, res) => {
   }
 
   try {
-    // Check if the email already exists in the waitlist
     const existingUser = await WaitListUser.findOne({ email: String(email) });
 
     if (existingUser) {
       return res.status(409).send({ message: "Email is already on the waitlist" });
     }
 
-    // Add the user to the waitlist
     const waitListUser = new WaitListUser({
       email: String(email),
     });
@@ -86,5 +84,6 @@ router.get("/confirm-waitlist", async (req, res) => {
     res.status(500).send({ message: "Server error, please try again later." });
   }
 });
+
 
 module.exports = router;
