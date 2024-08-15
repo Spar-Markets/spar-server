@@ -56,7 +56,7 @@ router.post("/sendConfirmationEmail", async (req, res) => {
     });
   } catch (error) {
     console.error("Error sending confirmation email:", error);
-    res.status(500).send({ message: "Server error, please try again later." });
+    res.status(500).send({ message: `Server error, please try again later. ${error}` });
   }
 });
 
