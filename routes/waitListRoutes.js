@@ -4,8 +4,6 @@ const WaitListUser = require("../models/WaitListUser.js");
 const nodemailer = require("nodemailer");
 const { appPassword, mailKey } = require("../config/constants.js");
 const sgMail = require('@sendgrid/mail')
-sgMail.setApiKey(mailKey)
-
 
 
 router.post("/sendConfirmationEmail", async (req, res) => {
@@ -35,6 +33,8 @@ router.post("/sendConfirmationEmail", async (req, res) => {
     // Generate a unique confirmation URL
     //TODO, point domain to spar server
     const confirmationUrl = `https://spar-server-heroku-0fbb9e6415f2.herokuapp.com/confirm-waitlist?email=${encodeURIComponent(email)}`;
+
+    sgMail.setApiKey(mailKey)
 
     const msg = {
       to: email, // Change to your recipient
