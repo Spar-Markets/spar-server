@@ -38,13 +38,8 @@ router.post("/sendConfirmationEmail", async (req, res) => {
       subject: 'Confirm Your Spot on the Waitlist',
       html: `
         <div style="font-family: Arial, sans-serif; padding: 20px; max-width: 600px; margin: auto;">
-          <div style="display: flex; align-items: center; padding: 20px 20px 0 20px;">
-            <div style="background-color: black; width: 60px; height: 60px; border-radius: 8px; display: flex; justify-content: center; align-items: center; padding: 8px; overflow: hidden; margin-right: 20px;">
-              <img src="cid:logo" alt="Spar Markets Logo" style="max-width: 100%; max-height: 100%; object-fit: contain;">
-            </div>
-            <h1 style="color: black; margin: 0;">Confirm Your Spot on the Waitlist</h1>
-          </div>
           <div style="margin-top: 20px; text-align: left;">
+            <h2 style="color: black; margin: 0;">Confirm Your Spot on the Waitlist</h2>
             <p>Thank you for signing up for our waitlist! Please confirm your spot by clicking the button below:</p>
             <a href="${confirmationUrl}" style="display: block; width: 100%; background-color: white; color: black; padding: 15px 0; text-decoration: none; border: 2px solid black; border-radius: 5px; font-weight: bold; text-align: center;">Confirm Spot</a>
             <p style="margin-top: 20px;">Note: do not join the waitlist with multiple emails. When you create your account, you'll have to verify your identity and we only allow one account per person.</p>
