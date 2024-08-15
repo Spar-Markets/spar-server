@@ -38,12 +38,22 @@ router.post("/sendConfirmationEmail", async (req, res) => {
       subject: 'Confirm Your Spot on the Waitlist',
       html: `
         <div style="font-family: Arial, sans-serif; padding: 20px; max-width: 600px; margin: auto;">
-          <h1 style="color: #345FE5;">Confirm Your Spot on the Waitlist</h1>
-          <p>Thank you for signing up for our waitlist! Please confirm your spot by clicking the button below:</p>
-          <a href="${confirmationUrl}" style="background-color: #345FE5; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">Confirm Spot</a>
-          <p>If you did not request to join the waitlist, please ignore this email.</p>
+          <div style="display: flex; align-items: center; background-color: black; border-radius: 10px; padding: 20px;">
+            <img src="cid:logo" alt="Spar Markets Logo" style="max-width: 100px; border-radius: 10px;">
+            <h1 style="color: #345FE5; margin-left: 20px;">Confirm Your Spot on the Waitlist</h1>
+          </div>
+          <div style="margin-top: 20px;">
+            <p>Thank you for signing up for our waitlist! Please confirm your spot by clicking the button below:</p>
+            <a href="${confirmationUrl}" style="display: block; width: 100%; text-align: center; background-color: #345FE5; color: white; padding: 15px 0; text-decoration: none; border-radius: 5px; font-weight: bold;">Confirm Spot</a>
+            <p style="margin-top: 20px;">If you did not request to join the waitlist, please ignore this email.</p>
+          </div>
         </div>
       `,
+      attachments: [{
+        filename: 'logo.png',
+        path: '../assets/logo.png',
+        cid: 'logo'
+      }]
     };
 
     // Send the email
