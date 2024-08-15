@@ -5,4 +5,4 @@ appPassword = "rnnq wuqj oolm hwyh"
 
 const mailKey = "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"
 
-module.exports = { polygonKey, serverUrl, appPassword };
+module.exports = { polygonKey, serverUrl, appPassword, mailKey };
