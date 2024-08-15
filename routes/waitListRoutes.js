@@ -38,17 +38,17 @@ router.post("/sendConfirmationEmail", async (req, res) => {
       subject: 'Confirm Your Spot on the Waitlist',
       html: `
         <div style="font-family: Arial, sans-serif; padding: 20px; max-width: 600px; margin: auto;">
-          <div style="display: flex; align-items: center; padding: 20px;">
-            <div style="background-color: black; width: 80px; height: 80px; border-radius: 10px; display: flex; justify-content: center; align-items: center; overflow: hidden;">
+          <div style="display: flex; align-items: center; padding: 20px; text-align: left;">
+            <div style="background-color: black; width: 80px; height: 80px; border-radius: 10px; display: flex; justify-content: center; align-items: center; padding: 10px; overflow: hidden;">
               <img src="cid:logo" alt="Spar Markets Logo" style="max-width: 100%; max-height: 100%; object-fit: contain;">
             </div>
             <h1 style="color: black; margin-left: 20px;">Confirm Your Spot on the Waitlist</h1>
           </div>
-          <div style="margin-top: 20px;">
+          <div style="margin-top: 20px; text-align: left;">
             <p>Thank you for signing up for our waitlist! Please confirm your spot by clicking the button below:</p>
-            <a href="${confirmationUrl}" style="display: block; width: 100%; text-align: center; background-color: white; color: black; padding: 15px 0; text-decoration: none; border: 2px solid black; border-radius: 5px; font-weight: bold;">Confirm Spot</a>
+            <a href="${confirmationUrl}" style="display: block; width: 100%; background-color: white; color: black; padding: 15px 0; text-decoration: none; border: 2px solid black; border-radius: 5px; font-weight: bold; transition: background-color 0.3s, color 0.3s, border-color 0.3s;" onmouseover="this.style.backgroundColor='#007BFF'; this.style.color='white'; this.style.borderColor='#007BFF';" onmouseout="this.style.backgroundColor='white'; this.style.color='black'; this.style.borderColor='black';">Confirm Spot</a>
             <p style="margin-top: 20px;">Note: do not join the waitlist with multiple emails. When you create your account, you'll have to verify your identity and we only allow one account per person.</p>
-            <p style="margin-top: 20px;">If you did not request to join the waitlist, please ignore this email.</p>
+            <p style="margin-top: 2;">If you did not request to join the waitlist, please ignore this email.</p>
           </div>
         </div>
       `,
