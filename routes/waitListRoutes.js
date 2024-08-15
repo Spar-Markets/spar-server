@@ -35,7 +35,7 @@ router.post("/sendConfirmationEmail", async (req, res) => {
     // Email content
     const mailOptions = {
       to: email,
-      subject: 'Confirm Your Spot on the Waitlist',
+      subject: 'Spar Markets - Confirm Your Spot on the Waitlist',
       html: `
         <div style="font-family: Arial, sans-serif; padding: 20px; max-width: 600px; margin: auto;">
           <div style="margin-top: 20px; text-align: left;">
