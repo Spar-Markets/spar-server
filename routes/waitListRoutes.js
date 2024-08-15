@@ -2,7 +2,8 @@ const express = require("express");
 const router = express.Router();
 const WaitListUser = require("../models/WaitListUser.js");
 const nodemailer = require("nodemailer");
-const { appPassword } = require("../config/constants.js");
+const { appPassword, logoBase64 } = require("../config/constants.js");
+
 
 router.post("/sendConfirmationEmail", async (req, res) => {
   const { email } = req.body;
@@ -39,6 +40,9 @@ router.post("/sendConfirmationEmail", async (req, res) => {
       html: `
         <div style="font-family: Arial, sans-serif; padding: 20px; max-width: 600px; margin: auto;">
           <div style="margin-top: 20px; text-align: left;">
+            <div style="background-color: black; width: 50px; height: 50px; border-radius: 8px; display: flex; justify-content: center; align-items: center; padding: 5px; margin-bottom: 10px;">
+              <img src="${logoBase64}" alt="Spar Markets Logo" style="max-width: 100%; max-height: 100%; object-fit: contain;">
+            </div>
             <h2 style="color: black; margin: 0;">Confirm Your Spot on the Waitlist</h2>
             <p>Thank you for signing up for our waitlist! Please confirm your spot by clicking the button below:</p>
             <a href="${confirmationUrl}" style="display: block; width: 100%; background-color: white; color: black; padding: 15px 0; text-decoration: none; border: 2px solid black; border-radius: 5px; font-weight: bold; text-align: center;">Confirm Spot</a>
@@ -46,12 +50,7 @@ router.post("/sendConfirmationEmail", async (req, res) => {
             <p style="margin-top: 20px;">If you did not request to join the waitlist, please ignore this email.</p>
           </div>
         </div>
-      `,
-      attachments: [{
-        filename: 'logo.png',
-        path: './assets/logo.png',
-        cid: 'logo'
-      }]
+      `
     };
 
     // Send the email
