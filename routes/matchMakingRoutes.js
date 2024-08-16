@@ -287,8 +287,10 @@ router.post("/challengeFriend", async (req, res) => {
   }
 });
 
+//TODO make this server side reference to balance
+
 router.post("/acceptChallenge", async (req, res) => {
-  const { invitationID, invitedUserID } = req.body;
+  const { invitationID, invitedUserID, balance } = req.body;
 
   try {
     // get necessary information to create match
