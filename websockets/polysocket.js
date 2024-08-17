@@ -105,24 +105,18 @@ stockEmitter.on("newChat", async (chat) => {
   // userIDs
   const userIDs = chat.userIDs; //chat.userIDs
 
-
-
-
-
-
-
   // 2. lookup the corresponding socket connections in chatList
   for (let userID of userIDs) {
     const activeChatSockets = chatList[userID];
+    console.log("chat check grant", activeChatSockets)
 
     const update = chat.messages[chat.messages.length - 1];
-
-
+    console.log("chat check grant", update)
 
     // 3. IF any active connections: send the newly created match to them
     if (activeChatSockets) {
       // send them the match
-      console.log("MATCH CREATION - INSIDE AREA TO SEND TO CLIENT");
+      console.log("MATCH chat - INSIDE AREA TO SEND TO CLIENT");
       console.log("activeMatchmaking sockets:", activeChatSockets);
       console.log(
         "activeChatSockets has",
