@@ -103,7 +103,7 @@ stockEmitter.on("newChat", async (chat) => {
   // 1. grab the userIDs from the new chat
 
   // userIDs
-  const userIDs = [chat.userIDs[0], chat.userIDs[1]]; //chat.userIDs
+  const userIDs = chat.userIDs; //chat.userIDs
 
   // 2. lookup the corresponding socket connections in userMatchmakingList
   for (let userID of userIDs) {
