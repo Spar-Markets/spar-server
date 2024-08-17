@@ -101,35 +101,38 @@ stockEmitter.on("newMatch", async (newMatch) => {
 stockEmitter.on("newChat", async (chat) => {
   console.log("Stock emitter NEW Chat was hit.");
   // 1. grab the userIDs from the new chat
-
+  let activeChatSockets = []
   // userIDs
   const userIDs = chat.userIDs; //chat.userIDs
-
-  // 2. lookup the corresponding socket connections in userMatchmakingList
+  // 2. lookup the corresponding socket connections in chatList
   for (let userID of userIDs) {
-    const activeChatSockets = chatList[userID];
-    const update = chat.messages[chat.messages.length - 1];
-    // 3. IF any active connections: send the newly created match to them
-    if (activeChatSockets) {
-      // send them the match
-      console.log("MATCH CREATION - INSIDE AREA TO SEND TO CLIENT");
-      console.log("activeMatchmaking sockets:", activeChatSockets);
-      console.log(
-        "activeChatSockets has",
-        activeChatSockets.length,
-        "connections"
-      );
+    activeChatSockets = chatList[userID];
+  }
 
-      for (const socket of activeChatSockets) {
-        socket.send(
-          JSON.stringify({
-            type: "newChat",
-            newChat: update,
-          })
-        );
-      }
+  console.log("grant check for chat", activeChatSockets)
+  const update = chat.messages[chat.messages.length - 1];
 
-    }
+
+  // 3. IF any active connections: send the newly created match to them
+  if (activeChatSockets) {
+    socketsToNotify = activeChatSockets.filter(socket => socket.userID !== update.userID);
+    // send them the match
+    console.log("MATCH CREATION - INSIDE AREA TO SEND TO CLIENT");
+    console.log("activeMatchmaking sockets:", activeChatSockets);
+    console.log(
+      "activeChatSockets has",
+      activeChatSockets.length,
+      "connections"
+    );
+  }
+
+  for (const socket of socketsToNotify) {
+    socket.send(
+      JSON.stringify({
+        type: "newChat",
+        newChat: update,
+      })
+    );
   }
 });
 
@@ -202,6 +205,7 @@ async function chatChangeStream() {
   try {
     await client.connect();
     console.log("Connected to MongoDB");
+
 
     // Access the database and collection
     const database = client.db("Spar");
@@ -378,6 +382,7 @@ function setupWebSocket(server) {
 
       // delete it 
       try {
+        console.log("DELETING CHAT WEBSOCKET CONNECTION")
         delete chatList[socket];
       } catch (error) {
         console.log("error deleting chatlist from")
