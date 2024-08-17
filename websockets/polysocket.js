@@ -123,7 +123,7 @@ stockEmitter.on("newChat", async (chat) => {
         socket.send(
           JSON.stringify({
             type: "newChat",
-            newMatch: newChat,
+            newMatch: chat,
           })
         );
       }
