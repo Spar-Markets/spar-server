@@ -108,6 +108,7 @@ stockEmitter.on("newChat", async (chat) => {
   // 2. lookup the corresponding socket connections in userMatchmakingList
   for (let userID of userIDs) {
     const activeChatSockets = chatList[userID];
+    const update = chat.messages[chat.messages.length - 1];
     // 3. IF any active connections: send the newly created match to them
     if (activeChatSockets) {
       // send them the match
@@ -123,7 +124,7 @@ stockEmitter.on("newChat", async (chat) => {
         socket.send(
           JSON.stringify({
             type: "newChat",
-            newMatch: chat,
+            newChat: update,
           })
         );
       }
