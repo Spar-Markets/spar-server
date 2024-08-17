@@ -129,8 +129,6 @@ stockEmitter.on("newChat", async (chat) => {
         );
       }
 
-      // delete it 
-      delete chatList[userID];
     }
   }
 });
@@ -239,13 +237,12 @@ async function chatChangeStream() {
 
     changeStream.on("close", () => {
       console.log("Change stream closed");
+
     });
   } catch (error) {
     console.error("Error in changeStream function:", error);
   }
 }
-
-
 
 
 function setupPolySocket() {
@@ -377,6 +374,15 @@ function setupWebSocket(server) {
 
     socket.on("close", () => {
       // Delete client from interested stocks list
+
+
+      // delete it 
+      try {
+        delete chatList[socket];
+      } catch (error) {
+        console.log("error deleting chatlist from")
+      }
+
       Object.keys(interestedStocksList).forEach((ticker) => {
         interestedStocksList[ticker] = interestedStocksList[ticker].filter(
           (client) => client !== socket
