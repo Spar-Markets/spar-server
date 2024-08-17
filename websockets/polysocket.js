@@ -108,6 +108,7 @@ stockEmitter.on("newChat", async (chat) => {
   // 2. lookup the corresponding socket connections in chatList
   for (let userID of userIDs) {
     console.log(chatList)
+
     const activeChatSockets = chatList[userID];
     console.log("chat check grant", activeChatSockets)
 
@@ -128,6 +129,7 @@ stockEmitter.on("newChat", async (chat) => {
 
 
       for (const socket of activeChatSockets) {
+        console.log("CHECK THIS NOW", socket, update.userID)
         socket.send(
           JSON.stringify({
             type: "newChat",
@@ -362,7 +364,7 @@ function setupWebSocket(server) {
         if (chatList[object.userID]) {
           chatList[object.userID].push(socket);
         } else {
-          // otherwise, create it
+          // otherwise, create chatlist
           chatList[object.userID] = [socket];
         }
 
