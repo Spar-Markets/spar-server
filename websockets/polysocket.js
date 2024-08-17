@@ -100,31 +100,31 @@ stockEmitter.on("newMatch", async (newMatch) => {
  */
 stockEmitter.on("newChat", async (chat) => {
   console.log("Stock emitter NEW Chat was hit.");
-
   // 1. grab the userIDs from the new chat
-  let activeChatSockets = [];
-
+  let activeChatSockets = []
+  // userIDs
+  const userIDs = chat.userIDs; //chat.userIDs
   // 2. lookup the corresponding socket connections in chatList
-  const userIDs = chat.userIDs;
-
   for (let userID of userIDs) {
-    if (chatList[userID]) {
-      activeChatSockets = activeChatSockets.concat(chatList[userID]);
-    }
+    activeChatSockets = chatList[userID];
   }
 
-  console.log("grant check for chat", activeChatSockets);
+  console.log("grant check for chat", activeChatSockets)
   const update = chat.messages[chat.messages.length - 1];
 
-  // 3. IF any active connections: send the newly created chat to them
-  if (activeChatSockets.length > 0) {
-    // Filter out sockets where the socket's userID matches update.userID
+
+  // 3. IF any active connections: send the newly created match to them
+  if (activeChatSockets) {
     const socketsToNotify = activeChatSockets.filter(socket => socket.userID !== update.userID);
-
+    // send them the match
     console.log("MATCH CREATION - INSIDE AREA TO SEND TO CLIENT");
-    console.log("activeChatSockets has", socketsToNotify.length, "connections");
-
-    for (const socket of socketsToNotify) {
+    console.log("activeMatchmaking sockets:", activeChatSockets);
+    console.log(
+      "activeChatSockets has",
+      activeChatSockets.length,
+      "connections"
+    );
+    for (const socket of activeChatSockets) {
       socket.send(
         JSON.stringify({
           type: "newChat",
@@ -133,6 +133,7 @@ stockEmitter.on("newChat", async (chat) => {
       );
     }
   }
+
 });
 
 async function changeStream() {
