@@ -121,7 +121,7 @@ stockEmitter.on("newChat", async (chat) => {
     // Filter out sockets where the socket's userID matches update.userID
     const socketsToNotify = activeChatSockets.filter(socket => socket.userID !== update.userID);
 
-    console.log("MATCH CREATION - INSIDE AREA TO SEND TO CLIENT");
+    console.log("chat - INSIDE AREA TO SEND TO CLIENT");
     console.log("activeChatSockets has", socketsToNotify.length, "connections");
 
     for (const socket of socketsToNotify) {
