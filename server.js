@@ -25,6 +25,7 @@ const feedRoutes = require("./routes/feedRoutes");
 const snapshotRoutes = require("./routes/snapshot");
 const waitListRoutes = require("./routes/waitListRoutes");
 const friendRoutes = require("./routes/friendRoutes");
+const chatRoutes = require("./routes/chatRoutes")
 
 // initialize express app and ports
 const app = express();
@@ -58,6 +59,7 @@ app.use(stockDataDelayed);
 app.use(snapshotRoutes);
 app.use(waitListRoutes);
 app.use(friendRoutes);
+app.use(chatRoutes)
 
 // intervals
 fifteenMinuteInterval.start();

@@ -13,6 +13,8 @@ const { polygonKey } = require("../config/constants");
 const { CloudTasksClient } = require("@google-cloud/tasks");
 const { serverUrl } = require("../config/constants");
 
+const Chat = require("../models/Chat.js")
+
 const client = new CloudTasksClient();
 
 // Define routes here
@@ -403,11 +405,19 @@ async function createMatch(
     user1Snapshots: [{ value: 100000, timeField: Date.now() }],
     user2Snapshots: [{ value: 100000, timeField: Date.now() }],
   });
+
+  const matchChat = new Chat({
+    matchID: matchID,
+    messages: {},
+  });
+
   console.log("Alright bro here's the match", match);
   console.log("Also bro here's the snapshots:", matchSnapshots);
   try {
     const test = await match.save();
     console.log("THIS IS THE TEST REPSONSE THAT MATCH WAS SAVED:", test);
+    await matchChat.save();
+
     await matchSnapshots.save();
   } catch (error) {
     console.log("error creating match");
