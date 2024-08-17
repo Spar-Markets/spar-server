@@ -115,7 +115,7 @@ stockEmitter.on("newChat", async (chat) => {
 
   // 3. IF any active connections: send the newly created match to them
   if (activeChatSockets) {
-    socketsToNotify = activeChatSockets.filter(socket => socket.userID !== update.userID);
+    const socketsToNotify = activeChatSockets.filter(socket => socket.userID !== update.userID);
     // send them the match
     console.log("MATCH CREATION - INSIDE AREA TO SEND TO CLIENT");
     console.log("activeMatchmaking sockets:", activeChatSockets);
@@ -124,16 +124,16 @@ stockEmitter.on("newChat", async (chat) => {
       activeChatSockets.length,
       "connections"
     );
+    for (const socket of socketsToNotify) {
+      socket.send(
+        JSON.stringify({
+          type: "newChat",
+          newChat: update,
+        })
+      );
+    }
   }
 
-  for (const socket of socketsToNotify) {
-    socket.send(
-      JSON.stringify({
-        type: "newChat",
-        newChat: update,
-      })
-    );
-  }
 });
 
 async function changeStream() {
