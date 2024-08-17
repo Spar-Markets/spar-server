@@ -9,6 +9,7 @@ let interestedStocksList = {};
 let matchClientList = {};
 // maps userIDs to socket connection
 let userMatchmakingList = {};
+let chatList = {};
 
 const { MongoClient } = require("mongodb");
 const uri =
@@ -93,6 +94,44 @@ stockEmitter.on("newMatch", async (newMatch) => {
   }
 });
 
+
+/**
+ * Handle new match event and distribute to websockets.
+ */
+stockEmitter.on("newChat", async (newChat) => {
+  console.log("Stock emitter NEW Chat was hit.");
+  // 1. grab the userIDs from the newly created match
+  const userIDs = [newChat.user1.userID, newChat.user2.userID];
+
+  // 2. lookup the corresponding socket connections in userMatchmakingList
+  for (let userID of userIDs) {
+    const activeMatchmakingSockets = chatList[userID];
+    // 3. IF any active connections: send the newly created match to them
+    if (activeMatchmakingSockets) {
+      // send them the match
+      console.log("MATCH CREATION - INSIDE AREA TO SEND TO CLIENT");
+      console.log("activeMatchmaking sockets:", activeMatchmakingSockets);
+      console.log(
+        "activeMatchmakingSockets has",
+        activeMatchmakingSockets.length,
+        "connections"
+      );
+
+      for (const socket of activeMatchmakingSockets) {
+        socket.send(
+          JSON.stringify({
+            type: "newChat",
+            newMatch: newChat,
+          })
+        );
+      }
+
+      // delete it ong
+      delete userMatchmakingList[userID];
+    }
+  }
+});
+
 async function changeStream() {
   try {
     await client.connect();
@@ -155,6 +194,54 @@ async function changeStream() {
     console.error("Error in changeStream function:", error);
   }
 }
+
+
+
+async function chatChangeStream() {
+  try {
+    await client.connect();
+    console.log("Connected to MongoDB");
+
+    // Access the database and collection
+    const database = client.db("Spar");
+    const chats = database.collection("chats");
+
+    console.log("boutta run change streams on chats");
+    const changeStream = chats.watch([], {
+      fullDocument: "updateLookup",
+      fullDocumentBeforeChange: "whenAvailable",
+    });
+
+    console.log("Ran the change streams w chats");
+
+    changeStream.on("change", (change) => {
+      // NOTES FOR PEOPLE READING THIS
+      // This change stream detects ANY change on the matches collection (creation, deletion, and updates to documents).
+      // We use conditionals to determine the type of change, and how we should handle it.
+
+      // check operation type
+      if (change.operationType == "insert") {
+        // this means new match was created
+        // emit event that new match was created
+        console.log("RECOGNIZED CHANGE OPERATION TYPE AS INSERT");
+        stockEmitter.emit("newChat", change.fullDocument);
+      }
+    })
+
+    changeStream.on("error", (error) => {
+      console.error("Error on change stream:", error);
+    });
+
+    changeStream.on("close", () => {
+      console.log("Change stream closed");
+    });
+  } catch (error) {
+    console.error("Error in changeStream function:", error);
+  }
+}
+
+
+
 
 function setupPolySocket() {
   let ws = new WebSocket("wss://delayed.polygon.io/stocks");
@@ -261,6 +348,14 @@ function setupWebSocket(server) {
         // do nothing
       } else if (object.type == "GameScreenConnection") {
         console.log("GameScreenConnection");
+      } else if (object.type == "chats") {
+        if (chatList[object.userID]) {
+          chatList[object.userID].push(socket);
+        } else {
+          // otherwise, create it
+          chatList[object.userID] = [socket];
+        }
+
       } else {
         const ticker = object.ticker;
         if (!interestedStocksList[ticker]) {
@@ -331,4 +426,5 @@ module.exports = {
   setupPolySocket,
   setupWebSocket,
   changeStream,
+  chatChangeStream
 };

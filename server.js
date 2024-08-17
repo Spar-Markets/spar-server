@@ -10,6 +10,7 @@ const {
   setupPolySocket,
   setupWebSocket,
   changeStream,
+  chatChangeStream
 } = require("./websockets/polysocket");
 
 // import routes
@@ -69,6 +70,7 @@ oneWeekInterval.start();
 // websockets
 setupPolySocket();
 changeStream();
+chatChangeStream();
 
 // listen on port
 const server = app.listen(PORT, function listening() {
