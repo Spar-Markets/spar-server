@@ -107,6 +107,7 @@ stockEmitter.on("newChat", async (chat) => {
 
   // 2. lookup the corresponding socket connections in chatList
   for (let userID of userIDs) {
+    console.log(chatList)
     const activeChatSockets = chatList[userID];
     console.log("chat check grant", activeChatSockets)
 
