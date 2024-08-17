@@ -100,7 +100,9 @@ stockEmitter.on("newMatch", async (newMatch) => {
  */
 stockEmitter.on("newChat", async (newChat) => {
   console.log("Stock emitter NEW Chat was hit.");
-  // 1. grab the userIDs from the newly created match
+  // 1. grab the userIDs from the new chat
+
+  // userIDs
   const userIDs = [newChat.userID, newChat.userID];
 
   // 2. lookup the corresponding socket connections in userMatchmakingList
@@ -218,11 +220,13 @@ async function chatChangeStream() {
       // NOTES FOR PEOPLE READING THIS
       // This change stream detects ANY change on the matches collection (creation, deletion, and updates to documents).
       // We use conditionals to determine the type of change, and how we should handle it.
-      console.log("chat change detected")
+      console.log("chat change detected", change)
+
       // check operation type
       if (change.operationType == "insert") {
         // this means new match was created
         // emit event that new match was created
+
         console.log("RECOGNIZED CHANGE OPERATION TYPE AS INSERT");
         stockEmitter.emit("newChat", change.fullDocument);
       }
