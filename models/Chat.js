@@ -9,7 +9,9 @@ const Chat = new mongoose.Schema({
             message: { type: String, required: true }, // The message content
             time: { type: Date, required: true, default: Date.now }, // Timestamp of when the message was sent
         }
-    ]
+
+    ],
+    userIDs: { type: [String], required: true }
 });
 
 module.exports = sparDB.model("Chats", Chat);

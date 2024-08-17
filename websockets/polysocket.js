@@ -98,28 +98,28 @@ stockEmitter.on("newMatch", async (newMatch) => {
 /**
  * Handle new match event and distribute to websockets.
  */
-stockEmitter.on("newChat", async (newChat) => {
+stockEmitter.on("newChat", async (chat) => {
   console.log("Stock emitter NEW Chat was hit.");
   // 1. grab the userIDs from the new chat
 
   // userIDs
-  const userIDs = [newChat.userID, newChat.userID];
+  const userIDs = [chat.userIDs[0], chat.userIDs[1]]; //chat.userIDs
 
   // 2. lookup the corresponding socket connections in userMatchmakingList
   for (let userID of userIDs) {
-    const activeMatchmakingSockets = chatList[userID];
+    const activeChatSockets = chatList[userID];
     // 3. IF any active connections: send the newly created match to them
-    if (activeMatchmakingSockets) {
+    if (activeChatSockets) {
       // send them the match
       console.log("MATCH CREATION - INSIDE AREA TO SEND TO CLIENT");
-      console.log("activeMatchmaking sockets:", activeMatchmakingSockets);
+      console.log("activeMatchmaking sockets:", activeChatSockets);
       console.log(
-        "activeMatchmakingSockets has",
-        activeMatchmakingSockets.length,
+        "activeChatSockets has",
+        activeChatSockets.length,
         "connections"
       );
 
-      for (const socket of activeMatchmakingSockets) {
+      for (const socket of activeChatSockets) {
         socket.send(
           JSON.stringify({
             type: "newChat",
@@ -128,8 +128,8 @@ stockEmitter.on("newChat", async (newChat) => {
         );
       }
 
-      // delete it ong
-      delete userMatchmakingList[userID];
+      // delete it 
+      delete chatList[userID];
     }
   }
 });
@@ -223,11 +223,11 @@ async function chatChangeStream() {
       console.log("chat change detected", change)
 
       // check operation type
-      if (change.operationType == "insert") {
+      if (change.operationType == "update") {
         // this means new match was created
         // emit event that new match was created
 
-        console.log("RECOGNIZED CHANGE OPERATION TYPE AS INSERT");
+        console.log("RECOGNIZED CHANGE OPERATION TYPE AS UPDATE");
         stockEmitter.emit("newChat", change.fullDocument);
       }
     })

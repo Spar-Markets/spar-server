@@ -409,6 +409,7 @@ async function createMatch(
   const matchChat = new Chat({
     matchID: matchID,
     messages: {},
+    userIDs: [player1UserID, player2UserID]
   });
 
   console.log("Alright bro here's the match", match);
