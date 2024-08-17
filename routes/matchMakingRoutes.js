@@ -408,7 +408,7 @@ async function createMatch(
 
   const matchChat = new Chat({
     matchID: matchID,
-    messages: {},
+    messages: [],
     userIDs: [player1UserID, player2UserID]
   });
 
