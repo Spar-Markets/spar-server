@@ -102,8 +102,10 @@ stockEmitter.on("newChat", async (chat) => {
   console.log("Stock emitter NEW Chat was hit.");
   // 1. grab the userIDs from the new chat
 
+  const update = chat.messages[chat.messages.length - 1];
+
   // userIDs
-  const userIDs = chat.userIDs; //chat.userIDs
+  const userIDs = chat.userIDs.filter(id => id !== update.userID);
 
   // 2. lookup the corresponding socket connections in chatList
   for (let userID of userIDs) {
@@ -111,8 +113,6 @@ stockEmitter.on("newChat", async (chat) => {
 
     const activeChatSockets = chatList[userID];
     console.log("chat check grant", activeChatSockets)
-
-    const update = chat.messages[chat.messages.length - 1];
     console.log("chat check grant", update)
 
     // 3. IF any active connections: send the newly created match to them
