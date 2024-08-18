@@ -105,7 +105,7 @@ stockEmitter.on("newChat", async (chat) => {
   const update = chat.messages[chat.messages.length - 1];
 
   // userIDs
-  const userIDs = chat.userIDs.filter(id => id !== update.userID);
+  const userIDs = chat.userIDs.filter(id => id !== update.userID); //sends updates to all except u since client handles yours
 
   // 2. lookup the corresponding socket connections in chatList
   for (let userID of userIDs) {
