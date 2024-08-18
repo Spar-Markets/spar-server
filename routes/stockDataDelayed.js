@@ -126,7 +126,7 @@ router.post("/getMostRecentOneDayPrices", async (req, res) => {
     timeframeClose = getMillisecondsForTime(mostRecentMarketDay, 20, 0);
   }
 
-  // Case 2. if it's within market hours on the same market day, set most recent market time to right now
+  // Case 2: if it's within market hours on the same market day, set most recent market time to right now
   else {
     timeframeClose = getMillisecondsForTime(
       mostRecentMarketDay,
