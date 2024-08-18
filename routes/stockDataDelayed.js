@@ -191,7 +191,7 @@ router.post("/getMostRecentOneDayPrices", async (req, res) => {
 
     // add a check for if tickers is an array otherwise throw error
     if (!Array.isArray(tickers)) {
-      res
+      return res
         .status(400)
         .json({ error: "invalid ticker input: tickers is not an array" });
     }
