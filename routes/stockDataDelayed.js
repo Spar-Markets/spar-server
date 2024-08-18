@@ -32,7 +32,7 @@ function closeformatDate(date) {
   return `${year}-${month}-${day}`;
 }
 
-// Assuming polygonKey and other required variables are defined somewhere in your code
+// Assuming polygonKey and other required variables are defined somewhere in your code.
 router.post("/closeEndpoint", async (req, res) => {
   try {
     console.log("Close Endpoint called");
