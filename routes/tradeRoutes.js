@@ -8,7 +8,7 @@ router.post("/purchaseStock", async (req, res) => {
     // TODO: shares
     console.log("purchaseStock: hit endpoint");
     const { userID, matchID, ticker, type } = req.body;
-    
+
 
     const match = await Match.findOne({ matchID: matchID });
     //console.log("purchaseStock: got match: ", match);
@@ -34,8 +34,8 @@ router.post("/purchaseStock", async (req, res) => {
 
     // check how much this trade will cost
     // determine trade cost based on type (shares or dollars)
-    const tradeCost = (type == "shares") ? parseFloat(buyPrice) * parseFloat(shares) : parseFloat(req.body.dollars);
     const shares = (type == "shares") ? req.body.shares : parseFloat(req.body.dollars) / parseFloat(buyPrice);
+    const tradeCost = (type == "shares") ? parseFloat(buyPrice) * parseFloat(shares) : parseFloat(req.body.dollars);
     console.log("purchaseStock: trade cost:", tradeCost);
 
     if (match[user].buyingPower < tradeCost) {
