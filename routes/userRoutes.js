@@ -108,7 +108,10 @@ router.post("/checkUserExists", async function (req, res) {
   }
 });
 
+
+// Used to get all of the financial accounts associated with a user
 router.post("/accounts", async function (request, response, next) {
+  // why is this called newaccessotoken?? we should be passing one token to this function
   const { newAccessToken } = request.body;
   console.log("printing" + newAccessToken);
   try {

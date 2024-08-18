@@ -1,6 +1,8 @@
 const express = require("express");
 const router = express.Router();
 const session = require("express-session");
+const User = require("../models/User");
+
 
 const {
   Configuration,
@@ -34,10 +36,10 @@ const config = new Configuration({
   },
 });
 
-//Instantiate the Plaid client with the configuration
+// Instantiate the Plaid client with the configuration
 const client = new PlaidApi(config);
 
-//Creates a Link token and return it
+// Creates a link token 
 router.post("/createLinkToken", async (req, res) => {
   console.log("Called Link Token Process");
   let payload1 = {};
@@ -72,7 +74,9 @@ router.post("/createLinkToken", async (req, res) => {
   res.json(tokenResponse.data);
 });
 
-// Exchanges the public token from Plaid Link for an access token
+
+// After the user has linked their bank the link token turns into a public token
+// Exchanges the public token for an access token, which is the final token
 router.post("/exchangePublicToken", async function (request, response, next) {
   console.log(
     "checking request body in exchange: " + request.body.public_token
@@ -101,11 +105,14 @@ router.post("/exchangePublicToken", async function (request, response, next) {
   }
 });
 
-// a debit payment means its coming out of the users account
+
+
+
+// A debit payment means its coming out of the users account
 
 router.post("/transfer", async function (req, res) {
-  // request with access_token, account_id, legal_name, amount, debit/credit, network
-  // for ACH, ach_class also required.
+  // Request with access_token, account_id, legal_name, amount, debit/credit, network
+  // For ACH, ach_class also required.
   // idempotency_key - recommended to avoid duplicate transfers
 
   try {
@@ -199,13 +206,12 @@ router.post("/getBalance", async (req, res) => {
   }
 });
 
+
 router.post("/getAccount", async (req, res) => {
   const { newAccessToken } = req.body;
   const request = {
     access_token: newAccessToken,
   };
-
-  //console.log("Getting Account: " + request);
 
   try {
     const response = await client.accountsGet(request);
@@ -219,21 +225,23 @@ router.post("/getAccount", async (req, res) => {
   }
 });
 
-router.post("/updateUserAccessToken", async (req, res) => {
+
+// Uploads the user's accessotoken
+router.post("/uploadUserAccessToken", async (req, res) => {
   // Extract username and newBalance from the request body
-  const { email, newAccessToken } = req.body;
+  const { userID, accessToken } = req.body;
   console.log("going into updateacces" + email + newAccessToken);
 
   try {
     // Find the user by username and update the balance
     try {
       const user = await User.findOneAndUpdate(
-        { email: email },
-        { $set: { plaidPersonalAccess: newAccessToken } },
+        { userID: userID },
+        { $set: { plaidPersonalAccess: accessToken } },
         { new: true } // Return the updated document
       );
     } catch (error) {
-      console.log("user doesn't exist");
+      console.log("Error in uploading the useraccesstoken: user doesn't exist");
     }
 
     // Log another success message to the console
@@ -246,6 +254,8 @@ router.post("/updateUserAccessToken", async (req, res) => {
   }
 });
 
+
+// Retreives the users access token
 router.post("/getAccessFromMongo", async function (req, res) {
   try {
     const { email } = req.body; // Destructure email from request body
