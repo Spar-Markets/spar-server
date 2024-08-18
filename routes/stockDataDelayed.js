@@ -219,7 +219,7 @@ router.post("/getMostRecentOneDayPrices", async (req, res) => {
     return prices;
   };
 
-  //Modified for stockcards, for main details page it gets all data, for stock cards it only gets 1D
+  //Modified for stockcards, for main details page it gets all data, for stock cards it only gets 1D.
   const sendData = async () => {
     const timeframes = ["1D", "1W", "1M", "3M", "YTD", "1Y", "5Y"];
 
