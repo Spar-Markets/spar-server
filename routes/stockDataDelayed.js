@@ -8,7 +8,7 @@ const getMostRecentMarketOpenDay = require("../utility/getMostRecentMarketOpenDa
 const getPreviousDay = require("../utility/getPreviousDay");
 const getCurrentPrice = require("../utility/getCurrentPrice");
 const { json } = require("body-parser");
-
+const estTime = require("../utility/estTime")
 
 /**
  * STOCK DATA
@@ -92,7 +92,8 @@ router.post("/getMostRecentOneDayPrices", async (req, res) => {
     }
   }
 
-  const now = new Date(Date.now());
+  const now = estTime()
+
   let mostRecentMarketDay = getMostRecentMarketOpenDay(now);
   // edge case. if most recent market day is today, AND it is before 9:45am, go for the previous day before that
   const isSameDay =
