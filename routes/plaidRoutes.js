@@ -121,10 +121,17 @@ router.post("/transfer", async function (req, res) {
 
   try {
     console.log("STARTING TRANSFER");
-    const { access_token, account_id } = req.body;
+    const { access_token, account_id, amount } = req.body;
     const authId = await client.transferAuthorizationCreate({
       access_token: access_token[0],
       account_id: account_id,
+      type: 'debit',
+      network: 'ach',
+      amount: amount,
+      ach_class: 'ppd',
+      user: {
+        legal_name: 'Grant Drinkwater',
+      },
     });
 
     const transferReq = {
