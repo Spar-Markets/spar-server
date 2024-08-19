@@ -123,23 +123,24 @@ router.post("/transfer", async function (req, res) {
     console.log("STARTING TRANSFER");
     const { access_token, account_id } = req.body;
     const authId = await client.transferAuthorizationCreate({
-      access_token: access_token,
+      access_token: access_token[0],
       account_id: account_id,
-      // i don't know what idempotency_key
-      // idempotency_key:
     });
 
     const transferReq = {
-      access_token: access_token,
+      access_token: access_token[0],
       account_id: account_id,
       authorization_id: authId.data.authorization.id,
       description: "Deposit",
     };
     console.log(authId.data);
+    
     // this is to create the actual pending ACH
+    
     const response = await client.transferCreate(transferReq);
-    //
+    
     res.send(authId.data.authorization.decision);
+  
   } catch (error) {
     console.error(error);
   }
