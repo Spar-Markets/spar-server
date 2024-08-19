@@ -2,12 +2,12 @@ const express = require("express");
 const router = express.Router();
 
 router.post("/updateUserBalanceDeposit", async (req, res) => {
-  const { email, deposit } = req.body;
+  const { userID, deposit } = req.body;
 
   try {
     try {
       await User.findOneAndUpdate(
-        { email: email },
+        { userID: userID },
         { $inc: { balance: deposit } }
       );
     } catch (error) {

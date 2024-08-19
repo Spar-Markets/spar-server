@@ -108,7 +108,10 @@ router.post("/checkUserExists", async function (req, res) {
   }
 });
 
+
+// Used to get all of the financial accounts associated with a user
 router.post("/accounts", async function (request, response, next) {
+  // why is this called newaccessotoken?? we should be passing one token to this function
   const { newAccessToken } = request.body;
   console.log("printing" + newAccessToken);
   try {
@@ -440,5 +443,63 @@ router.get("/getProfileImages/:userID", async (req, res) => {
       .json({ error: "Server error when trying to fetch profile images" });
   }
 });
+
+
+
+// Uploads the user's accessotoken
+router.post("/uploadUserAccessToken", async (req, res) => {
+  // Extract username and newBalance from the request body
+  const { userID, accessToken } = req.body;
+  console.log("going into updateacces"  + accessToken);
+
+  try {
+    // Find the user by username and update the balance
+    try {
+      const user = await User.findOneAndUpdate(
+        { userID: userID },
+        { $push: { plaidPersonalAccess: accessToken } },
+        { new: true } // Return the updated document
+      );
+    } catch (error) {
+      console.log("Error in uploading the useraccesstoken: user doesn't exist");
+    }
+
+    // Log another success message to the console
+    console.log("Success in accesstokenupdating");
+
+    res.status(201).json({ message: "User AccessToken Updated" });
+  } catch (error) {
+    console.error("Error AccessToken Failed to Update:", error);
+    res.status(500).json({ error: "Could not create user" });
+  }
+});
+
+
+// Retreives the users access token
+router.post("/getAccessFromMongo", async function (req, res) {
+  try {
+    const { userID } = req.body; // Destructure email from request body
+    const user = await User.findOne({ userID: userID });
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const plaidPersonalAccess = user.plaidPersonalAccess;
+    return res.send(plaidPersonalAccess);
+  } catch (error) {
+    console.error("Error retrieving user access:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+});
+
+
+
+
+
+
+
+
+
 
 module.exports = router;

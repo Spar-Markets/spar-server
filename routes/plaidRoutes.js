@@ -1,6 +1,8 @@
 const express = require("express");
 const router = express.Router();
 const session = require("express-session");
+const User = require("../models/User");
+
 
 const {
   Configuration,
@@ -34,10 +36,10 @@ const config = new Configuration({
   },
 });
 
-//Instantiate the Plaid client with the configuration
+// Instantiate the Plaid client with the configuration
 const client = new PlaidApi(config);
 
-//Creates a Link token and return it
+// Creates a link token 
 router.post("/createLinkToken", async (req, res) => {
   console.log("Called Link Token Process");
   let payload1 = {};
@@ -72,7 +74,9 @@ router.post("/createLinkToken", async (req, res) => {
   res.json(tokenResponse.data);
 });
 
-// Exchanges the public token from Plaid Link for an access token
+
+// After the user has linked their bank the link token turns into a public token
+// Exchanges the public token for an access token, which is the final token
 router.post("/exchangePublicToken", async function (request, response, next) {
   console.log(
     "checking request body in exchange: " + request.body.public_token
@@ -101,11 +105,18 @@ router.post("/exchangePublicToken", async function (request, response, next) {
   }
 });
 
-// a debit payment means its coming out of the users account
+
+
+
+
+
+
+
+// A debit payment means its coming out of the users account
 
 router.post("/transfer", async function (req, res) {
-  // request with access_token, account_id, legal_name, amount, debit/credit, network
-  // for ACH, ach_class also required.
+  // Request with access_token, account_id, legal_name, amount, debit/credit, network
+  // For ACH, ach_class also required.
   // idempotency_key - recommended to avoid duplicate transfers
 
   try {
@@ -199,14 +210,13 @@ router.post("/getBalance", async (req, res) => {
   }
 });
 
+
 router.post("/getAccount", async (req, res) => {
-  const { newAccessToken } = req.body;
+  const { accessToken } = req.body;
   const request = {
-    access_token: newAccessToken,
+    access_token: accessToken[0],
   };
-
-  //console.log("Getting Account: " + request);
-
+  console.log("banking tests", request)
   try {
     const response = await client.accountsGet(request);
     const data = response.data;
@@ -216,51 +226,33 @@ router.post("/getAccount", async (req, res) => {
     console.log("Get Account: Success");
   } catch (error) {
     console.log("Error Getting Account");
+    res.send(error)
   }
 });
 
-router.post("/updateUserAccessToken", async (req, res) => {
-  // Extract username and newBalance from the request body
-  const { email, newAccessToken } = req.body;
-  console.log("going into updateacces" + email + newAccessToken);
 
+router.post("/sandbox-transfer-simulate", async (req, res) => {
+  const { accessToken, transferAmt } = req.body;
+  const request = {
+    transfer_id,
+    event_type: 'posted',
+    failure_reason: failureReason,
+  };
   try {
-    // Find the user by username and update the balance
-    try {
-      const user = await User.findOneAndUpdate(
-        { email: email },
-        { $set: { plaidPersonalAccess: newAccessToken } },
-        { new: true } // Return the updated document
-      );
-    } catch (error) {
-      console.log("user doesn't exist");
-    }
+    const response = await client.sandboxTransferSimulate(request);
+    // empty response upon success
+    const data = response.data;
+    res.json({
+      data,
+    });
 
-    // Log another success message to the console
-    console.log("Success in accesstokenupdating");
-
-    res.status(201).json({ message: "User AccessToken Updated" });
   } catch (error) {
-    console.error("Error AccessToken Failed to Update:", error);
-    res.status(500).json({ error: "Could not create user" });
+    // handle error
   }
 });
 
-router.post("/getAccessFromMongo", async function (req, res) {
-  try {
-    const { email } = req.body; // Destructure email from request body
-    const user = await User.findOne({ email: email });
 
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
 
-    const plaidPersonalAccess = user.plaidPersonalAccess;
-    return res.send(plaidPersonalAccess);
-  } catch (error) {
-    console.error("Error retrieving user access:", error);
-    return res.status(500).json({ message: "Internal server error" });
-  }
-});
+
 
 module.exports = router;
