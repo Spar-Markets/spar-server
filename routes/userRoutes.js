@@ -433,6 +433,7 @@ router.get("/getProfileImages/:userID", async (req, res) => {
     }
 
     res.status(200).json({
+      
       hasDefaultProfileImage: user.hasDefaultProfileImage,
       defaultProfileImage: user.defaultProfileImage,
     });
