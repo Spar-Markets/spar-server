@@ -5,14 +5,10 @@ router.post("/updateUserBalanceDeposit", async (req, res) => {
   const { userID, deposit } = req.body;
 
   try {
-    try {
       await User.findOneAndUpdate(
         { userID: userID },
         { $inc: { balance: deposit } }
       );
-    } catch (error) {
-      console.log("user doesn't exist");
-    }
   } catch (error) {
     console.error("Error in updating balance");
   }

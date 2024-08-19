@@ -140,11 +140,10 @@ router.post("/transfer", async function (req, res) {
       authorization_id: authId.data.authorization.id,
       description: "Deposit",
 
-
     };
     console.log(authId.data);
     
-    // this is to create the actual pending ACH
+    // This is to create the actual pending ACH
     
     const response = await client.transferCreate(transferReq);
     
@@ -155,6 +154,7 @@ router.post("/transfer", async function (req, res) {
   }
 });
 
+
 router.post("/simTransfer", async function (req, res) {
   try {
     const response = await client.sandboxTransferSimulate(req.body);
@@ -164,21 +164,6 @@ router.post("/simTransfer", async function (req, res) {
   }
 });
 
-router.post("/getPlaidBalance", async function (req, res) {
-  try {
-    const response = await client.transferLedgerGet({});
-    const available_balance = response.data.balance.available;
-    const pending_balance = response.data.balance.pending;
-    res.send(
-      "Available Balance: " +
-        available_balance +
-        ", Pending Balance: " +
-        pending_balance
-    );
-  } catch {
-    console.error("error getting plaid balance");
-  }
-});
 
 router.post("/getTransferList", async (req, res) => {
   const request = {
@@ -221,6 +206,23 @@ router.post("/getBalance", async (req, res) => {
 });
 
 
+router.post("/getPlaidBalance", async function (req, res) {
+  try {
+    const response = await client.transferLedgerGet({});
+    const available_balance = response.data.balance.available;
+    const pending_balance = response.data.balance.pending;
+    res.send(
+      "Available Balance: " +
+        available_balance +
+        ", Pending Balance: " +
+        pending_balance
+    );
+  } catch {
+    console.error("error getting plaid balance");
+  }
+});
+
+
 router.post("/getAccount", async (req, res) => {
   const { accessToken } = req.body;
   const request = {
@@ -242,7 +244,7 @@ router.post("/getAccount", async (req, res) => {
 
 
 router.post("/sandbox-transfer-simulate", async (req, res) => {
-  const { accessToken, transferAmt } = req.body;
+  const { transfer_id } = req.body;
   const request = {
     transfer_id,
     event_type: 'posted',
