@@ -225,12 +225,11 @@ router.post("/getAccount", async (req, res) => {
   }
 });
 
-
 // Uploads the user's accessotoken
 router.post("/uploadUserAccessToken", async (req, res) => {
   // Extract username and newBalance from the request body
   const { userID, accessToken } = req.body;
-  console.log("going into updateacces" + email + newAccessToken);
+  console.log("going into updateacces"  + accessToken);
 
   try {
     // Find the user by username and update the balance
