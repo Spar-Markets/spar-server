@@ -153,7 +153,7 @@ router.post("/transfer", async function (req, res) {
 
 router.post("/getTransferList", async (req, res) => {
   const request = {
-    start_date: '2024-01-01T22:35:49Z',
+    start_date: '2024-05-01T22:35:49Z',
     end_date: '2024-10-01T22:35:49Z',
     count: 14,
     offset: 2,
@@ -165,11 +165,9 @@ router.post("/getTransferList", async (req, res) => {
     console.log("okok",response)
     
     const transfers = response.data.transfers;
-    for (const transfer of transfers) {
-      // iterate through transfers
-    }
+    res.send(transfers)
   } catch (error) {
-    // handle error
+    console.log("error getting transfers")
   }
 });
 
