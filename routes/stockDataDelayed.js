@@ -66,7 +66,8 @@ router.post("/closeEndpoint", async (req, res) => {
     // UNCOMMENT THIS const response = await axios.get(url);
 
     // Get the last price from the response data
-    const closePrice = response.data.close;
+    // UNCOMMENT THIS 8/18/24
+    // const closePrice = response.data.close;
 
     // UNCOMMENT THIS 8/18/24
     // res.status(200).json({
