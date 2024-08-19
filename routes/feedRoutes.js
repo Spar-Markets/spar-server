@@ -12,7 +12,6 @@ router.post("/postToDatabase", async function (req, res) {
   try {
     const {
       postId,
-      username,
       postedTime,
       type,
       title,
@@ -24,7 +23,6 @@ router.post("/postToDatabase", async function (req, res) {
     const newPost = new Post({
       postId: postId,
       posterId: posterId,
-      username: username,
       postedTime: postedTime,
       type: type,
       title: title,

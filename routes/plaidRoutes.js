@@ -1,6 +1,8 @@
 const express = require("express");
 const router = express.Router();
 const session = require("express-session");
+const User = require("../models/User");
+
 
 const {
   Configuration,
@@ -34,10 +36,10 @@ const config = new Configuration({
   },
 });
 
-//Instantiate the Plaid client with the configuration
+// Instantiate the Plaid client with the configuration
 const client = new PlaidApi(config);
 
-//Creates a Link token and return it
+// Creates a link token 
 router.post("/createLinkToken", async (req, res) => {
   console.log("Called Link Token Process");
   let payload1 = {};
@@ -72,7 +74,9 @@ router.post("/createLinkToken", async (req, res) => {
   res.json(tokenResponse.data);
 });
 
-// Exchanges the public token from Plaid Link for an access token
+
+// After the user has linked their bank the link token turns into a public token
+// Exchanges the public token for an access token, which is the final token
 router.post("/exchangePublicToken", async function (request, response, next) {
   console.log(
     "checking request body in exchange: " + request.body.public_token
@@ -101,81 +105,71 @@ router.post("/exchangePublicToken", async function (request, response, next) {
   }
 });
 
-// a debit payment means its coming out of the users account
+
+
+
+
+// A debit payment means its coming out of the users account
 
 router.post("/transfer", async function (req, res) {
-  // request with access_token, account_id, legal_name, amount, debit/credit, network
-  // for ACH, ach_class also required.
+  // Request with access_token, account_id, legal_name, amount, debit/credit, network
+  // For ACH, ach_class also required.
   // idempotency_key - recommended to avoid duplicate transfers
 
   try {
-    console.log("STARTING TRANSFER");
-    const { access_token, account_id } = req.body;
+    console.log("STARTING TRANSFER Grant ");
+    const { access_token, account_id, amount } = req.body;
     const authId = await client.transferAuthorizationCreate({
-      access_token: access_token,
+      access_token: access_token[0],
       account_id: account_id,
-      // i don't know what idempotency_key
-      // idempotency_key:
+      type: 'debit',
+      network: 'ach',
+      amount: amount,
+      ach_class: 'ppd',
+      user: {
+        legal_name: 'Grant Drinkwater',
+      },
     });
 
     const transferReq = {
-      access_token: access_token,
+      access_token: access_token[0],
       account_id: account_id,
       authorization_id: authId.data.authorization.id,
       description: "Deposit",
     };
     console.log(authId.data);
-    // this is to create the actual pending ACH
+    
+    // This is to create the actual pending ACH
+    
     const response = await client.transferCreate(transferReq);
-    //
+    
     res.send(authId.data.authorization.decision);
+  
   } catch (error) {
     console.error(error);
   }
 });
 
-router.post("/simTransfer", async function (req, res) {
-  try {
-    const response = await client.sandboxTransferSimulate(req.body);
-    res.send("Success: " + req.body.event_type);
-  } catch {
-    console.error("Error Simming");
-  }
-});
-
-router.post("/getPlaidBalance", async function (req, res) {
-  try {
-    const response = await client.transferLedgerGet({});
-    const available_balance = response.data.balance.available;
-    const pending_balance = response.data.balance.pending;
-    res.send(
-      "Available Balance: " +
-        available_balance +
-        ", Pending Balance: " +
-        pending_balance
-    );
-  } catch {
-    console.error("error getting plaid balance");
-  }
-});
 
 router.post("/getTransferList", async (req, res) => {
   const request = {
-    count: 25,
+    start_date: '2024-08-18T23:00:00Z',
+    end_date: '2024-10-01T22:35:49Z',
+    count: 5,
+    origination_account_id: '8945fedc-e703-463d-86b1-dc0607b55460',
   };
-
   try {
     const response = await client.transferList(request);
+    
+    console.log("okok",response)
+    
     const transfers = response.data.transfers;
-    for (const transfer of transfers) {
-      console.log(transfer.amount + ", " + transfer.status);
-    }
-    res.send(transfers);
-    //console.log(transfers);
-  } catch {
-    console.error("Error getting transfer list");
+    res.send(transfers)
+  } catch (error) {
+    console.log("error getting transfers")
   }
 });
+
 
 // Fetches balance data using the Node client library for Plaid
 router.post("/getBalance", async (req, res) => {
@@ -199,14 +193,30 @@ router.post("/getBalance", async (req, res) => {
   }
 });
 
+
+router.post("/getPlaidBalance", async function (req, res) {
+  try {
+    const response = await client.transferLedgerGet({});
+    const available_balance = response.data.balance.available;
+    const pending_balance = response.data.balance.pending;
+    res.send(
+      "Available Balance: " +
+        available_balance +
+        ", Pending Balance: " +
+        pending_balance
+    );
+  } catch {
+    console.error("error getting plaid balance");
+  }
+});
+
+
 router.post("/getAccount", async (req, res) => {
-  const { newAccessToken } = req.body;
+  const { accessToken } = req.body;
   const request = {
-    access_token: newAccessToken,
+    access_token: accessToken[0],
   };
-
-  //console.log("Getting Account: " + request);
-
+  console.log("banking tests", request)
   try {
     const response = await client.accountsGet(request);
     const data = response.data;
@@ -216,51 +226,77 @@ router.post("/getAccount", async (req, res) => {
     console.log("Get Account: Success");
   } catch (error) {
     console.log("Error Getting Account");
+    res.send(error)
   }
 });
 
-router.post("/updateUserAccessToken", async (req, res) => {
-  // Extract username and newBalance from the request body
-  const { email, newAccessToken } = req.body;
-  console.log("going into updateacces" + email + newAccessToken);
 
+router.post("/sandbox-transfer-simulate", async (req, res) => {
+  const { transfer_id } = req.body;
+  const request1 = {
+    transfer_id,
+    event_type: 'posted',
+  };
+  const request7 = {
+    transfer_id,
+    event_type: 'settled',
+  };
   try {
-    // Find the user by username and update the balance
+
+
+    const response8 = await client.sandboxTransferSimulate(request1);
+    const response9 = await client.sandboxTransferSimulate(request7);
+
+    // empty response upon success
+
+
+    console.log("posted yay!")
+
+
+    // Now simulate the sweep
+    const sweep1 = await client.sandboxTransferSweepSimulate({})
+    console.log("this could be important sweep", sweep1)
+    const sweep = sweep1.data;
+    console.log("sweeping",sweep)
+
+
+    const request2 = {
+      sweep_id: sweep.id,
+      event_type: 'sweep.settled',
+    };
     try {
-      const user = await User.findOneAndUpdate(
-        { email: email },
-        { $set: { plaidPersonalAccess: newAccessToken } },
-        { new: true } // Return the updated document
-      );
+      const response = await client.sandboxTransferLedgerDepositSimulate(request2);
+      // Handle success, response should be empty upon success
     } catch (error) {
-      console.log("user doesn't exist");
+      // Handle error
+    }
+    const request3 = {
+      sweep_id: "f4ba7a287eae4d228d12331b68a9f35a",
+      event_type: 'sweep.settled',
+    };
+    try {
+      const response = await client.sandboxTransferLedgerDepositSimulate(request3);
+      // Handle success, response should be empty upon succes
+    } catch (error) {
+      // Handle error
     }
 
-    // Log another success message to the console
-    console.log("Success in accesstokenupdating");
 
-    res.status(201).json({ message: "User AccessToken Updated" });
+
+    
+
+    console.log("sweeped")
+      res.send("done")
+      // empty response upon success
+  
+
   } catch (error) {
-    console.error("Error AccessToken Failed to Update:", error);
-    res.status(500).json({ error: "Could not create user" });
+    // handle error
   }
 });
 
-router.post("/getAccessFromMongo", async function (req, res) {
-  try {
-    const { email } = req.body; // Destructure email from request body
-    const user = await User.findOne({ email: email });
 
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
 
-    const plaidPersonalAccess = user.plaidPersonalAccess;
-    return res.send(plaidPersonalAccess);
-  } catch (error) {
-    console.error("Error retrieving user access:", error);
-    return res.status(500).json({ message: "Internal server error" });
-  }
-});
+
 
 module.exports = router;

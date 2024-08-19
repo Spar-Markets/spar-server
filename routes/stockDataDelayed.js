@@ -63,15 +63,22 @@ router.post("/closeEndpoint", async (req, res) => {
 
     console.log("Polygon URL request in close: " + url);
 
-    const response = await axios.get(url);
+    // UNCOMMENT THIS const response = await axios.get(url);
 
     // Get the last price from the response data
-    const closePrice = response.data.close;
+    // UNCOMMENT THIS 8/18/24
+    // const closePrice = response.data.close;
 
+    // UNCOMMENT THIS 8/18/24
+    // res.status(200).json({
+    //   ticker: response.data.symbol,
+    //   lastPrice: closePrice,
+    // });
+    // DELETE THIS 8/18/24
     res.status(200).json({
-      ticker: response.data.symbol,
-      lastPrice: closePrice,
-    });
+      ticker: "AAPL",
+      lastPrice: 230
+    })
   } catch (error) {
     console.error("There is an error in closeEndpoint:", error.message);
     console.error(error.stack);
@@ -250,5 +257,25 @@ router.get("/getCurrentPrice/:ticker", async (req, res) => {
     res.status(500).json({ error: error });
   }
 });
+
+// TODO: DELETE THIS. DEBUGGING THE HEADERS SENT ERROR ON 8/18/24
+// I'm in the trenches. Also I'm sick. L's all around
+router.get("/testClose", async (req, res) => {
+  setTimeout(() => {
+    res.status(200).json({
+      ticker: "AAPL",
+      lastPrice: 230
+    })
+  }, 2000)
+})
+
+router.get("/testOneDayPrices", async (req, res) => {
+  setTimeout(() => {
+    res.status(200).json({
+      timeframe: "1D"
+    })
+  }, 2000)
+})
+
 
 module.exports = router;

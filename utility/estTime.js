@@ -10,7 +10,6 @@ const estTime = () => {
         timeZone,
         'yyyy-MM-dd HH:mm:ssXXX',
     );
-    console.log(easternTime)
 
     return easternTime
 };
