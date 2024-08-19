@@ -433,6 +433,7 @@ router.get("/getProfileImages/:userID", async (req, res) => {
     }
 
     res.status(200).json({
+
       hasDefaultProfileImage: user.hasDefaultProfileImage,
       defaultProfileImage: user.defaultProfileImage,
     });
@@ -446,7 +447,7 @@ router.get("/getProfileImages/:userID", async (req, res) => {
 
 
 
-// Uploads the user's accessotoken
+// Uploads the user's access token
 router.post("/uploadUserAccessToken", async (req, res) => {
   // Extract username and newBalance from the request body
   const { userID, accessToken } = req.body;

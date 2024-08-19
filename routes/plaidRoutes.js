@@ -109,9 +109,6 @@ router.post("/exchangePublicToken", async function (request, response, next) {
 
 
 
-
-
-
 // A debit payment means its coming out of the users account
 
 router.post("/transfer", async function (req, res) {
@@ -139,12 +136,10 @@ router.post("/transfer", async function (req, res) {
       account_id: account_id,
       authorization_id: authId.data.authorization.id,
       description: "Deposit",
-
-
     };
     console.log(authId.data);
     
-    // this is to create the actual pending ACH
+    // This is to create the actual pending ACH
     
     const response = await client.transferCreate(transferReq);
     
@@ -155,48 +150,29 @@ router.post("/transfer", async function (req, res) {
   }
 });
 
-router.post("/simTransfer", async function (req, res) {
-  try {
-    const response = await client.sandboxTransferSimulate(req.body);
-    res.send("Success: " + req.body.event_type);
-  } catch {
-    console.error("Error Simming");
-  }
-});
-
-router.post("/getPlaidBalance", async function (req, res) {
-  try {
-    const response = await client.transferLedgerGet({});
-    const available_balance = response.data.balance.available;
-    const pending_balance = response.data.balance.pending;
-    res.send(
-      "Available Balance: " +
-        available_balance +
-        ", Pending Balance: " +
-        pending_balance
-    );
-  } catch {
-    console.error("error getting plaid balance");
-  }
-});
 
 router.post("/getTransferList", async (req, res) => {
   const request = {
-    count: 25,
+    start_date: '2024-01-01T22:35:49Z',
+    end_date: '2024-10-01T22:35:49Z',
+    count: 14,
+    offset: 2,
+    origination_account_id: '8945fedc-e703-463d-86b1-dc0607b55460',
   };
-
   try {
     const response = await client.transferList(request);
+    
+    console.log("okok",response)
+    
     const transfers = response.data.transfers;
     for (const transfer of transfers) {
-      console.log(transfer.amount + ", " + transfer.status);
+      // iterate through transfers
     }
-    res.send(transfers);
-    //console.log(transfers);
-  } catch {
-    console.error("Error getting transfer list");
+  } catch (error) {
+    // handle error
   }
 });
+
 
 // Fetches balance data using the Node client library for Plaid
 router.post("/getBalance", async (req, res) => {
@@ -217,6 +193,23 @@ router.post("/getBalance", async (req, res) => {
     console.log("Get Balance: Success");
   } catch (error) {
     console.log("Error Getting Balance");
+  }
+});
+
+
+router.post("/getPlaidBalance", async function (req, res) {
+  try {
+    const response = await client.transferLedgerGet({});
+    const available_balance = response.data.balance.available;
+    const pending_balance = response.data.balance.pending;
+    res.send(
+      "Available Balance: " +
+        available_balance +
+        ", Pending Balance: " +
+        pending_balance
+    );
+  } catch {
+    console.error("error getting plaid balance");
   }
 });
 
@@ -242,7 +235,7 @@ router.post("/getAccount", async (req, res) => {
 
 
 router.post("/sandbox-transfer-simulate", async (req, res) => {
-  const { accessToken, transferAmt } = req.body;
+  const { transfer_id } = req.body;
   const request = {
     transfer_id,
     event_type: 'posted',

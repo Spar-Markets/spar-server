@@ -5,26 +5,22 @@ router.post("/updateUserBalanceDeposit", async (req, res) => {
   const { userID, deposit } = req.body;
 
   try {
-    try {
       await User.findOneAndUpdate(
         { userID: userID },
         { $inc: { balance: deposit } }
       );
-    } catch (error) {
-      console.log("user doesn't exist");
-    }
   } catch (error) {
     console.error("Error in updating balance");
   }
 });
 
 router.post("/updateUserBalanceWithdraw", async (req, res) => {
-  const { email, withdraw } = req.body;
+  const { userID, withdraw } = req.body;
 
   try {
     try {
       await User.findOneAndUpdate(
-        { email: email },
+        { userID: userID },
         { $inc: { balance: -withdraw } }
       );
     } catch (error) {
