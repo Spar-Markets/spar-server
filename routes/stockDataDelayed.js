@@ -257,4 +257,24 @@ router.get("/getCurrentPrice/:ticker", async (req, res) => {
   }
 });
 
+// TODO: DELETE THIS. DEBUGGING THE HEADERS SENT ERROR ON 8/18/24
+// I'm in the trenches. Also I'm sick. L's all around
+router.get("/testClose", async (req, res) => {
+  setTimeout(() => {
+    res.status(200).json({
+      ticker: "AAPL",
+      lastPrice: 230
+    })
+  }, 2000)
+})
+
+router.get("/testOneDayPrices", async (req, res) => {
+  setTimeout(() => {
+    res.status(200).json({
+      timeframe: "1D"
+    })
+  }, 2000)
+})
+
+
 module.exports = router;
