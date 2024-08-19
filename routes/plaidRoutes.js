@@ -216,7 +216,7 @@ router.post("/getAccount", async (req, res) => {
   const request = {
     access_token: accessToken[0],
   };
-
+  console.log("banking tests", request)
   try {
     const response = await client.accountsGet(request);
     const data = response.data;
