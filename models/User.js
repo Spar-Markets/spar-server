@@ -50,8 +50,8 @@ const userSchema = new mongoose.Schema({
     },
   ],
   plaidPersonalAccess: {
-    type: String,
-    default: "",
+    type: [String],
+    default: [],
   },
   postsVotedOn: {
     type: [Object],

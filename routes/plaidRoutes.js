@@ -257,8 +257,8 @@ router.post("/uploadUserAccessToken", async (req, res) => {
 // Retreives the users access token
 router.post("/getAccessFromMongo", async function (req, res) {
   try {
-    const { email } = req.body; // Destructure email from request body
-    const user = await User.findOne({ email: email });
+    const { userID } = req.body; // Destructure email from request body
+    const user = await User.findOne({ userID: userID });
 
     if (!user) {
       return res.status(404).json({ message: "User not found" });
