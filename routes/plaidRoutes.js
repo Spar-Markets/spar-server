@@ -233,25 +233,25 @@ router.post("/getAccount", async (req, res) => {
 
 router.post("/sandbox-transfer-simulate", async (req, res) => {
   const { transfer_id } = req.body;
-  const request = {
+  const request1 = {
     transfer_id,
     event_type: 'posted',
   };
   try {
-    const response = await client.sandboxTransferSimulate(request);
+    const response = await client.sandboxTransferSimulate(request1);
     // empty response upon success
 
     const data = response.data;
 
     console.log("posted yay!")
 
-    const request = {
+    const request2 = {
       sweep_id: 'f4ba7a287eae4d228d12331b68a9f35a',
       event_type: 'sweep.posted',
     };
     try {
       const response = await client.sandboxTransferLedgerDepositSimulate(
-        request,
+        request2,
       );
 
       console.log("sweeped")
