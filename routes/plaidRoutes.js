@@ -255,6 +255,7 @@ router.post("/sandbox-transfer-simulate", async (req, res) => {
       );
 
       console.log("sweeped")
+      res.send("done")
       // empty response upon success
     } catch (error) {
       // handle error
