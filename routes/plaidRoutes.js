@@ -108,6 +108,10 @@ router.post("/exchangePublicToken", async function (request, response, next) {
 
 
 
+
+
+
+
 // A debit payment means its coming out of the users account
 
 router.post("/transfer", async function (req, res) {
@@ -208,9 +212,9 @@ router.post("/getBalance", async (req, res) => {
 
 
 router.post("/getAccount", async (req, res) => {
-  const { newAccessToken } = req.body;
+  const { accessToken } = req.body;
   const request = {
-    access_token: newAccessToken,
+    access_token: accessToken,
   };
 
   try {
@@ -222,54 +226,9 @@ router.post("/getAccount", async (req, res) => {
     console.log("Get Account: Success");
   } catch (error) {
     console.log("Error Getting Account");
+    res.send(error)
   }
 });
 
-// Uploads the user's accessotoken
-router.post("/uploadUserAccessToken", async (req, res) => {
-  // Extract username and newBalance from the request body
-  const { userID, accessToken } = req.body;
-  console.log("going into updateacces"  + accessToken);
-
-  try {
-    // Find the user by username and update the balance
-    try {
-      const user = await User.findOneAndUpdate(
-        { userID: userID },
-        { $push: { plaidPersonalAccess: accessToken } },
-        { new: true } // Return the updated document
-      );
-    } catch (error) {
-      console.log("Error in uploading the useraccesstoken: user doesn't exist");
-    }
-
-    // Log another success message to the console
-    console.log("Success in accesstokenupdating");
-
-    res.status(201).json({ message: "User AccessToken Updated" });
-  } catch (error) {
-    console.error("Error AccessToken Failed to Update:", error);
-    res.status(500).json({ error: "Could not create user" });
-  }
-});
-
-
-// Retreives the users access token
-router.post("/getAccessFromMongo", async function (req, res) {
-  try {
-    const { userID } = req.body; // Destructure email from request body
-    const user = await User.findOne({ userID: userID });
-
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
-
-    const plaidPersonalAccess = user.plaidPersonalAccess;
-    return res.send(plaidPersonalAccess);
-  } catch (error) {
-    console.error("Error retrieving user access:", error);
-    return res.status(500).json({ message: "Internal server error" });
-  }
-});
 
 module.exports = router;
