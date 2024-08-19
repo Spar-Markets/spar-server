@@ -231,4 +231,28 @@ router.post("/getAccount", async (req, res) => {
 });
 
 
+router.post("/sandbox-transfer-simulate", async (req, res) => {
+  const { accessToken, transferAmt } = req.body;
+  const request = {
+    transfer_id,
+    event_type: 'posted',
+    failure_reason: failureReason,
+  };
+  try {
+    const response = await client.sandboxTransferSimulate(request);
+    // empty response upon success
+    const data = response.data;
+    res.json({
+      data,
+    });
+
+  } catch (error) {
+    // handle error
+  }
+});
+
+
+
+
+
 module.exports = router;
