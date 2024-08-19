@@ -15,12 +15,12 @@ router.post("/updateUserBalanceDeposit", async (req, res) => {
 });
 
 router.post("/updateUserBalanceWithdraw", async (req, res) => {
-  const { email, withdraw } = req.body;
+  const { userID, withdraw } = req.body;
 
   try {
     try {
       await User.findOneAndUpdate(
-        { email: email },
+        { userID: userID },
         { $inc: { balance: -withdraw } }
       );
     } catch (error) {

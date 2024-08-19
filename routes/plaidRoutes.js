@@ -109,9 +109,6 @@ router.post("/exchangePublicToken", async function (request, response, next) {
 
 
 
-
-
-
 // A debit payment means its coming out of the users account
 
 router.post("/transfer", async function (req, res) {
@@ -139,7 +136,6 @@ router.post("/transfer", async function (req, res) {
       account_id: account_id,
       authorization_id: authId.data.authorization.id,
       description: "Deposit",
-
     };
     console.log(authId.data);
     
@@ -155,33 +151,28 @@ router.post("/transfer", async function (req, res) {
 });
 
 
-router.post("/simTransfer", async function (req, res) {
-  try {
-    const response = await client.sandboxTransferSimulate(req.body);
-    res.send("Success: " + req.body.event_type);
-  } catch {
-    console.error("Error Simming");
-  }
-});
-
-
 router.post("/getTransferList", async (req, res) => {
   const request = {
-    count: 25,
+    start_date: '2014-01-01T22:35:49Z',
+    end_date: '2014-10-01T22:35:49Z',
+    count: 14,
+    offset: 2,
+    origination_account_id: '8945fedc-e703-463d-86b1-dc0607b55460',
   };
-
   try {
     const response = await client.transferList(request);
+    
+    console.log("okok",response)
+    
     const transfers = response.data.transfers;
     for (const transfer of transfers) {
-      console.log(transfer.amount + ", " + transfer.status);
+      // iterate through transfers
     }
-    res.send(transfers);
-    //console.log(transfers);
-  } catch {
-    console.error("Error getting transfer list");
+  } catch (error) {
+    // handle error
   }
 });
+
 
 // Fetches balance data using the Node client library for Plaid
 router.post("/getBalance", async (req, res) => {
