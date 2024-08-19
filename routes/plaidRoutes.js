@@ -214,7 +214,7 @@ router.post("/getBalance", async (req, res) => {
 router.post("/getAccount", async (req, res) => {
   const { accessToken } = req.body;
   const request = {
-    access_token: accessToken,
+    access_token: accessToken[0],
   };
 
   try {
