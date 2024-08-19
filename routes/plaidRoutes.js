@@ -246,7 +246,7 @@ router.post("/sandbox-transfer-simulate", async (req, res) => {
     console.log("posted yay!")
 
 
-      const response2 = await plaidClient.sandboxTransferSweepSimulate({});
+      const response2 = await client.sandboxTransferSweepSimulate({});
 
 
       console.log("sweeped")
