@@ -257,7 +257,6 @@ router.post("/sandbox-transfer-simulate", async (req, res) => {
     } catch (error) {
       // handle error
     }
-    const response3 = await client.sandboxTransferSweepSimulate({});
 
 
 
