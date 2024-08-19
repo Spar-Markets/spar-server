@@ -247,7 +247,8 @@ router.post("/sandbox-transfer-simulate", async (req, res) => {
 
     // Now simulate the sweep
     const sweep1 = await client.sandboxTransferSweepSimulate({})
-    const sweep = sweep1.data.sweep;
+    console.log("this could be important sweep", sweep1)
+    const sweep = sweep1.data;
     console.log("sweeping",sweep)
 
 
