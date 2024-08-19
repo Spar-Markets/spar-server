@@ -7,10 +7,6 @@ const postSchema = new mongoose.Schema({
     required: true,
     unique: true,
   },
-  username: {
-    type: String,
-    required: true,
-  },
   postedTime: {
     type: Date,
     required: true,
