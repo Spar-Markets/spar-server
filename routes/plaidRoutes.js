@@ -236,7 +236,7 @@ router.post("/sandbox-transfer-simulate", async (req, res) => {
   const request = {
     transfer_id,
     event_type: 'posted',
-    failure_reason: failureReason,
+s
   };
   try {
     const response = await client.sandboxTransferSimulate(request);
@@ -245,6 +245,7 @@ router.post("/sandbox-transfer-simulate", async (req, res) => {
     res.json({
       data,
     });
+    console.log()
 
   } catch (error) {
     // handle error
