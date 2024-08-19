@@ -236,7 +236,7 @@ router.post("/uploadUserAccessToken", async (req, res) => {
     try {
       const user = await User.findOneAndUpdate(
         { userID: userID },
-        { $set: { plaidPersonalAccess: accessToken } },
+        { $push: { plaidPersonalAccess: accessToken } },
         { new: true } // Return the updated document
       );
     } catch (error) {
