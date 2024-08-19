@@ -153,10 +153,9 @@ router.post("/transfer", async function (req, res) {
 
 router.post("/getTransferList", async (req, res) => {
   const request = {
-    start_date: '2024-01-01T22:35:49Z',
+    start_date: '2024-08-18T23:00:00Z',
     end_date: '2024-10-01T22:35:49Z',
-    count: 14,
-    offset: 2,
+    count: 5,
     origination_account_id: '8945fedc-e703-463d-86b1-dc0607b55460',
   };
   try {
@@ -165,11 +164,9 @@ router.post("/getTransferList", async (req, res) => {
     console.log("okok",response)
     
     const transfers = response.data.transfers;
-    for (const transfer of transfers) {
-      // iterate through transfers
-    }
+    res.send(transfers)
   } catch (error) {
-    // handle error
+    console.log("error getting transfers")
   }
 });
 
@@ -239,7 +236,6 @@ router.post("/sandbox-transfer-simulate", async (req, res) => {
   const request = {
     transfer_id,
     event_type: 'posted',
-    failure_reason: failureReason,
   };
   try {
     const response = await client.sandboxTransferSimulate(request);
@@ -248,6 +244,7 @@ router.post("/sandbox-transfer-simulate", async (req, res) => {
     res.json({
       data,
     });
+    console.log()
 
   } catch (error) {
     // handle error
