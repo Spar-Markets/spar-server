@@ -450,17 +450,18 @@ router.get("/getProfileImages/:userID", async (req, res) => {
 // Uploads the user's access token
 router.post("/uploadUserAccessToken", async (req, res) => {
   // Extract username and newBalance from the request body
-  const { userID, accessToken } = req.body;
+  const { userID, accessToken, bankName } = req.body;
   console.log("going into updateacces"  + accessToken);
 
   try {
     // Find the user by username and update the balance
     try {
-      const user = await User.findOneAndUpdate(
-        { userID: userID },
-        { $push: { plaidPersonalAccess: accessToken } },
-        { new: true } // Return the updated document
-      );
+       // Find the user by userID and update the plaidPersonalAccess field
+        const user = await User.findOneAndUpdate(
+          { userID: userID },
+          { $set: { [`plaidPersonalAccess.${bankName}`]: accessToken } },
+          { new: true } // Return the updated document
+        ); 
     } catch (error) {
       console.log("Error in uploading the useraccesstoken: user doesn't exist");
     }

@@ -50,8 +50,9 @@ const userSchema = new mongoose.Schema({
     },
   ],
   plaidPersonalAccess: {
-    type: [String],
-    default: [],
+    type: Map, // Use Map to store key-value pairs
+    of: String, // Each value in the map should be a string
+    default: {}, // Default to an empty object
   },
   postsVotedOn: {
     type: [Object],
