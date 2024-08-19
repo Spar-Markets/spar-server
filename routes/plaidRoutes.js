@@ -238,7 +238,7 @@ router.post("/sandbox-transfer-simulate", async (req, res) => {
     event_type: 'posted',
   };
   try {
-    const response = await client.sandboxTransferSimulate(request1);
+    const response8 = await client.sandboxTransferSimulate(request1);
     // empty response upon success
 
     const data = response.data;
@@ -247,9 +247,7 @@ router.post("/sandbox-transfer-simulate", async (req, res) => {
 
 
      // Now simulate the sweep
-     const sweep1 = await client.sandboxTransferSweepSimulate({
-      sweep_id: 'f4ba7a287eae4d228d12331b68a9f35a',
-    });
+     const sweep1 = await client.sandboxTransferSweepSimulate({})
     const sweep = sweep1.data.sweep;
     console.log("sweeping",sweep)
 
@@ -276,8 +274,6 @@ router.post("/sandbox-transfer-simulate", async (req, res) => {
       // Handle error
     }
     
-   
-
 
 
 
