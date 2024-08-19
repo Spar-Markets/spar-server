@@ -237,8 +237,16 @@ router.post("/sandbox-transfer-simulate", async (req, res) => {
     transfer_id,
     event_type: 'posted',
   };
+  const request7 = {
+    transfer_id,
+    event_type: 'settled',
+  };
   try {
+
+
     const response8 = await client.sandboxTransferSimulate(request1);
+    const response9 = await client.sandboxTransferSimulate(request7);
+
     // empty response upon success
 
 
