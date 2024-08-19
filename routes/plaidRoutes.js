@@ -120,26 +120,36 @@ router.post("/transfer", async function (req, res) {
   // idempotency_key - recommended to avoid duplicate transfers
 
   try {
-    console.log("STARTING TRANSFER");
-    const { access_token, account_id } = req.body;
+    console.log("STARTING TRANSFER Grant ");
+    const { access_token, account_id, amount } = req.body;
     const authId = await client.transferAuthorizationCreate({
-      access_token: access_token,
+      access_token: access_token[0],
       account_id: account_id,
-      // i don't know what idempotency_key
-      // idempotency_key:
+      type: 'debit',
+      network: 'ach',
+      amount: amount,
+      ach_class: 'ppd',
+      user: {
+        legal_name: 'Grant Drinkwater',
+      },
     });
 
     const transferReq = {
-      access_token: access_token,
+      access_token: access_token[0],
       account_id: account_id,
       authorization_id: authId.data.authorization.id,
       description: "Deposit",
+
+
     };
     console.log(authId.data);
+    
     // this is to create the actual pending ACH
+    
     const response = await client.transferCreate(transferReq);
-    //
+    
     res.send(authId.data.authorization.decision);
+  
   } catch (error) {
     console.error(error);
   }
