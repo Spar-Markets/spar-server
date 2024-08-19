@@ -240,11 +240,32 @@ router.post("/sandbox-transfer-simulate", async (req, res) => {
   try {
     const response = await client.sandboxTransferSimulate(request);
     // empty response upon success
+
+
+
     const data = response.data;
-    res.json({
-      data,
-    });
-    console.log()
+
+    console.log("posted yay!")
+
+
+
+    const request = {
+      sweep_id: 'f4ba7a287eae4d228d12331b68a9f35a',
+      event_type: 'sweep.posted',
+    };
+    try {
+      const response = await client.sandboxTransferLedgerDepositSimulate(
+        request,
+      );
+
+      console.log("sweeped")
+      // empty response upon success
+    } catch (error) {
+      // handle error
+    }
+    
+  
+
 
   } catch (error) {
     // handle error
