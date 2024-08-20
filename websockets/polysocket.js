@@ -4,6 +4,7 @@ const Match = require("../models/Match");
 const { polygonKey } = require("../config/constants");
 const stockEmitter = new EventEmitter();
 const finishMatch = require("../utility/finishMatch");
+const Chat = require("../models/Chat");
 
 let interestedStocksList = {};
 let matchClientList = {};
@@ -96,48 +97,28 @@ stockEmitter.on("newMatch", async (newMatch) => {
 
 
 /**
- * Handle new match event and distribute to websockets.
+ * Handle new message event and distribute to websockets.
  */
-stockEmitter.on("newChat", async (chat) => {
-  console.log("Stock emitter NEW Chat was hit.");
-  // 1. grab the userIDs from the new chat
+stockEmitter.on("newMessage", async (message) => {
+  console.log("Stock emitter NEW Message was hit.");
 
-  const update = chat.messages[chat.messages.length - 1];
+  const { chatID, userID } = message;
 
-  // userIDs
-  const userIDs = chat.userIDs.filter(id => id !== update.userID); //sends updates to all except u since client handles yours
+  // Find all users participating in the chat except the sender
+  const chat = await Chat.findOne({ conversationID: chatID });
+  const userIDs = chat.participantIDs.filter(id => id !== userID);
 
-  // 2. lookup the corresponding socket connections in chatList
-  for (let userID of userIDs) {
-    console.log(chatList)
+  // Send the new message to all connected clients except the sender
+  for (let participantID of userIDs) {
+    const activeChatSockets = chatList[participantID];
 
-    const activeChatSockets = chatList[userID];
-    console.log("chat check grant", activeChatSockets)
-    console.log("chat check grant", update)
-
-    // 3. IF any active connections: send the newly created match to them
     if (activeChatSockets) {
-      // send them the match
-      console.log("MATCH chat - INSIDE AREA TO SEND TO CLIENT");
-      console.log("activeMatchmaking sockets:", activeChatSockets);
-      console.log(
-        "activeChatSockets has",
-        activeChatSockets.length,
-        "connections"
-      );
-
-
-
       for (const socket of activeChatSockets) {
-        console.log("CHECK THIS NOW", socket, update.userID)
-        socket.send(
-          JSON.stringify({
-            type: "newChat",
-            newChat: update,
-          })
-        );
+        socket.send(JSON.stringify({
+          type: "newChat",
+          newChat: message,
+        }));
       }
-
     }
   }
 });
@@ -207,50 +188,42 @@ async function changeStream() {
 
 
 
+/**
+ * MongoDB change stream for the messages collection.
+ * Listens for new messages and emits the "newMessage" event.
+ */
 async function chatChangeStream() {
   try {
     await client.connect();
     console.log("Connected to MongoDB");
 
-
     // Access the database and collection
     const database = client.db("Spar");
-    const chats = database.collection("chats");
+    const messages = database.collection("messages");
 
-    console.log("boutta run change streams on chats");
-    const changeStream = chats.watch([], {
+    console.log("Running change streams on messages collection");
+    const changeStream = messages.watch([], {
       fullDocument: "updateLookup",
-      fullDocumentBeforeChange: "whenAvailable",
     });
 
-    console.log("Ran the change streams w chats");
-
     changeStream.on("change", (change) => {
-      // NOTES FOR PEOPLE READING THIS
-      // This change stream detects ANY change on the matches collection (creation, deletion, and updates to documents).
-      // We use conditionals to determine the type of change, and how we should handle it.
-      console.log("chat change detected", change)
+      console.log("Message change detected", change);
 
-      // check operation type
-      if (change.operationType == "update") {
-        // this means new match was created
-        // emit event that new match was created
-
-        console.log("RECOGNIZED CHANGE OPERATION TYPE AS UPDATE");
-        stockEmitter.emit("newChat", change.fullDocument);
+      if (change.operationType === "insert") {
+        console.log("Recognized change operation type as INSERT");
+        stockEmitter.emit("newMessage", change.fullDocument);
       }
-    })
+    });
 
     changeStream.on("error", (error) => {
-      console.error("Error on change stream:", error);
+      console.error("Error on message change stream:", error);
     });
 
     changeStream.on("close", () => {
-      console.log("Change stream closed");
-
+      console.log("Message change stream closed");
     });
   } catch (error) {
-    console.error("Error in changeStream function:", error);
+    console.error("Error in chatChangeStream function:", error);
   }
 }
 
@@ -360,14 +333,13 @@ function setupWebSocket(server) {
         // do nothing
       } else if (object.type == "GameScreenConnection") {
         console.log("GameScreenConnection");
-      } else if (object.type == "chats") {
+      }  // Handle chat subscriptions 
+      else if (object.type === "chats") {
         if (chatList[object.userID]) {
           chatList[object.userID].push(socket);
         } else {
-          // otherwise, create chatlist
           chatList[object.userID] = [socket];
         }
-
       } else {
         const ticker = object.ticker;
         if (!interestedStocksList[ticker]) {
@@ -387,11 +359,11 @@ function setupWebSocket(server) {
 
 
       // delete it 
-      try {
+      /*try {
         delete chatList[socket];
       } catch (error) {
         console.log("error deleting chatlist from")
-      }
+      }*/
 
       Object.keys(interestedStocksList).forEach((ticker) => {
         interestedStocksList[ticker] = interestedStocksList[ticker].filter(
@@ -416,6 +388,13 @@ function setupWebSocket(server) {
 
           // break out of the loop if a socket has been found
           break;
+        }
+      }
+
+      for (let userID in chatList) {
+        chatList[userID] = chatList[userID].filter(client => client !== socket);
+        if (chatList[userID].length === 0) {
+          delete chatList[userID];
         }
       }
 
