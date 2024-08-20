@@ -5,6 +5,7 @@ const Message = require("../models/Message");
 
 router.post("/addMessage", async (req, res) => {
     const { conversationID, userID, message } = req.body;
+    const posterId = conversationID.split('_').find(id => id !== userID);
 
     try {
         // Find the chat by conversationID
@@ -14,7 +15,7 @@ router.post("/addMessage", async (req, res) => {
             // Chat doesn't exist, create a new one
             chat = new Chat({
                 conversationID,
-                participantIDs: [userID],  // Add the initial user, you can adjust this logic as needed
+                participantIDs: [userID, posterId],  // Add the initial user, you can adjust this logic as needed
                 type: conversationID.includes('match') ? 'match' : 'dm',  // Determine type based on conversationID
             });
 
