@@ -1,5 +1,6 @@
 const express = require("express");
 const router = express.Router();
+const User = require("../models/User");
 
 router.post("/updateUserBalanceDeposit", async (req, res) => {
   const { userID, deposit } = req.body;

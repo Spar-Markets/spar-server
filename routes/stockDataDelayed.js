@@ -8,7 +8,7 @@ const getMostRecentMarketOpenDay = require("../utility/getMostRecentMarketOpenDa
 const getPreviousDay = require("../utility/getPreviousDay");
 const getCurrentPrice = require("../utility/getCurrentPrice");
 const { json } = require("body-parser");
-
+const estTime = require("../utility/estTime")
 
 /**
  * STOCK DATA
@@ -91,7 +91,8 @@ router.post("/getMostRecentOneDayPrices", async (req, res) => {
     }
   }
 
-  const now = new Date(Date.now());
+  const now = estTime()
+
   let mostRecentMarketDay = getMostRecentMarketOpenDay(now);
   // edge case. if most recent market day is today, AND it is before 9:45am, go for the previous day before that
   const isSameDay =
@@ -125,7 +126,7 @@ router.post("/getMostRecentOneDayPrices", async (req, res) => {
     timeframeClose = getMillisecondsForTime(mostRecentMarketDay, 20, 0);
   }
 
-  // Case 2: if it's within market hours on the same market day, set most recent market time to right now
+  // Case 2. if it's within market hours on the same market day, set most recent market time to right now
   else {
     timeframeClose = getMillisecondsForTime(
       mostRecentMarketDay,
@@ -218,7 +219,7 @@ router.post("/getMostRecentOneDayPrices", async (req, res) => {
     return prices;
   };
 
-  //Modified for stockcards, for main details page it gets all data, for stock cards it only gets 1D.
+  //Modified for stockcards, for main details page it gets all data, for stock cards it only gets 1D
   const sendData = async () => {
     const timeframes = ["1D", "1W", "1M", "3M", "YTD", "1Y", "5Y"];
 
