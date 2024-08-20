@@ -1,17 +1,20 @@
 const { sparDB } = require("../config/mongoConnection");
 const mongoose = require("mongoose");
 
-const Chat = new mongoose.Schema({
-    matchID: { type: String, required: true },
-    messages: [
-        {
-            userID: { type: String, required: true }, // User ID of the person sending the message
-            message: { type: String, required: true }, // The message content
-            time: { type: Date, required: true, default: Date.now }, // Timestamp of when the message was sent
-        }
-
-    ],
-    userIDs: { type: [String], required: true }
+const ChatSchema = new mongoose.Schema({
+    conversationID: { type: String, required: true }, // Acts as matchID for match-specific chats or a unique ID for DMs
+    type: { type: String, required: true, enum: ['dm', 'match'] }, // Type of chat: 'dm' or 'match'
+    participantIDs: { type: [String], required: true }, // Array of user IDs participating in the chat
+    createdAt: { type: Date, default: Date.now }, // Timestamp of when the chat was created
+    updatedAt: { type: Date, default: Date.now }  // Timestamp of the last message sent
 });
 
-module.exports = sparDB.model("Chats", Chat);
+// Automatically update the `updatedAt` field when a new message is sent
+ChatSchema.pre('save', function (next) {
+    this.updatedAt = Date.now();
+    next();
+});
+
+const Chat = sparDB.model("Chat", ChatSchema);
+
+module.exports = Chat;
