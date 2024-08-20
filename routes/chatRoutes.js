@@ -74,7 +74,7 @@ router.post("/conversations", async (req, res) => {
         const newChat = new Chat({
             conversationID,
             participantIDs,
-            type: type
+            type: type,
         });
 
         await newChat.save();

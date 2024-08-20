@@ -8,9 +8,9 @@ const ChatSchema = new mongoose.Schema({
     createdAt: { type: Date, default: Date.now },
     updatedAt: { type: Date, default: Date.now, index: true },
     lastMessage: {
-        text: { type: String, required: true },
-        userID: { type: String, required: true },
-        time: { type: Date, required: true }
+        text: { type: String, required: false },  // Make this optional
+        userID: { type: String, required: false },  // Make this optional
+        time: { type: Date, required: false }  // Make this optional
     }
 });
 
