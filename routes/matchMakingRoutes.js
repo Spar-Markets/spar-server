@@ -406,10 +406,10 @@ async function createMatch(
     user2Snapshots: [{ value: 100000, timeField: Date.now() }],
   });
 
-  const matchChat = new Chat({
-    matchID: matchID,
-    messages: [],
-    userIDs: [player1UserID, player2UserID]
+  const chat = new Chat({
+    conversationID: matchID, // The matchID acts as the conversationID
+    type: 'match',
+    participantIDs: [player1UserID, player2UserID],
   });
 
   console.log("Alright bro here's the match", match);
@@ -417,7 +417,7 @@ async function createMatch(
   try {
     const test = await match.save();
     console.log("THIS IS THE TEST REPSONSE THAT MATCH WAS SAVED:", test);
-    await matchChat.save();
+    await chat.save();
 
     await matchSnapshots.save();
   } catch (error) {
