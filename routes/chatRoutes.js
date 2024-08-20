@@ -68,13 +68,13 @@ router.get("/conversations/:conversationID", async (req, res) => {
 });
 
 router.post("/conversations", async (req, res) => {
-    const { conversationID, participantIDs } = req.body;
+    const { conversationID, participantIDs, type } = req.body;
 
     try {
         const newChat = new Chat({
             conversationID,
             participantIDs,
-            type: "dm"
+            type: type
         });
 
         await newChat.save();
