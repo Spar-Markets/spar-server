@@ -209,6 +209,8 @@ router.post("/getPlaidBalance", async function (req, res) {
     console.error("error getting plaid balance");
   }
 });
+
+
 router.post("/getAccount", async (req, res) => {
   const { accessToken } = req.body;
 
@@ -232,7 +234,7 @@ router.post("/getAccount", async (req, res) => {
         }
       })
     );
-
+    console.log("results?", results)
     // Send back all the results as a single array
     res.json({
       results,
