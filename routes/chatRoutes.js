@@ -5,21 +5,13 @@ const Message = require("../models/Message");
 
 router.post("/addMessage", async (req, res) => {
     const { conversationID, userID, message } = req.body;
-    const posterId = conversationID.split('_').find(id => id !== userID);
 
     try {
         // Find the chat by conversationID
         let chat = await Chat.findOne({ conversationID });
 
         if (!chat) {
-            // Chat doesn't exist, create a new one
-            chat = new Chat({
-                conversationID,
-                participantIDs: [userID, posterId],  // Add the initial user, you can adjust this logic as needed
-                type: conversationID.includes('match') ? 'match' : 'dm',  // Determine type based on conversationID
-            });
-
-            await chat.save();
+            return res.status(404).json({ success: false, error: "Chat not found" });
         }
 
         // Create a new message
@@ -98,6 +90,25 @@ router.get("/userConversations/:userID", async (req, res) => {
     } catch (err) {
         console.error(err);
         res.status(500).json({ success: false, error: "Failed to retrieve conversations" });
+    }
+});
+
+router.post("/conversations/search", async (req, res) => {
+    const { userID1, userID2 } = req.body;
+
+    try {
+        const chat = await Chat.findOne({
+            participantIDs: { $all: [userID1, userID2] }
+        });
+
+        if (chat) {
+            res.status(200).json({ exists: true, chat });
+        } else {
+            res.status(200).json({ exists: false });
+        }
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ success: false, error: "Failed to search conversation" });
     }
 });
 
