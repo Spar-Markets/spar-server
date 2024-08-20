@@ -1,49 +1,56 @@
 const express = require("express");
 const router = express.Router();
-const Chat = require("../models/Chat.js")
+const Chat = require("../models/Chat");
+const Message = require("../models/Message");
 
 router.post("/addMessage", async (req, res) => {
-    const { matchID, userID, message } = req.body;
+    const { conversationID, userID, message } = req.body;
 
     try {
-        // Find the chat by matchID
-        let chat = await Chat.findOne({ matchID: matchID });
+        // Find the chat by conversationID
+        let chat = await Chat.findOne({ conversationID });
 
-        if (chat) {
-            // Chat exists, append the new message to the messages array
-            chat.messages.push({ userID, message, time: new Date() });
-        } else {
+        if (!chat) {
             // Chat doesn't exist, create a new one
             chat = new Chat({
-                matchID: matchID,
-                messages: [{ userID, message, time: new Date() }]
+                conversationID,
+                participantIDs: [userID],  // Add the initial user, you can adjust this logic as needed
+                type: conversationID.includes('match') ? 'match' : 'dm',  // Determine type based on conversationID
             });
+
+            await chat.save();
         }
 
-        // Save the chat document
+        // Create a new message
+        const newMessage = new Message({
+            chatID: conversationID,
+            userID,
+            message,
+            time: new Date(),
+        });
+
+        // Save the message document
+        await newMessage.save();
+
+        // Update the chat's updatedAt timestamp
+        chat.updatedAt = new Date();
         await chat.save();
 
-        res.status(200).json({ success: true, chat });
+        res.status(200).json({ success: true, message: newMessage });
     } catch (err) {
         console.error(err);
         res.status(500).json({ success: false, error: "Failed to add message" });
     }
 });
 
-router.get("/messages/:matchID", async (req, res) => {
-    const { matchID } = req.params;
+router.get("/messages/:conversationID", async (req, res) => {
+    const { conversationID } = req.params;
 
     try {
-        // Find the chat document with the provided matchID
-        const chat = await Chat.findOne({ matchID });
+        // Find all messages associated with the given conversationID
+        const messages = await Message.find({ chatID: conversationID }).sort({ time: -1 });
 
-        if (chat) {
-            // If chat exists, send the messages
-            res.status(200).json({ success: true, messages: chat.messages });
-        } else {
-            // If no chat exists for the given matchID, send an empty array
-            res.status(200).json({ success: true, messages: [] });
-        }
+        res.status(200).json({ success: true, messages });
     } catch (err) {
         console.error(err);
         res.status(500).json({ success: false, error: "Failed to retrieve messages" });
