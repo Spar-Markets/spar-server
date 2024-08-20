@@ -88,4 +88,16 @@ router.post("/conversations", async (req, res) => {
     }
 });
 
+router.get("/userConversations/:userID", async (req, res) => {
+    const { userID } = req.params;
+
+    try {
+        const chats = await Chat.find({ participantIDs: userID }).sort({ updatedAt: -1 });
+        res.status(200).json({ success: true, chats });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ success: false, error: "Failed to retrieve conversations" });
+    }
+});
+
 module.exports = router;
