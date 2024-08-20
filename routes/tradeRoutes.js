@@ -280,8 +280,8 @@ router.post("/sellStock", async (req, res) => {
     const updatedMatchAssets = await Match.updateOne(
       // grabs doc with matchID and queries for object in "assets" array that matches ticker
       { matchID, [`${user}.assets.ticker`]: ticker },
-      // sets the queried object to have the new fields defined above
-      { $set: { [`${user}.assets.$`]: newFields } }
+      // update the total shares of this johnny
+      { $set: { [`${user}.assets.$.totalShares`]: totalShares - shares } }
     );
 
     return res.status(200).send(returnData);
