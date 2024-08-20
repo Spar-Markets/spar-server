@@ -128,7 +128,7 @@ router.post("/purchaseStock", async (req, res) => {
       );
 
       returnData = {
-        updatedTotalshares: totalShares + shares,
+        updatedTotalshares: shares,
         buyPrice,
         date: Date.now(),
       };
