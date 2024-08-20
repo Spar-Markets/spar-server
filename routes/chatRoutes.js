@@ -25,8 +25,14 @@ router.post("/addMessage", async (req, res) => {
         // Save the message document
         await newMessage.save();
 
-        // Update the chat's updatedAt timestamp
+        // Update the chat's updatedAt timestamp and lastMessage field
         chat.updatedAt = new Date();
+        chat.lastMessage = {
+            text: message,
+            userID: userID,
+            time: new Date()
+        };
+
         await chat.save();
 
         res.status(200).json({ success: true, message: newMessage });
@@ -35,7 +41,6 @@ router.post("/addMessage", async (req, res) => {
         res.status(500).json({ success: false, error: "Failed to add message" });
     }
 });
-
 router.get("/messages/:conversationID", async (req, res) => {
     const { conversationID } = req.params;
 
