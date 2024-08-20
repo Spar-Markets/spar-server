@@ -63,22 +63,14 @@ router.post("/closeEndpoint", async (req, res) => {
 
     console.log("Polygon URL request in close: " + url);
 
-    // UNCOMMENT THIS const response = await axios.get(url);
+    const response = await axios.get(url);
 
-    // Get the last price from the response data
-    // UNCOMMENT THIS 8/18/24
-    // const closePrice = response.data.close;
+    const closePrice = response.data.close;
 
-    // UNCOMMENT THIS 8/18/24
-    // res.status(200).json({
-    //   ticker: response.data.symbol,
-    //   lastPrice: closePrice,
-    // });
-    // DELETE THIS 8/18/24
-    res.status(200).json({
-      ticker: "AAPL",
-      lastPrice: 230
-    })
+    return res.status(200).json({
+      ticker: response.data.symbol,
+      lastPrice: closePrice,
+    });
   } catch (error) {
     console.error("There is an error in closeEndpoint:", error.message);
     console.error(error.stack);
