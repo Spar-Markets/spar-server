@@ -77,10 +77,12 @@ router.post("/purchaseStock", async (req, res) => {
       { new: true }
     );
 
-    console.log("About to check if has asset");
+    console.log("purchaseStock: About to check if has asset");
     // check if ticker is inside of asset
     const asset = match[user].assets.find((asset) => asset.ticker === ticker);
     if (asset) {
+      console.log("purchaeStock: Bro DOES have an asset for ticker", ticker);
+      console.log("purchaseStock: Here is bro's asset:", asset)
       // get share amount and average cost basis
       const { totalShares, avgCostBasis } = asset;
 
@@ -108,9 +110,8 @@ router.post("/purchaseStock", async (req, res) => {
         avgCostBasis: asset.avgCostBasis,
         date: Date.now(),
       };
-      console.log("They have this ticker inside assets");
     } else {
-      console.log("THey do NOT have this ticker");
+      console.log("purchaseStock: bro does NOT have this ticker");
       // write new asset to DB
 
       const newFields = {
