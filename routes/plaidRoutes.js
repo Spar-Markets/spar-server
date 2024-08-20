@@ -209,24 +209,37 @@ router.post("/getPlaidBalance", async function (req, res) {
     console.error("error getting plaid balance");
   }
 });
-
-
 router.post("/getAccount", async (req, res) => {
   const { accessToken } = req.body;
-  const request = {
-    access_token: accessToken[0],
-  };
-  console.log("banking tests", request)
+
   try {
-    const response = await client.accountsGet(request);
-    const data = response.data;
+    // Create an array to hold the results for each token
+    const results = await Promise.all(
+      accessToken.map(async (token) => {
+        const request = {
+          access_token: token,
+        };
+        console.log("Request for access token:", request);
+
+        try {
+          const response = await client.accountsGet(request);
+          const data = response.data;
+          console.log("Get Account: Success for token", token);
+          return { token, data }; // Include the token for reference
+        } catch (error) {
+          console.log("Error Getting Account for token", token);
+          return { token, error: error.message }; // Handle the error for this token
+        }
+      })
+    );
+
+    // Send back all the results as a single array
     res.json({
-      data,
+      results,
     });
-    console.log("Get Account: Success");
   } catch (error) {
-    console.log("Error Getting Account");
-    res.send(error)
+    console.log("Error processing the request", error);
+    res.status(500).send({ error: "Internal Server Error" });
   }
 });
 
@@ -243,60 +256,19 @@ router.post("/sandbox-transfer-simulate", async (req, res) => {
   };
   try {
 
-
     const response8 = await client.sandboxTransferSimulate(request1);
     const response9 = await client.sandboxTransferSimulate(request7);
 
-    // empty response upon success
-
+    // Empty response upon success
 
     console.log("posted yay!")
 
-
-    // Now simulate the sweep
-    const sweep1 = await client.sandboxTransferSweepSimulate({})
-    console.log("this could be important sweep", sweep1)
-    const sweep = sweep1.data;
-    console.log("sweeping",sweep)
-
-
-    const request2 = {
-      sweep_id: sweep.id,
-      event_type: 'sweep.settled',
-    };
-    try {
-      const response = await client.sandboxTransferLedgerDepositSimulate(request2);
-      // Handle success, response should be empty upon success
-    } catch (error) {
-      // Handle error
-    }
-    const request3 = {
-      sweep_id: "f4ba7a287eae4d228d12331b68a9f35a",
-      event_type: 'sweep.settled',
-    };
-    try {
-      const response = await client.sandboxTransferLedgerDepositSimulate(request3);
-      // Handle success, response should be empty upon succes
-    } catch (error) {
-      // Handle error
-    }
-
-
-
-    
-
-    console.log("sweeped")
-      res.send("done")
-      // empty response upon success
+    res.send("done")
   
-
   } catch (error) {
-    // handle error
+    console.log("There was an error in transfer", error)
   }
 });
-
-
-
 
 
 module.exports = router;
