@@ -57,4 +57,35 @@ router.get("/messages/:conversationID", async (req, res) => {
     }
 });
 
+router.get("/conversations/:conversationID", async (req, res) => {
+    const { conversationID } = req.params;
+
+    try {
+        const chat = await Chat.findOne({ conversationID });
+        res.status(200).json({ exists: !!chat });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ success: false, error: "Failed to check conversation" });
+    }
+});
+
+router.post("/conversations", async (req, res) => {
+    const { conversationID, participantIDs } = req.body;
+
+    try {
+        const newChat = new Chat({
+            conversationID,
+            participantIDs,
+            type: "dm"
+        });
+
+        await newChat.save();
+
+        res.status(201).json({ success: true, chat: newChat });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ success: false, error: "Failed to create conversation" });
+    }
+});
+
 module.exports = router;
