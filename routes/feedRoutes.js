@@ -210,4 +210,29 @@ router.post("/deletePost", async function (req, res) {
   }
 });
 
+// Get posts by a specific userID
+router.get("/postsByUser", async function (req, res) {
+  try {
+    const { userID } = req.query;
+    const limit = parseInt(req.query.limit) || 10; // Default to 10 if limit is not provided
+    const skip = parseInt(req.query.skip) || 0; // Default to 0 if skip is not provided
+
+    if (!userID) {
+      return res.status(400).send("UserID is required");
+    }
+
+    const posts = await Post.find({ posterId: userID }, "-comments")
+      .sort({ _id: -1 }) // Excludes comments array and sorts in reverse order
+      .skip(skip)
+      .limit(limit);
+
+    const totalPosts = await Post.countDocuments({ posterId: userID });
+
+    res.status(200).send({ posts, totalPosts });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send("Server error fetching posts by user");
+  }
+});
+
 module.exports = router;
