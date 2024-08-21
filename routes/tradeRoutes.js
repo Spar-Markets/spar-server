@@ -109,7 +109,11 @@ router.post("/purchaseStock", async (req, res) => {
         buyPrice,
         avgCostBasis: asset.avgCostBasis,
         date: Date.now(),
+        shares,
+        tradeCost
       };
+
+      console.log("HELLO JACKSON HERE IS THE RETURN DATA:", returnData);
     } else {
       console.log("purchaseStock: bro does NOT have this ticker");
       // write new asset to DB
@@ -128,7 +132,7 @@ router.post("/purchaseStock", async (req, res) => {
       );
 
       returnData = {
-        updatedTotalshares: shares,
+        updatedTotalShares: shares,
         buyPrice,
         date: Date.now(),
       };
@@ -262,7 +266,7 @@ router.post("/sellStock", async (req, res) => {
 
       // return successful
       returnData = {
-        updatedTotalshares: totalShares - shares,
+        updatedTotalShares: totalShares - shares,
         sellPrice,
         date: Date.now(),
       };
@@ -272,7 +276,7 @@ router.post("/sellStock", async (req, res) => {
 
     // define new fields for assets
     returnData = {
-      updatedTotalshares: totalShares - shares,
+      updatedTotalShares: totalShares - shares,
       sellPrice,
       date: Date.now(),
     };
