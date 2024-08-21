@@ -171,9 +171,9 @@ router.post("/getTransferList", async (req, res) => {
 });
 
 
-// Fetches balance data using the Node client library for Plaid
+
+// Fetches balance for a given bank account from the access token
 router.post("/getBalance", async (req, res) => {
-  //console.log("Start of bal req");
 
   const { newAccessToken } = req.body;
 
@@ -194,6 +194,7 @@ router.post("/getBalance", async (req, res) => {
 });
 
 
+// unsure of what this does 
 router.post("/getPlaidBalance", async function (req, res) {
   try {
     const response = await client.transferLedgerGet({});
