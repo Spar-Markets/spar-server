@@ -132,7 +132,7 @@ router.post("/purchaseStock", async (req, res) => {
       );
 
       returnData = {
-        updatedTotalshares: shares,
+        updatedTotalShares: shares,
         buyPrice,
         date: Date.now(),
       };
@@ -266,7 +266,7 @@ router.post("/sellStock", async (req, res) => {
 
       // return successful
       returnData = {
-        updatedTotalshares: totalShares - shares,
+        updatedTotalShares: totalShares - shares,
         sellPrice,
         date: Date.now(),
       };
@@ -276,7 +276,7 @@ router.post("/sellStock", async (req, res) => {
 
     // define new fields for assets
     returnData = {
-      updatedTotalshares: totalShares - shares,
+      updatedTotalShares: totalShares - shares,
       sellPrice,
       date: Date.now(),
     };
