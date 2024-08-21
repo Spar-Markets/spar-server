@@ -109,6 +109,8 @@ router.post("/purchaseStock", async (req, res) => {
         buyPrice,
         avgCostBasis: asset.avgCostBasis,
         date: Date.now(),
+        shares,
+        tradeCost
       };
 
       console.log("HELLO JACKSON HERE IS THE RETURN DATA:", returnData);
@@ -277,8 +279,6 @@ router.post("/sellStock", async (req, res) => {
       updatedTotalshares: totalShares - shares,
       sellPrice,
       date: Date.now(),
-      shares,
-      tradeCost
     };
     // update share amount and average cost basis
     const updatedMatchAssets = await Match.updateOne(
