@@ -277,6 +277,8 @@ router.post("/sellStock", async (req, res) => {
       updatedTotalshares: totalShares - shares,
       sellPrice,
       date: Date.now(),
+      shares,
+      tradeCost
     };
     // update share amount and average cost basis
     const updatedMatchAssets = await Match.updateOne(
