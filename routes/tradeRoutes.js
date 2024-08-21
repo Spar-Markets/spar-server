@@ -110,6 +110,8 @@ router.post("/purchaseStock", async (req, res) => {
         avgCostBasis: asset.avgCostBasis,
         date: Date.now(),
       };
+
+      console.log("HELLO JACKSON HERE IS THE RETURN DATA:", returnData);
     } else {
       console.log("purchaseStock: bro does NOT have this ticker");
       // write new asset to DB
