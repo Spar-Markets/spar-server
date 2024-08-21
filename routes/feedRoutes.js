@@ -235,4 +235,36 @@ router.get("/postsByUser", async function (req, res) {
   }
 });
 
+router.get("/upvotedPostsByUser", async function (req, res) {
+  try {
+    const { userID } = req.query;
+    const limit = parseInt(req.query.limit) || 10; // Default to 10 if limit is not provided
+    const skip = parseInt(req.query.skip) || 0; // Default to 0 if skip is not provided
+
+    if (!userID) {
+      return res.status(400).send("UserID is required");
+    }
+
+    // Find posts where the user has upvoted
+    const posts = await Post.find(
+      { "userVoteData.userID": userID, "userVoteData.voteType": "up" },
+      "-comments" // Exclude comments from the result
+    )
+      .sort({ _id: -1 }) // Sort in reverse order to get the most recent posts first
+      .skip(skip)
+      .limit(limit);
+
+    const totalUpvotedPosts = await Post.countDocuments({
+      "userVoteData.userID": userID,
+      "userVoteData.voteType": "up",
+    });
+
+    res.status(200).send({ posts, totalUpvotedPosts });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send("Server error fetching upvoted posts by user");
+  }
+});
+
+
 module.exports = router;
