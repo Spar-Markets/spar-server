@@ -134,7 +134,7 @@ router.post("/purchaseStock", async (req, res) => {
       returnData = {
         updatedTotalShares: shares,
         buyPrice,
-        avgCostBasis: asset.avgCostBasis,
+        avgCostBasis: buyPrice,
         date: Date.now(),
         shares,
         tradeCost
