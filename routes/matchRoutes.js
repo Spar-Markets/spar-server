@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const MatchSnapshots = require("../models/MatchSnapshots");
+const MatchHistory = require("../models/MatchHistory");
 
 router.post("/getSnapshots", async (req, res) => {
     try {
@@ -19,5 +20,24 @@ router.post("/getSnapshots", async (req, res) => {
         console.log("Error on getSnapshots endpoint: " + error);
     }
 });
+
+/**
+ * TODO: pastMatch refactor
+ */
+router.post("/getPastMatch", async (req, res) => {
+    try {
+        const { matchID } = req.body;
+        const userMatchHistory = await MatchHistory.findOne({ userID: winnerUserID });
+        const match = userMatchHistory.pastMatches.find(match => match.matchID == matchID);
+        if (match) {
+            res.status(200).json({ match: match });
+        } else {
+            res.status(400).send("Match not found");
+        }
+    } catch (error) {
+        console.error("Error in /getPastMatch:", error);
+        res.status(500).send(error);
+    }
+})
 
 module.exports = router;
