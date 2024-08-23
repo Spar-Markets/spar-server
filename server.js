@@ -23,7 +23,7 @@ const tradeRoutes = require("./routes/tradeRoutes");
 const userRoutes = require("./routes/userRoutes");
 const stockDataDelayed = require("./routes/stockDataDelayed");
 const feedRoutes = require("./routes/feedRoutes");
-const snapshotRoutes = require("./routes/snapshot");
+const matchRoutes = require("./routes/matchRoutes");
 const waitListRoutes = require("./routes/waitListRoutes");
 const friendRoutes = require("./routes/friendRoutes");
 const chatRoutes = require("./routes/chatRoutes")
@@ -57,7 +57,7 @@ app.use(tradeRoutes);
 app.use(userRoutes);
 app.use(feedRoutes);
 app.use(stockDataDelayed);
-app.use(snapshotRoutes);
+app.use(matchRoutes);
 app.use(waitListRoutes);
 app.use(friendRoutes);
 app.use(chatRoutes)

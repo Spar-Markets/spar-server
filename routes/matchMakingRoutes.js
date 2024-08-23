@@ -5,7 +5,6 @@ const Match = require("../models/Match");
 const MatchSnapshots = require("../models/MatchSnapshots");
 
 const User = require("../models/User");
-const MatchHistory = require("../models/MatchHistory");
 const generateRandomString = require("../utility/generateRandomString");
 const schedule = require("node-schedule");
 const { polygonKey } = require("../config/constants");
