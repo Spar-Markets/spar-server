@@ -332,7 +332,7 @@ router.post("/getPastMatches", async (req, res) => {
       return res.status(404).send("No match history found");
     }
 
-    res.status(200).json({ message: "Match history found", pastMatches: pastMatchesResponse.pastMatches });
+    return res.status(200).json({ message: "Match history found", pastMatches: pastMatchesResponse.pastMatches });
   } catch (error) {
     return res.status(500).send("Server error trying to get Match history");
   }
