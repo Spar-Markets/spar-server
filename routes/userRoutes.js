@@ -326,13 +326,13 @@ router.post("/getPastMatches", async (req, res) => {
   const { userID } = req.body;
   console.log("Hitting endpoint");
   try {
-    const pastMatches = await MatchHistory.findOne({ userID: userID });
+    const pastMatchesResponse = await MatchHistory.findOne({ userID: userID });
 
     if (!pastMatches) {
       return res.status(404).send("No match history found");
     }
 
-    res.status(200).json({ message: "Match history found", pastMatches });
+    res.status(200).json({ message: "Match history found", pastMatches: pastMatchesResponse.pastMatches });
   } catch (error) {
     return res.status(500).send("Server error trying to get Match history");
   }
@@ -451,7 +451,7 @@ router.get("/getProfileImages/:userID", async (req, res) => {
 router.post("/uploadUserAccessToken", async (req, res) => {
   // Extract username and newBalance from the request body
   const { userID, accessToken } = req.body;
-  console.log("going into updateacces"  + accessToken);
+  console.log("going into updateacces" + accessToken);
 
   try {
     // Find the user by username and update the balance
