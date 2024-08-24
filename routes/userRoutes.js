@@ -328,7 +328,7 @@ router.post("/getPastMatches", async (req, res) => {
   try {
     const pastMatchesResponse = await MatchHistory.findOne({ userID: userID });
 
-    if (!pastMatches) {
+    if (!pastMatchesResponse) {
       return res.status(404).send("No match history found");
     }
 
