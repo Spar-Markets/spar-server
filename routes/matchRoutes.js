@@ -26,8 +26,8 @@ router.post("/getSnapshots", async (req, res) => {
  */
 router.post("/getPastMatch", async (req, res) => {
     try {
-        const { matchID } = req.body;
-        const userMatchHistory = await MatchHistory.findOne({ userID: match.winnerUserID });
+        const { matchID, userID } = req.body;
+        const userMatchHistory = await MatchHistory.findOne({ userID: userID });
         const match = userMatchHistory.pastMatches.find(match => match.matchID == matchID);
         if (match) {
             res.status(200).json({ match: match });
