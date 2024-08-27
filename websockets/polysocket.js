@@ -155,10 +155,10 @@ async function changeStream() {
         const winnings = finishMatch(match);
         if (matchClientList[match.matchID]) {
           for (socket of matchClientList[match.matchID]) {
-            socket.send({
+            socket.send(JSON.stringify({
               ...winnings,
               type: "updateWinnings",
-            });
+            }));
           }
         }
       } else {
