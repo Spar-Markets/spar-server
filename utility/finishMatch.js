@@ -26,9 +26,12 @@ const finishMatch = async (matchToFinish) => {
   // 2. determine winner
   // calculate portfolio value of each user
   async function calculatePortfolioValue(user) {
+    console.log("MILK USER:", user);
+    console.log("MILK Match:", matchToFinish);
     let portfolioValue = matchToFinish[user].buyingPower;
 
     const assets = matchToFinish[user].assets;
+    console.log("MILK assets:", assets);
 
     // get current price for each ticker
     for (tickerObject in assets) {
