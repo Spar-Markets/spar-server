@@ -34,7 +34,7 @@ const finishMatch = async (matchToFinish) => {
     console.log("MILK assets:", assets);
 
     // get current price for each ticker
-    for (tickerObject in assets) {
+    for (let tickerObject of assets) {
       try {
         const currentPrice = await getCurrentPrice(tickerObject.ticker);
         console.log("MAMA I WANT MILKY!!! Price for", tickerObject.ticker, "is", currentPrice);
