@@ -10,6 +10,9 @@ router.post("/updateUserBalanceDeposit", async (req, res) => {
         { userID: userID },
         { $inc: { balance: deposit } }
       );
+      res.status(200).json({ message: "Balance updated successfully." });
+
+    
   } catch (error) {
     console.error("Error in updating balance");
   }
