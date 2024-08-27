@@ -71,7 +71,7 @@ router.post("/purchaseStock", async (req, res) => {
             buyPrice: buyPrice,
             time: now,
             shares: shares,
-            type: "buy"
+            type: "Buy"
           },
         },
       },
@@ -238,7 +238,7 @@ router.post("/sellStock", async (req, res) => {
             sellPrice: sellPrice,
             time: now,
             shares: shares,
-            type: "sell"
+            type: "Sell"
           },
         },
       },
