@@ -155,6 +155,7 @@ async function changeStream() {
         const winnings = finishMatch(match);
         if (matchClientList[match.matchID]) {
           for (socket of matchClientList[match.matchID]) {
+            console.log("MILK boutta shend data to client");
             const dataToSend = {
               ...winnings,
               type: "updateWinnings",
