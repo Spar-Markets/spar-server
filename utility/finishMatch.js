@@ -6,6 +6,7 @@ const MatchHistorySnapshots = require("../models/MatchHistorySnapshots");
 const axios = require("axios");
 const rankingAlgo = require("../utility/rankingAlgo");
 const { polygonKey } = require("../config/constants");
+const getCurrentPrice = require("./getCurrentPrice");
 
 /**
  * Logic to finish match.
@@ -32,10 +33,8 @@ const finishMatch = async (matchToFinish) => {
     // get current price for each ticker
     for (tickerObject in assets) {
       try {
-        const response = await axios.get(
-          `https://api.polygon.io/v2/snapshot/locale/us/markets/stocks/tickers/${tickerObject.ticker}?apiKey=${polygonKey}`
-        );
-        const currentPrice = response.data.ticker.min.c;
+        const currentPrice = await getCurrentPrice(tickerObject.ticker);
+        console.log("MAMA I WANT MILKY!!! Price for", tickerObject.ticker, "is", currentPrice);
 
         // add value of shares to portfolioValue
         portfolioValue += currentPrice * tickerObject.totalShares;
@@ -43,6 +42,8 @@ const finishMatch = async (matchToFinish) => {
         console.error("ERROR GETTING DATA FOR TICKER:", tickerObject.ticker);
       }
     }
+
+    console.log("I STILL WANT MILKY!!! portfolio value is:", portfolioValue);
 
     // return portfolio value
     return portfolioValue;
