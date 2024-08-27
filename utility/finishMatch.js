@@ -26,18 +26,14 @@ const finishMatch = async (matchToFinish) => {
   // 2. determine winner
   // calculate portfolio value of each user
   async function calculatePortfolioValue(user) {
-    console.log("MILK USER:", user);
-    console.log("MILK Match:", matchToFinish);
     let portfolioValue = matchToFinish[user].buyingPower;
 
     const assets = matchToFinish[user].assets;
-    console.log("MILK assets:", assets);
 
     // get current price for each ticker
     for (let tickerObject of assets) {
       try {
         const currentPrice = await getCurrentPrice(tickerObject.ticker);
-        console.log("MAMA I WANT MILKY!!! Price for", tickerObject.ticker, "is", currentPrice);
 
         // add value of shares to portfolioValue
         portfolioValue += currentPrice * tickerObject.totalShares;
@@ -45,8 +41,6 @@ const finishMatch = async (matchToFinish) => {
         console.error("ERROR GETTING DATA FOR TICKER:", tickerObject.ticker);
       }
     }
-
-    console.log("I STILL WANT MILKY!!! portfolio value is:", portfolioValue);
 
     // return portfolio value
     return portfolioValue;
@@ -70,9 +64,6 @@ const finishMatch = async (matchToFinish) => {
     winner = "user1";
     loser = "user2";
   }
-
-  console.log("STEP 2: The winner is", winner);
-  console.log("The loser is", loser);
 
   // get user IDs for winner and loser
   const winnerUserID = matchToFinish[winner].userID;
