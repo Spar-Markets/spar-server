@@ -117,7 +117,7 @@ router.post("/transfer", async function (req, res) {
   // idempotency_key - recommended to avoid duplicate transfers
 
   try {
-    console.log("STARTING TRANSFER Grant ");
+    console.log("STARTING TRANSFER");
     const { access_token, account_id, amount } = req.body;
     const authId = await client.transferAuthorizationCreate({
       access_token: access_token,
@@ -138,9 +138,7 @@ router.post("/transfer", async function (req, res) {
       description: "Deposit",
     };
     console.log(authId.data);
-    
-    // This is to create the actual pending ACH
-    
+        
     const response = await client.transferCreate(transferReq);
     
     res.send(authId.data.authorization.decision);
@@ -149,7 +147,6 @@ router.post("/transfer", async function (req, res) {
     console.error(error);
   }
 });
-
 
 router.post("/getTransferList", async (req, res) => {
   const request = {
@@ -169,8 +166,6 @@ router.post("/getTransferList", async (req, res) => {
     console.log("error getting transfers")
   }
 });
-
-
 
 // Fetches balance for a given bank account from the access token
 router.post("/getBalance", async (req, res) => {
@@ -235,7 +230,6 @@ router.post("/getAccount", async (req, res) => {
         }
       })
     );
-    console.log("results?", results)
     // Send back all the results as a single array
     res.json({
       results,
@@ -245,7 +239,6 @@ router.post("/getAccount", async (req, res) => {
     res.status(500).send({ error: "Internal Server Error" });
   }
 });
-
 
 router.post("/sandbox-transfer-simulate", async (req, res) => {
   const { transfer_id } = req.body;
